@@ -33,6 +33,7 @@
 #define DEPRESS_TIME 15
 #define RESTING_HEART_RATE 90.0f
 #define EVA_HEART_RATE 140.0f
+#define WORKSPACE_HEART_RATE 120.0f
 #define HAB_OXY_PRESSURE   3.0723f
 #define HAB_CO2_PRESSURE   0.0059f
 #define HAB_OTHER_PRESSURE 11.5542f
@@ -119,6 +120,18 @@
 //Fans
 #define PR_FAN_SPIN_UP_RATE 0.9f
 #define PR_FAN_RPM 30000.0f
+
+//Heart Sim 
+enum{
+    HEART_CASE_TIRED = 1,
+    HEART_CASE_TIRED2,
+    HEART_CASE_TIRED3,
+    HEART_CASE_DEPRESS,
+    HEART_CASE_WORKSPACE,
+    HEART_CASE_RESTING
+};
+
+#define HEART_SIM_INCREASE_RATE 0.8f
 
 //Other
 #define exp7           10000000i64    //1E+7     
@@ -212,6 +225,20 @@ struct comm_data_t {
 
 };
 
+struct heart_sim_data_t{
+
+    float resting_heart_rate;
+    float max_heart_rate;
+    float heart_increase_rate;
+
+    float start_heart_rate;
+    float target_heart_rate;
+    
+    float prev_heart_rate;
+    int prev_case;
+    uint32_t start_time;
+};
+
 struct telemetry_data_t {
 
     // Battery
@@ -247,6 +274,9 @@ struct telemetry_data_t {
 
     // Communications
     int com_channel;
+
+    // Sim for each team
+    struct heart_sim_data_t heart_sim;
 
 };
 

@@ -12,6 +12,7 @@
 
 // Helper functions
 size_t rover_index();
+float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time, int heart_case, float x);
 float prPrevX = 0;
 float prPrevY = 0;
 ///////////////////////////////////////////////////////////////////////////////////
@@ -251,6 +252,17 @@ void reset_telemetry(struct telemetry_data_t* telemetry, float seed){
     telemetry->coolant_tank = randomized_sine_value(seed, 0.2f, 0.1f, 360.0f, .02f) * 100.0f; // %
     telemetry->coolant_liquid_pressure = 0.0f;
     telemetry->coolant_gaseous_pressure = 0.0f;
+
+    telemetry->heart_sim.max_heart_rate = EVA_HEART_RATE;
+    telemetry->heart_sim.resting_heart_rate = RESTING_HEART_RATE;
+    telemetry->heart_sim.heart_increase_rate = HEART_SIM_INCREASE_RATE;
+
+    telemetry->heart_sim.start_heart_rate = RESTING_HEART_RATE;
+    telemetry->heart_sim.target_heart_rate = RESTING_HEART_RATE;
+
+    telemetry->heart_sim.prev_heart_rate = RESTING_HEART_RATE;
+    telemetry->heart_sim.prev_case = HEART_CASE_RESTING;
+    telemetry->heart_sim.start_time = 0;
 
     // Communications
     int com_channel;
@@ -1928,6 +1940,22 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
 
     // telemetry->heart_rate += randomized_sine_value(x, 0, 1.0f, 360.0f, 0.023f);
 
+    //New stuff TODO
+    if(eva_time > 15 && eva_time < 30){
+        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_TIRED, x);
+    }
+    else if (eva_time > 30 && eva_time < 45){
+        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
+    }
+    else if (eva_time > 80){
+        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_WORKSPACE, x);
+    }
+    else{
+        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
+    }
+
+    //End new stuff
+
     telemetry->suit_oxy_pressure += randomized_sine_value(x, 0, 0.00008f, 1320.0f, 0.0012f);
     telemetry->suit_co2_pressure += randomized_sine_value(x, 0, 0.00008f, 1380.0f, 0.0013f);
     if(telemetry->suit_co2_pressure < 0.00001f){
@@ -1937,6 +1965,116 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
         telemetry->suit_other_pressure = 0.0f;
     }
 
+}
+
+float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time, int heart_case, float x){
+
+    struct heart_sim_data_t* heart_sim = &(telemetry->heart_sim);
+
+    float heart_rate = 0.0f;
+    float target_heart_rate = 0.0f;
+    float increase = 1.0f;
+
+    switch (heart_case)
+    {
+    case HEART_CASE_TIRED:
+        if(heart_sim->prev_case != HEART_CASE_TIRED){
+            heart_sim->start_time = eva_time;
+            heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
+        } 
+        heart_sim->prev_case = HEART_CASE_TIRED;
+    
+        target_heart_rate = EVA_HEART_RATE;
+        increase = 5.0f;
+
+        heart_rate = increase * heart_sim->heart_increase_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
+
+        if(heart_rate > target_heart_rate){
+            heart_rate = target_heart_rate;
+        }
+
+        heart_sim->prev_heart_rate = heart_rate;
+        printf("Heart Rate TIRED: %.2f\n", heart_rate);
+        return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
+        
+    case HEART_CASE_TIRED2:
+
+        break;
+    case HEART_CASE_WORKSPACE:
+        if(heart_sim->prev_case != HEART_CASE_WORKSPACE){
+            heart_sim->start_time = eva_time;
+            heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
+        }
+        heart_sim->prev_case = HEART_CASE_WORKSPACE;
+
+
+        target_heart_rate = WORKSPACE_HEART_RATE;
+        increase = 5.0f;
+        
+        if(heart_sim->prev_heart_rate >= WORKSPACE_HEART_RATE){
+            increase = -1.0f;
+        }
+
+        heart_rate = increase * heart_sim->heart_increase_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
+
+        if(heart_rate < target_heart_rate && increase < 0){
+            heart_rate = target_heart_rate;
+        }
+        else if(heart_rate > target_heart_rate && increase > 0){
+            heart_rate = target_heart_rate;
+        }  
+
+        heart_sim->prev_heart_rate = heart_rate;
+        printf("Heart Rate WORKSPACE: %.2f\n", heart_rate);
+        return randomized_sine_value(x, heart_rate, 10.0f, 1.0f, 0.023f);
+
+    case HEART_CASE_DEPRESS:
+        if(heart_sim->prev_case != HEART_CASE_DEPRESS){
+            heart_sim->start_time = eva_time;
+            heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
+        } 
+        heart_sim->prev_case = HEART_CASE_DEPRESS;
+
+        target_heart_rate = EVA_HEART_RATE;
+        float heart_rate_depress_rate = (target_heart_rate - heart_sim->start_heart_rate) / DEPRESS_TIME;
+        heart_rate = heart_rate_depress_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
+
+        if(heart_rate > target_heart_rate){
+            heart_rate = target_heart_rate;
+        }
+
+        heart_sim->prev_heart_rate = heart_rate;
+        printf("Heart Rate DEPRESS: %.2f\n", heart_rate);
+        return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
+
+    case HEART_CASE_RESTING:
+        
+        if(heart_sim->prev_case != HEART_CASE_RESTING){
+            heart_sim->start_time = eva_time;
+            heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
+        }
+        heart_sim->prev_case = HEART_CASE_RESTING;
+
+        if(heart_sim->prev_heart_rate >= RESTING_HEART_RATE){
+            increase = -1.0f;
+        }
+            
+        heart_rate = increase * heart_sim->heart_increase_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
+
+        target_heart_rate = RESTING_HEART_RATE;
+        if(heart_rate < target_heart_rate){
+            heart_rate = target_heart_rate;
+        }
+        
+        heart_sim->prev_heart_rate = heart_rate;
+        printf("Heart Rate RESTING: %.2f\n", heart_rate);
+        return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
+
+    default:
+        break;
+    }
+
+    return 0.0f;
 }
 
 bool update_pr_telemetry(char* request_content, struct backend_data_t* backend, int teamIndex){
