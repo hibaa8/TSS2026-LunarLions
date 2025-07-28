@@ -132,6 +132,19 @@ enum{
 
 #define HEART_SIM_INCREASE_RATE 0.8f
 
+//CO2 Production Sim
+//Linear regression CO2 production sim (y = mx + b)
+#define CO2_PRODUCTION_RATE 0.400627f //m
+#define CO2_PRODUCTION_INTERCEPT -22.13672f //b
+
+//O2 Consumption Sim
+#define O2_CONSUMPTION_TO_BPM_RATIO 21.46219f //assuming a weight of 80kg
+
+//Linear regression O2 consumption sim (y = mx + b)
+#define O2_CONSUMPTION_RATE 0.415264f //m 
+#define O2_CONSUMPTION_INTERCEPT -27.66028f //b
+
+
 //Other
 #define exp7           10000000i64    //1E+7     
 #define exp9         1000000000i64     //1E+9
@@ -235,6 +248,29 @@ struct heart_sim_data_t{
     uint32_t start_time;
 };
 
+struct co2_prod_sim_data_t {
+
+    float co2_production_rate;
+    float start_co2_production;
+    float prev_co2_production;
+    int prev_case;
+
+    uint32_t sim_in_progress_time;
+    uint32_t start_time;
+};
+
+struct oxy_com_sim_data_t {
+
+    float oxy_consumption_rate;
+    float start_oxy_consumption;
+    float prev_oxy_consumption;
+    int prev_case;
+
+    uint32_t sim_in_progress_time;
+    uint32_t start_time;
+
+};
+
 struct telemetry_data_t {
 
     // Battery
@@ -273,7 +309,8 @@ struct telemetry_data_t {
 
     // Sim for each team
     struct heart_sim_data_t heart_sim;
-
+    struct co2_prod_sim_data_t co2_production_sim;
+    struct oxy_com_sim_data_t oxy_consumption_sim;
 };
 
 // Pressurized Rover Data

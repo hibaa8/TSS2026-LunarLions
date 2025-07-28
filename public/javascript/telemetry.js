@@ -444,8 +444,8 @@ function loadTelemetry(team){
         document.getElementById("h2OGasPressure1").innerText      = Number(data.telemetry.eva1.coolant_gas_pressure).toFixed(2) + " psi";
         document.getElementById("h2OLiquidPressure1").innerText   = Number(data.telemetry.eva1.coolant_liquid_pressure).toFixed(2) + " psi";
 
-        document.getElementById("o2Consumption1").innerText       = Number(data.telemetry.eva1.oxy_consumption).toFixed(2) + " psi/min";
-        document.getElementById("co2Production1").innerText       = Number(data.telemetry.eva1.co2_production).toFixed(2) + " psi/min";
+        document.getElementById("o2Consumption1").innerText       = Number(data.telemetry.eva1.oxy_consumption).toFixed(2) + " ml/min";
+        document.getElementById("co2Production1").innerText       = Number(data.telemetry.eva1.co2_production).toFixed(2) + " ml/min";
         document.getElementById("primaryFan1").innerText          = Number(data.telemetry.eva1.fan_pri_rpm).toFixed(0) + " rpm";
         document.getElementById("secondaryFan1").innerText        = Number(data.telemetry.eva1.fan_sec_rpm).toFixed(0) + " rpm";
 
@@ -476,8 +476,8 @@ function loadTelemetry(team){
         document.getElementById("h2OGasPressure2").innerText      = Number(data.telemetry.eva2.coolant_gas_pressure).toFixed(2) + " psi";
         document.getElementById("h2OLiquidPressure2").innerText   = Number(data.telemetry.eva2.coolant_liquid_pressure).toFixed(2) + " psi";
 
-        document.getElementById("o2Consumption2").innerText       = Number(data.telemetry.eva2.oxy_consumption).toFixed(2) + " psi/min";
-        document.getElementById("co2Production2").innerText       = Number(data.telemetry.eva2.co2_production).toFixed(2) + " psi/min";
+        document.getElementById("o2Consumption2").innerText       = Number(data.telemetry.eva2.oxy_consumption).toFixed(2) + " ml/min";
+        document.getElementById("co2Production2").innerText       = Number(data.telemetry.eva2.co2_production).toFixed(2) + " ml/min";
         document.getElementById("primaryFan2").innerText          = Number(data.telemetry.eva2.fan_pri_rpm).toFixed(0) + " rpm";
         document.getElementById("secondaryFan2").innerText        = Number(data.telemetry.eva2.fan_sec_rpm).toFixed(0) + " rpm";
 

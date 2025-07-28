@@ -13,8 +13,20 @@
 // Helper functions
 size_t rover_index();
 float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time, int heart_case, float x);
+float simulate_oxy_consumption(struct telemetry_data_t* telemetry, uint32_t eva_time, int oxy_case, int x);
+float simulate_co2_production(struct telemetry_data_t* telemetry, uint32_t eva_time, int co2_case, int x);
 float prPrevX = 0;
 float prPrevY = 0;
+
+float bpm_to_o2_consumption(float bpm) {
+    //In ml per minute
+    return bpm * O2_CONSUMPTION_RATE + O2_CONSUMPTION_INTERCEPT;
+}
+
+float bpm_to_co2_production(float bpm) {
+    //In ml per minute
+    return bpm * CO2_PRODUCTION_RATE + CO2_PRODUCTION_INTERCEPT;
+}
 ///////////////////////////////////////////////////////////////////////////////////
 //                                 Functions
 ///////////////////////////////////////////////////////////////////////////////////
@@ -1873,9 +1885,10 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
 
         }
 
-        telemetry->oxy_consumption = 0.0f;
-        telemetry->co2_production  = 0.0f;
+        telemetry->oxy_consumption = simulate_oxy_consumption(telemetry, eva_time, 0, x);
+        telemetry->co2_production  = simulate_co2_production(telemetry, eva_time, 0, x);
 
+        //printf("O2 Consumption: %f, CO2 Production: %f\n", telemetry->oxy_consumption, telemetry->co2_production);
     } else { //----------------------------- Outside of HAB on EVA Mission
 
         // Oxygen is consumed each second
@@ -1892,8 +1905,9 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
         }
 
         // Life Support Process
-        telemetry->oxy_consumption = randomized_sine_value(x, SUIT_OXY_CONSUMPTION, SUIT_OXY_CONSUMPTION / 10.0f, 359.0f, 0.023f);
-        telemetry->co2_production  = randomized_sine_value(x, SUIT_CO2_PRODUCTION, SUIT_CO2_PRODUCTION / 10.f, 355.0f, 0.023f);
+        //TODO CO2 production and O2 consumption
+        telemetry->oxy_consumption = simulate_oxy_consumption(telemetry, eva_time, 0, x);
+        telemetry->co2_production  = simulate_co2_production(telemetry, eva_time, 0, x);
         telemetry->helmet_co2_pressure += telemetry->co2_production * 0.015f;
 
         // Distribute CO2 between helmet and suit
@@ -2074,6 +2088,14 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
     }
 
     return -1.0f;
+}
+
+float simulate_oxy_consumption(struct telemetry_data_t* telemetry, uint32_t eva_time, int oxy_case, int x){
+    return randomized_sine_value(x, bpm_to_o2_consumption(telemetry->heart_rate), 0.1f, 1.0f, 0.023f);
+}
+
+float simulate_co2_production(struct telemetry_data_t* telemetry, uint32_t eva_time, int co2_case, int x){
+    return randomized_sine_value(x, bpm_to_co2_production(telemetry->heart_rate), 0.1f, 1.0f, 0.023f);
 }
 
 bool update_pr_telemetry(char* request_content, struct backend_data_t* backend, int teamIndex){
