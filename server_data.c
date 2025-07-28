@@ -1186,7 +1186,7 @@ bool build_json_error(struct eva_failures_t* error){
 	"\n\t\"error\": {"
 	"\n\t\t\"fan_error\": %s,"
 	"\n\t\t\"oxy_error\": %s,"
-	// "\n\t\t\"batt_error\": %s,"
+	"\n\t\t\"batt_error\": %s,"
 	"\n\t\t\"pump_error\": %s"
 	"\n\t}"
     "\n}";
@@ -1195,7 +1195,7 @@ bool build_json_error(struct eva_failures_t* error){
     sprintf(out_buffer, format_buffer,
         error->fan_error ? "true" : "false",
         error->oxy_error ? "true" : "false",
-        // error->power_error ? "true" : "false",
+        error->power_error ? "true" : "false",
         error->pump_error ? "true" : "false"
     );
 
@@ -1211,6 +1211,7 @@ bool build_json_error(struct eva_failures_t* error){
 bool update_error(char* request_content, struct eva_failures_t* error){
 
     bool* update_var = NULL;
+    int* update_heart_case = NULL;
 
     // Check which variable needs to be updated
     if(strncmp(request_content, "fan=", strlen("fan=")) == 0) {
@@ -1229,6 +1230,10 @@ bool update_error(char* request_content, struct eva_failures_t* error){
         request_content += strlen("pump=");
         update_var = &error->pump_error;
         printf("Pump Error: ");
+    } else if(strncmp(request_content, "heart_case=", strlen("heart_case=")) == 0) {
+        request_content += strlen("heart_case=");
+        update_heart_case = &error->heart_case;
+        printf("Heart Case: ");
     } else {
         return false;
     }
@@ -1243,6 +1248,24 @@ bool update_error(char* request_content, struct eva_failures_t* error){
         } else if(strncmp(request_content, "false", 5) == 0) {
             *update_var = false;
             printf("OFF\n");
+        } else {
+            return false;
+        }
+
+        // update json
+        build_json_error(error);
+
+        return true;
+    }
+
+    if(update_heart_case){
+
+        if(strncmp(request_content, "HEART_CASE_RESTING", strlen("HEART_CASE_RESTING")) == 0) {
+            *update_heart_case = HEART_CASE_RESTING;
+            printf("%d\n", HEART_CASE_RESTING);
+        } else if(strncmp(request_content, "HEART_CASE_WORKSPACE", strlen("HEART_CASE_WORKSPACE")) == 0) {
+            *update_heart_case = HEART_CASE_DEPRESS;
+            printf("%d\n", HEART_CASE_WORKSPACE);
         } else {
             return false;
         }

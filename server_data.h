@@ -134,15 +134,15 @@ enum{
 
 //CO2 Production Sim
 //Linear regression CO2 production sim (y = mx + b)
-#define CO2_PRODUCTION_RATE 0.400627f //m
-#define CO2_PRODUCTION_INTERCEPT -22.13672f //b
+#define CO2_PRODUCTION_RATE 32.05018f //m
+#define CO2_PRODUCTION_INTERCEPT -1770.93791f //b
 
 //O2 Consumption Sim
 #define O2_CONSUMPTION_TO_BPM_RATIO 21.46219f //assuming a weight of 80kg
 
 //Linear regression O2 consumption sim (y = mx + b)
-#define O2_CONSUMPTION_RATE 0.415264f //m 
-#define O2_CONSUMPTION_INTERCEPT -27.66028f //b
+#define O2_CONSUMPTION_RATE 33.22114f //m 
+#define O2_CONSUMPTION_INTERCEPT -2212.8225f //b
 
 
 //Other
@@ -408,6 +408,8 @@ struct eva_failures_t {
     bool fan_error;
     bool pump_error;
     bool power_error;
+
+    int heart_case;
 
 };
 
