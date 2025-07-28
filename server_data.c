@@ -253,12 +253,8 @@ void reset_telemetry(struct telemetry_data_t* telemetry, float seed){
     telemetry->coolant_liquid_pressure = 0.0f;
     telemetry->coolant_gaseous_pressure = 0.0f;
 
-    telemetry->heart_sim.max_heart_rate = EVA_HEART_RATE;
-    telemetry->heart_sim.resting_heart_rate = RESTING_HEART_RATE;
     telemetry->heart_sim.heart_increase_rate = HEART_SIM_INCREASE_RATE;
-
     telemetry->heart_sim.start_heart_rate = RESTING_HEART_RATE;
-    telemetry->heart_sim.target_heart_rate = RESTING_HEART_RATE;
 
     telemetry->heart_sim.prev_heart_rate = RESTING_HEART_RATE;
     telemetry->heart_sim.prev_case = HEART_CASE_RESTING;
@@ -1974,6 +1970,9 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
 float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time, int heart_case, float x){
 
     struct heart_sim_data_t* heart_sim = &(telemetry->heart_sim);
+    
+    float heart_rate = 0.0f;
+    float increase = 1.0f;
 
     //prioritize first case called each second, avoiding repeated calls
     if(eva_time == heart_sim->sim_in_progress_time){
@@ -1982,10 +1981,6 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
     }
 
     heart_sim->sim_in_progress_time = eva_time;
-
-    float heart_rate = 0.0f;
-    float target_heart_rate = 0.0f;
-    float increase = 1.0f;
 
     switch (heart_case)
     {
@@ -1996,14 +1991,12 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
             heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
         }
         heart_sim->prev_case = HEART_CASE_TIRED;
-
-        target_heart_rate = EVA_HEART_RATE;
         increase = 5.0f;
 
         heart_rate = increase * heart_sim->heart_increase_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
 
-        if(heart_rate > target_heart_rate){
-            heart_rate = target_heart_rate;
+        if(heart_rate > EVA_HEART_RATE){
+            heart_rate = EVA_HEART_RATE;
         }
 
         heart_sim->prev_heart_rate = heart_rate;
@@ -2017,8 +2010,6 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         }
         heart_sim->prev_case = HEART_CASE_WORKSPACE;
 
-
-        target_heart_rate = WORKSPACE_HEART_RATE;
         increase = 5.0f;
 
         if(heart_sim->prev_heart_rate >= WORKSPACE_HEART_RATE){
@@ -2027,11 +2018,11 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
 
         heart_rate = increase * heart_sim->heart_increase_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
 
-        if(heart_rate < target_heart_rate && increase < 0){
-            heart_rate = target_heart_rate;
+        if(heart_rate < WORKSPACE_HEART_RATE && increase < 0){
+            heart_rate = WORKSPACE_HEART_RATE;
         }
-        else if(heart_rate > target_heart_rate && increase > 0){
-            heart_rate = target_heart_rate;
+        else if(heart_rate > WORKSPACE_HEART_RATE && increase > 0){
+            heart_rate = WORKSPACE_HEART_RATE;
         }
 
         heart_sim->prev_heart_rate = heart_rate;
@@ -2045,12 +2036,11 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         }
         heart_sim->prev_case = HEART_CASE_DEPRESS;
 
-        target_heart_rate = EVA_HEART_RATE;
-        float heart_rate_depress_rate = (target_heart_rate - heart_sim->start_heart_rate) / DEPRESS_TIME;
+        float heart_rate_depress_rate = (EVA_HEART_RATE - heart_sim->start_heart_rate) / DEPRESS_TIME;
         heart_rate = heart_rate_depress_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
 
-        if(heart_rate > target_heart_rate){
-            heart_rate = target_heart_rate;
+        if(heart_rate > EVA_HEART_RATE){
+            heart_rate = EVA_HEART_RATE;
         }
 
         heart_sim->prev_heart_rate = heart_rate;
@@ -2071,9 +2061,8 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
 
         heart_rate = increase * heart_sim->heart_increase_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
 
-        target_heart_rate = RESTING_HEART_RATE;
-        if(heart_rate < target_heart_rate){
-            heart_rate = target_heart_rate;
+        if(heart_rate < RESTING_HEART_RATE){
+            heart_rate = RESTING_HEART_RATE;
         }
 
         heart_sim->prev_heart_rate = heart_rate;

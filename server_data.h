@@ -226,15 +226,11 @@ struct comm_data_t {
 
 struct heart_sim_data_t{
 
-    float resting_heart_rate;
-    float max_heart_rate;
     float heart_increase_rate;
-
     float start_heart_rate;
-    float target_heart_rate;
-    
     float prev_heart_rate;
     int prev_case;
+    
     uint32_t sim_in_progress_time;
     uint32_t start_time;
 };
