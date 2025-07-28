@@ -125,7 +125,6 @@
 enum{
     HEART_CASE_TIRED = 1,
     HEART_CASE_TIRED2,
-    HEART_CASE_TIRED3,
     HEART_CASE_DEPRESS,
     HEART_CASE_WORKSPACE,
     HEART_CASE_RESTING
@@ -236,6 +235,7 @@ struct heart_sim_data_t{
     
     float prev_heart_rate;
     int prev_case;
+    uint32_t sim_in_progress_time;
     uint32_t start_time;
 };
 

@@ -114,26 +114,26 @@ void handle_udp_post_request(unsigned int command, char* data, char* request, st
 // --------------------------UDP Get Teams---------------------------
 
 char* itoa_custom(int val, int base){
-	
+
 	static char buf[32] = {0};
-	
+
 	int i = 30;
-	
+
 	for(; val && i ; --i, val /= base)
-	
+
 		buf[i] = "0123456789abcdef"[val % base];
-	
+
 	return &buf[i+1];
-	
+
 }
 
 bool udp_get_teams(unsigned char* request_content){
     //Open file
     FILE* fp = fopen("public/json_data/TEAMS.json", "r");
-    if (fp == NULL) { 
-        printf("Error: Unable to open the file.\n"); 
-        return false; 
-    } 
+    if (fp == NULL) {
+        printf("Error: Unable to open the file.\n");
+        return false;
+    }
 
     //Get file size
     fseek(fp, 0L, SEEK_END);
@@ -143,27 +143,27 @@ bool udp_get_teams(unsigned char* request_content){
     //printf("file size: %d\n", file_size);
 
     //Save file to buffer
-    char *file_buffer = malloc(sizeof(char) * file_size); 
-    int len = fread(file_buffer, 1, file_size, fp); 
-    fclose(fp); 
+    char *file_buffer = malloc(sizeof(char) * file_size);
+    int len = fread(file_buffer, 1, file_size, fp);
+    fclose(fp);
 
     //Parse buffer to cJSON object
-    cJSON *json = cJSON_Parse(file_buffer); 
-    if (json == NULL) { 
-        const char *error_ptr = cJSON_GetErrorPtr(); 
-        if (error_ptr != NULL) { 
-            printf("Error: %s\n", error_ptr); 
-        } 
-        cJSON_Delete(json); 
-        return false; 
-    } 
+    cJSON *json = cJSON_Parse(file_buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error: %s\n", error_ptr);
+        }
+        cJSON_Delete(json);
+        return false;
+    }
 
     cJSON* teams = cJSON_GetObjectItemCaseSensitive(json, "teams");
     cJSON* team = teams->child;
 
     while (team != NULL){
         if (cJSON_IsNumber(team) == true){
-        
+
             char* temp = itoa_custom(team->valueint, 10);
             strcat(request_content, temp);
 
@@ -174,7 +174,7 @@ bool udp_get_teams(unsigned char* request_content){
         strcat(request_content, "\n");
         team = team->next;
     }
-    
+
 }
 
 // -------------------------- INIT --------------------------------
@@ -231,13 +231,13 @@ void reset_pr_telemetry(struct backend_data_t* backend, int teamIndex){
 void reset_telemetry(struct telemetry_data_t* telemetry, float seed){
 
     telemetry->batt_time         = randomized_sine_value(seed, 0.2f, 0.1f, 060.0f, .02f) * BATT_TIME_CAP;
-    telemetry->oxy_pri_tank_fill = randomized_sine_value(seed, 0.2f, 0.1f, 160.0f, .02f) * OXY_TIME_CAP;      
-    telemetry->oxy_sec_tank_fill = randomized_sine_value(seed, 0.2f, 0.1f, 260.0f, .02f) * OXY_TIME_CAP; 
-    telemetry->oxy_pri_tank_pressure = 0.0f;   
+    telemetry->oxy_pri_tank_fill = randomized_sine_value(seed, 0.2f, 0.1f, 160.0f, .02f) * OXY_TIME_CAP;
+    telemetry->oxy_sec_tank_fill = randomized_sine_value(seed, 0.2f, 0.1f, 260.0f, .02f) * OXY_TIME_CAP;
+    telemetry->oxy_pri_tank_pressure = 0.0f;
     telemetry->oxy_sec_tank_pressure = 0.0f;
 
-    telemetry->heart_rate = RESTING_HEART_RATE;              
-    telemetry->helmet_co2_pressure = 0.0f;     
+    telemetry->heart_rate = RESTING_HEART_RATE;
+    telemetry->helmet_co2_pressure = 0.0f;
     telemetry->fan_pri_rpm = 0.0f;
     telemetry->fan_sec_rpm = 0.0f;
     telemetry->scrubber_A_co2_captured = 0.0f;
@@ -276,7 +276,7 @@ bool build_json_meta_data(struct backend_data_t* backend){
 // -------------------------- UIA --------------------------------
 bool build_json_uia(struct uia_data_t* uia){
 
-    const char format_buffer[512] = 
+    const char format_buffer[512] =
     "\n{"
 	"\n\t\"uia\": {"
 	"\n\t\t\"eva1_power\":        %s,"
@@ -293,7 +293,7 @@ bool build_json_uia(struct uia_data_t* uia){
     "\n}";
 
     char out_buffer[512];
-    sprintf(out_buffer, format_buffer, 
+    sprintf(out_buffer, format_buffer,
         uia->eva1_power        ? "true" : "false",
         uia->eva1_oxy          ? "true" : "false",
         uia->eva1_water_supply ? "true" : "false",
@@ -305,7 +305,7 @@ bool build_json_uia(struct uia_data_t* uia){
         uia->oxy_vent          ? "true" : "false",
         uia->depress           ? "true" : "false"
     );
-    
+
     // Write bytes to file
     FILE* fd_uia = fopen("public/json_data/UIA.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_uia);
@@ -318,7 +318,7 @@ bool build_json_uia(struct uia_data_t* uia){
 bool update_uia(char* request_content, struct uia_data_t* uia){
 
     bool* update_var = NULL;
-        
+
     // Check which variable needs to be updated
     if(strncmp(request_content, "eva1_power=", strlen("eva1_power=")) == 0) {
         request_content += strlen("eva1_power=");
@@ -353,7 +353,7 @@ bool update_uia(char* request_content, struct uia_data_t* uia){
         request_content += strlen("eva2_water_waste=");
         update_var = &uia->eva2_water_waste;
         printf("UIA EVA2 Water Waste: ");
-    } 
+    }
     else if(strncmp(request_content, "depress=", strlen("depress=")) == 0) {
         request_content += strlen("depress=");
         update_var = &uia->depress;
@@ -377,9 +377,9 @@ bool update_uia(char* request_content, struct uia_data_t* uia){
         }
 
         build_json_uia(uia);
-        
+
         return true;
-    } 
+    }
 
     return false;
 
@@ -390,10 +390,10 @@ bool udp_get_uia(unsigned int command, unsigned char* data){
     int off_set = command - 53;
     //Open file
     FILE* fp = fopen("public/json_data/UIA.json", "r");
-    if (fp == NULL) { 
-        printf("Error: Unable to open the file.\n"); 
-        return false; 
-    } 
+    if (fp == NULL) {
+        printf("Error: Unable to open the file.\n");
+        return false;
+    }
 
     //Get file size
     fseek(fp, 0L, SEEK_END);
@@ -403,20 +403,20 @@ bool udp_get_uia(unsigned int command, unsigned char* data){
     //printf("file size: %d\n", file_size);
 
     //Save file to buffer
-    char *file_buffer = malloc(sizeof(char) * file_size); 
-    int len = fread(file_buffer, 1, file_size, fp); 
-    fclose(fp); 
+    char *file_buffer = malloc(sizeof(char) * file_size);
+    int len = fread(file_buffer, 1, file_size, fp);
+    fclose(fp);
 
     //Parse buffer to cJSON object
-    cJSON *json = cJSON_Parse(file_buffer); 
-    if (json == NULL) { 
-        const char *error_ptr = cJSON_GetErrorPtr(); 
-        if (error_ptr != NULL) { 
-            printf("Error: %s\n", error_ptr); 
-        } 
-        cJSON_Delete(json); 
-        return false; 
-    } 
+    cJSON *json = cJSON_Parse(file_buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error: %s\n", error_ptr);
+        }
+        cJSON_Delete(json);
+        return false;
+    }
 
     cJSON* uia = cJSON_GetObjectItemCaseSensitive(json, "uia");
     cJSON* uia_item = uia->child;
@@ -440,7 +440,7 @@ bool udp_get_uia(unsigned int command, unsigned char* data){
 // -------------------------- DCU --------------------------------
 bool build_json_dcu(struct dcu_data_t* dcu){
 
-    const char format_buffer[512] = 
+    const char format_buffer[512] =
     "\n{"
 	"\n\t\"dcu\": {"
 	"\n\t\t\"eva1\": {"
@@ -463,7 +463,7 @@ bool build_json_dcu(struct dcu_data_t* dcu){
     "\n}";
 
     char out_buffer[512];
-    sprintf(out_buffer, format_buffer, 
+    sprintf(out_buffer, format_buffer,
         dcu->eva1_batt ? "true" : "false",
         dcu->eva1_oxy  ? "true" : "false",
         dcu->eva1_comm  ? "true" : "false",
@@ -477,7 +477,7 @@ bool build_json_dcu(struct dcu_data_t* dcu){
         dcu->eva2_pump ? "true" : "false",
         dcu->eva2_co2  ? "true" : "false"
     );
-    
+
     // Write bytes to file
     FILE* fd_uia = fopen("public/json_data/DCU.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_uia);
@@ -490,7 +490,7 @@ bool build_json_dcu(struct dcu_data_t* dcu){
 bool update_dcu(char* request_content, struct dcu_data_t* dcu){
 
     bool* update_var = NULL;
-        
+
     // Check which variable needs to be updated
     if(strncmp(request_content, "eva1_batt=", strlen("eva1_batt=")) == 0) {
         request_content += strlen("eva1_batt=");
@@ -558,9 +558,9 @@ bool update_dcu(char* request_content, struct dcu_data_t* dcu){
 
         // update json
         build_json_dcu(dcu);
-        
+
         return true;
-    } 
+    }
 
     return false;
 
@@ -572,10 +572,10 @@ bool udp_get_dcu(unsigned int command, unsigned char* data){
 
     //Open file
     FILE* fp = fopen("public/json_data/DCU.json", "r");
-    if (fp == NULL) { 
-        printf("Error: Unable to open the file.\n"); 
-        return false; 
-    } 
+    if (fp == NULL) {
+        printf("Error: Unable to open the file.\n");
+        return false;
+    }
 
     //Get file size
     fseek(fp, 0L, SEEK_END);
@@ -585,20 +585,20 @@ bool udp_get_dcu(unsigned int command, unsigned char* data){
     //printf("file size: %d\n", file_size);
 
     //Save file to buffer
-    char *file_buffer = malloc(sizeof(char) * file_size); 
-    int len = fread(file_buffer, 1, file_size, fp); 
-    fclose(fp); 
+    char *file_buffer = malloc(sizeof(char) * file_size);
+    int len = fread(file_buffer, 1, file_size, fp);
+    fclose(fp);
 
     //Parse buffer to cJSON object
-    cJSON *json = cJSON_Parse(file_buffer); 
-    if (json == NULL) { 
-        const char *error_ptr = cJSON_GetErrorPtr(); 
-        if (error_ptr != NULL) { 
-            printf("Error: %s\n", error_ptr); 
-        } 
-        cJSON_Delete(json); 
-        return false; 
-    } 
+    cJSON *json = cJSON_Parse(file_buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error: %s\n", error_ptr);
+        }
+        cJSON_Delete(json);
+        return false;
+    }
     cJSON* dcu = cJSON_GetObjectItemCaseSensitive(json, "dcu");
     cJSON* eva1 = dcu->child;
     cJSON* eva2 = eva1->next;
@@ -622,8 +622,8 @@ bool udp_get_dcu(unsigned int command, unsigned char* data){
         }
         val = eva2_item->valueint;
         memcpy(data, &val, 4);
-    }   
-    
+    }
+
     cJSON_Delete(json);
     return true;
 }
@@ -631,7 +631,7 @@ bool udp_get_dcu(unsigned int command, unsigned char* data){
 // -------------------------- IMU --------------------------------
 bool build_json_imu(struct imu_data_t* imu){
 
-    const char format_buffer[512] = 
+    const char format_buffer[512] =
     "\n{"
 	"\n\t\"imu\": {"
 	"\n\t\t\"eva1\": {"
@@ -648,7 +648,7 @@ bool build_json_imu(struct imu_data_t* imu){
     "\n}";
 
     char out_buffer[512];
-    sprintf(out_buffer, format_buffer, 
+    sprintf(out_buffer, format_buffer,
         imu->eva1_posx,
         imu->eva1_posy,
         imu->eva1_heading,
@@ -656,7 +656,7 @@ bool build_json_imu(struct imu_data_t* imu){
         imu->eva2_posy,
         imu->eva2_heading
     );
-    
+
     // Write bytes to file
     FILE* fd_imu = fopen("public/json_data/IMU.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_imu);
@@ -667,7 +667,7 @@ bool build_json_imu(struct imu_data_t* imu){
 }
 
 bool update_imu(char* request_content, struct imu_data_t* imu){
-    
+
     float* update_var = NULL;
 
     // Check which variable needs to be updated
@@ -718,10 +718,10 @@ bool udp_get_imu(unsigned int command, unsigned char* data){
 
     //Open file
     FILE* fp = fopen("public/json_data/IMU.json", "r");
-    if (fp == NULL) { 
-        printf("Error: Unable to open the file.\n"); 
-        return false; 
-    } 
+    if (fp == NULL) {
+        printf("Error: Unable to open the file.\n");
+        return false;
+    }
 
     //Get file size
     fseek(fp, 0L, SEEK_END);
@@ -731,21 +731,21 @@ bool udp_get_imu(unsigned int command, unsigned char* data){
     //printf("file size: %d\n", file_size);
 
     //Save file to buffer
-    char *file_buffer = malloc(sizeof(char) * file_size); 
-    int len = fread(file_buffer, 1, file_size, fp); 
-    fclose(fp); 
+    char *file_buffer = malloc(sizeof(char) * file_size);
+    int len = fread(file_buffer, 1, file_size, fp);
+    fclose(fp);
 
     //Parse buffer to cJSON object
-    cJSON *json = cJSON_Parse(file_buffer); 
-    if (json == NULL) { 
-        const char *error_ptr = cJSON_GetErrorPtr(); 
-        if (error_ptr != NULL) { 
-            printf("Error: %s\n", error_ptr); 
-        } 
-        cJSON_Delete(json); 
-        return false; 
-    } 
-    
+    cJSON *json = cJSON_Parse(file_buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error: %s\n", error_ptr);
+        }
+        cJSON_Delete(json);
+        return false;
+    }
+
     cJSON* imu = cJSON_GetObjectItemCaseSensitive(json, "imu");
     cJSON* eva1 = imu->child;
     cJSON* eva2 = eva1->next;
@@ -780,9 +780,9 @@ bool udp_get_imu(unsigned int command, unsigned char* data){
 }
 
 // -------------------------- ROVER --------------------------------
-bool build_json_rover(struct rover_data_t* rover){ 
+bool build_json_rover(struct rover_data_t* rover){
 
-    const char format_buffer[512] = 
+    const char format_buffer[512] =
     "\n{"
 	"\n\t\"rover\": {"
 	"\n\t\t\"posx\": %f,"
@@ -797,7 +797,7 @@ bool build_json_rover(struct rover_data_t* rover){
 	"\n\t}"
     "\n}";
     char out_buffer[512];
-    sprintf(out_buffer, format_buffer, 
+    sprintf(out_buffer, format_buffer,
         rover->pos_x,
         rover->pos_y,
         rover->poi_1_x,
@@ -805,12 +805,12 @@ bool build_json_rover(struct rover_data_t* rover){
         rover->poi_2_x,
         rover->poi_2_y,
         rover->poi_3_x,
-        rover->poi_3_y, 
+        rover->poi_3_y,
         rover->ping ? "true" : "false"
     );
 
-   
-    
+
+
     // Write bytes to file
     FILE* fd_rover = fopen("public/json_data/ROVER.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_rover);
@@ -826,7 +826,7 @@ bool update_rover(char* request_content, struct rover_data_t* rover){
     //     request_content += strlen("qr=");
     //     rover->prev_qr_scan = atoi(request_content);
     //     printf("ROVER QR: %d\n", rover->prev_qr_scan);
-    //} else 
+    //} else
     if(strncmp(request_content, "posx=", strlen("posx=")) == 0) {
         request_content += strlen("posx=");
         rover->pos_x = atof(request_content);
@@ -836,11 +836,11 @@ bool update_rover(char* request_content, struct rover_data_t* rover){
         rover->pos_y = atof(request_content);
         printf("ROVER Pos y: %f\n", rover->pos_y);
     } else if(strncmp(request_content, "ping=", strlen("ping=")) == 0) {
-        
+
         rover->poi_1_x = ROVER_POI_1_X;
         rover->poi_1_y = ROVER_POI_1_Y;
         rover->poi_2_x = ROVER_POI_2_X;
-        rover->poi_2_y = ROVER_POI_2_Y; 
+        rover->poi_2_y = ROVER_POI_2_Y;
         rover->poi_3_x = ROVER_POI_3_X;
         rover->poi_3_y = ROVER_POI_3_Y;
         rover->ping    = request_content += strlen("ping=");
@@ -860,10 +860,10 @@ bool udp_get_rover(unsigned int command, unsigned char* data){
     int off_set = command - 23;
 
     FILE* fp = fopen("public/json_data/ROVER.json", "r");
-    if (fp == NULL) { 
-        printf("Error: Unable to open the file.\n"); 
-        return false; 
-    } 
+    if (fp == NULL) {
+        printf("Error: Unable to open the file.\n");
+        return false;
+    }
 
     //Get file size
     fseek(fp, 0L, SEEK_END);
@@ -873,20 +873,20 @@ bool udp_get_rover(unsigned int command, unsigned char* data){
     //printf("file size: %d\n", file_size);
 
     //Save file to buffer
-    char *file_buffer = malloc(sizeof(char) * file_size); 
-    int len = fread(file_buffer, 1, file_size, fp); 
-    fclose(fp); 
+    char *file_buffer = malloc(sizeof(char) * file_size);
+    int len = fread(file_buffer, 1, file_size, fp);
+    fclose(fp);
 
     //Parse buffer to cJSON object
-    cJSON *json = cJSON_Parse(file_buffer); 
-    if (json == NULL) { 
-        const char *error_ptr = cJSON_GetErrorPtr(); 
-        if (error_ptr != NULL) { 
-            printf("Error: %s\n", error_ptr); 
-        } 
-        cJSON_Delete(json); 
-        return false; 
-    } 
+    cJSON *json = cJSON_Parse(file_buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error: %s\n", error_ptr);
+        }
+        cJSON_Delete(json);
+        return false;
+    }
 
     cJSON* rover = cJSON_GetObjectItemCaseSensitive(json, "rover");
     cJSON* rover_item = rover->child;
@@ -920,7 +920,7 @@ bool build_json_spec(struct spec_data_t* spec){
     rock_database[fsize] = 0;
 
     // Format string for SPEC Data
-    const char format_buffer[512] = 
+    const char format_buffer[512] =
     "\n{"
 	"\n\t\"spec\": {"
 	"\n\t\t\"eva1\": \n\t\t%s,"
@@ -948,11 +948,11 @@ bool build_json_spec(struct spec_data_t* spec){
     eva2_selected_rock_data_end[1] = 0;
 
     char* out_buffer = malloc(512 + 2*fsize);
-    sprintf(out_buffer, format_buffer, 
+    sprintf(out_buffer, format_buffer,
         eva1_selected_rock_data_start,
         eva2_selected_rock_data_start
     );
-    
+
     // Write bytes to file
     FILE* fd_spec = fopen("public/json_data/SPEC.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_spec);
@@ -961,7 +961,7 @@ bool build_json_spec(struct spec_data_t* spec){
     free(rock_database);
     free(out_buffer);
 
-    return bytes_written == strlen(out_buffer);    
+    return bytes_written == strlen(out_buffer);
 
 }
 
@@ -995,10 +995,10 @@ bool udp_get_spec(unsigned int command, unsigned char* data){
     int off_set = command - 31;
     //Open file
     FILE* fp = fopen("public/json_data/SPEC.json", "r");
-    if (fp == NULL) { 
-        printf("Error: Unable to open the file.\n"); 
-        return false; 
-    } 
+    if (fp == NULL) {
+        printf("Error: Unable to open the file.\n");
+        return false;
+    }
 
     //Get file size
     fseek(fp, 0L, SEEK_END);
@@ -1008,20 +1008,20 @@ bool udp_get_spec(unsigned int command, unsigned char* data){
     //printf("file size: %d\n", file_size);
 
     //Save file to buffer
-    char *file_buffer = malloc(sizeof(char) * file_size); 
-    int len = fread(file_buffer, 1, file_size, fp); 
-    fclose(fp); 
+    char *file_buffer = malloc(sizeof(char) * file_size);
+    int len = fread(file_buffer, 1, file_size, fp);
+    fclose(fp);
 
     //Parse buffer to cJSON object
-    cJSON *json = cJSON_Parse(file_buffer); 
-    if (json == NULL) { 
-        const char *error_ptr = cJSON_GetErrorPtr(); 
-        if (error_ptr != NULL) { 
-            printf("Error: %s\n", error_ptr); 
-        } 
-        cJSON_Delete(json); 
-        return false; 
-    } 
+    cJSON *json = cJSON_Parse(file_buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error: %s\n", error_ptr);
+        }
+        cJSON_Delete(json);
+        return false;
+    }
 
     cJSON* spec = cJSON_GetObjectItemCaseSensitive(json, "spec");
     cJSON* eva1 = spec->child;
@@ -1034,17 +1034,17 @@ bool udp_get_spec(unsigned int command, unsigned char* data){
     cJSON* eva2_name = eva2->child;
     cJSON* eva2_id = eva2_name->next;
     cJSON* eva2_data_item = eva2_id->next->child;
-    
+
     float val = 0;
 
     if(off_set < 11){
         if(off_set == 0){
-        
+
             val = eva1_id->valueint;
             memcpy(data, &val, 4);
         }
         else{
-            
+
             for(int i = 1; i != off_set; i++){
                 eva1_data_item = eva1_data_item->next;
             }
@@ -1056,7 +1056,7 @@ bool udp_get_spec(unsigned int command, unsigned char* data){
     else{
         off_set -= 11;
         if(off_set == 0){
-        
+
             val = eva2_id->valueint;
             memcpy(data, &val, 4);
         }
@@ -1078,7 +1078,7 @@ bool udp_get_spec(unsigned int command, unsigned char* data){
 bool build_json_comm(struct comm_data_t* comm){
 
     // Format string for SPEC Data
-    const char format_buffer[512] = 
+    const char format_buffer[512] =
     "\n{"
 	"\n\t\"comm\": {"
 	"\n\t\t\"comm_tower\": %s"
@@ -1086,10 +1086,10 @@ bool build_json_comm(struct comm_data_t* comm){
     "\n}";
 
     char* out_buffer = malloc(512);
-    sprintf(out_buffer, format_buffer, 
+    sprintf(out_buffer, format_buffer,
         comm->comm_tower_online ? "true" : "false"
     );
-    
+
     // Write bytes to file
     FILE* fd_spec = fopen("public/json_data/COMM.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_spec);
@@ -1097,7 +1097,7 @@ bool build_json_comm(struct comm_data_t* comm){
 
     free(out_buffer);
 
-    return bytes_written == strlen(out_buffer);    
+    return bytes_written == strlen(out_buffer);
 
 }
 
@@ -1128,10 +1128,10 @@ bool update_comm(char* request_content, struct comm_data_t* comm){
 bool udp_get_comm(unsigned char* data){
     //Open file
     FILE* fp = fopen("public/json_data/COMM.json", "r");
-    if (fp == NULL) { 
-        printf("Error: Unable to open the file.\n"); 
-        return false; 
-    } 
+    if (fp == NULL) {
+        printf("Error: Unable to open the file.\n");
+        return false;
+    }
 
     //Get file size
     fseek(fp, 0L, SEEK_END);
@@ -1141,20 +1141,20 @@ bool udp_get_comm(unsigned char* data){
     //printf("file size: %d\n", file_size);
 
     //Save file to buffer
-    char *file_buffer = malloc(sizeof(char) * file_size); 
-    int len = fread(file_buffer, 1, file_size, fp); 
-    fclose(fp); 
+    char *file_buffer = malloc(sizeof(char) * file_size);
+    int len = fread(file_buffer, 1, file_size, fp);
+    fclose(fp);
 
     //Parse buffer to cJSON object
-    cJSON *json = cJSON_Parse(file_buffer); 
-    if (json == NULL) { 
-        const char *error_ptr = cJSON_GetErrorPtr(); 
-        if (error_ptr != NULL) { 
-            printf("Error: %s\n", error_ptr); 
-        } 
-        cJSON_Delete(json); 
-        return false; 
-    } 
+    cJSON *json = cJSON_Parse(file_buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error: %s\n", error_ptr);
+        }
+        cJSON_Delete(json);
+        return false;
+    }
 
     cJSON* comm = cJSON_GetObjectItemCaseSensitive(json, "comm");
     cJSON* comm_bool = comm->child;
@@ -1173,7 +1173,7 @@ bool udp_get_comm(unsigned char* data){
 // -------------------------- ERROR --------------------------------
 bool build_json_error(struct eva_failures_t* error){
 
-    const char format_buffer[512] = 
+    const char format_buffer[512] =
     "\n{"
 	"\n\t\"error\": {"
 	"\n\t\t\"fan_error\": %s,"
@@ -1184,13 +1184,13 @@ bool build_json_error(struct eva_failures_t* error){
     "\n}";
 
     char out_buffer[512];
-    sprintf(out_buffer, format_buffer, 
+    sprintf(out_buffer, format_buffer,
         error->fan_error ? "true" : "false",
         error->oxy_error ? "true" : "false",
         // error->power_error ? "true" : "false",
         error->pump_error ? "true" : "false"
     );
-    
+
     // Write bytes to file
     FILE* fd_eva = fopen("public/json_data/ERROR.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_eva);
@@ -1224,8 +1224,8 @@ bool update_error(char* request_content, struct eva_failures_t* error){
     } else {
         return false;
     }
-    
-    
+
+
     // Update var
     if(update_var){
 
@@ -1241,9 +1241,9 @@ bool update_error(char* request_content, struct eva_failures_t* error){
 
         // update json
         build_json_error(error);
-        
+
         return true;
-    } 
+    }
 
     return false;
 
@@ -1255,10 +1255,10 @@ bool udp_get_error(unsigned int command, unsigned char* data){
 
     //Open file
     FILE* fp = fopen("public/json_data/ERROR.json", "r");
-    if (fp == NULL) { 
-        printf("Error: Unable to open the file.\n"); 
-        return false; 
-    } 
+    if (fp == NULL) {
+        printf("Error: Unable to open the file.\n");
+        return false;
+    }
 
     //Get file size
     fseek(fp, 0L, SEEK_END);
@@ -1268,20 +1268,20 @@ bool udp_get_error(unsigned int command, unsigned char* data){
     //printf("file size: %d\n", file_size);
 
     //Save file to buffer
-    char *file_buffer = malloc(sizeof(char) * file_size); 
-    int len = fread(file_buffer, 1, file_size, fp); 
-    fclose(fp); 
+    char *file_buffer = malloc(sizeof(char) * file_size);
+    int len = fread(file_buffer, 1, file_size, fp);
+    fclose(fp);
 
     //Parse buffer to cJSON object
-    cJSON *json = cJSON_Parse(file_buffer); 
-    if (json == NULL) { 
-        const char *error_ptr = cJSON_GetErrorPtr(); 
-        if (error_ptr != NULL) { 
-            printf("Error: %s\n", error_ptr); 
-        } 
-        cJSON_Delete(json); 
-        return false; 
-    } 
+    cJSON *json = cJSON_Parse(file_buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error: %s\n", error_ptr);
+        }
+        cJSON_Delete(json);
+        return false;
+    }
 
     cJSON* error = cJSON_GetObjectItemCaseSensitive(json, "error");
     cJSON* error_type = error->child;
@@ -1302,7 +1302,7 @@ bool udp_get_error(unsigned int command, unsigned char* data){
 // -------------------------- EVA --------------------------------
 bool build_json_eva(struct eva_data_t* eva, int team_index, bool completed){
 
-    const char format_buffer[512] = 
+    const char format_buffer[512] =
     "\n{"
 	"\n\t\"eva\": {"
 	"\n\t\t\"started\": %s,"
@@ -1333,17 +1333,17 @@ bool build_json_eva(struct eva_data_t* eva, int team_index, bool completed){
     "\n}";
 
     char out_buffer[512];
-    sprintf(out_buffer, format_buffer, 
+    sprintf(out_buffer, format_buffer,
         eva->started            ? "true" : "false",
         eva->paused             ? "true" : "false",
         eva->completed          ? "true" : "false",
         eva->total_time,
         eva->started_UIA        ? "true" : "false",
         eva->completed_UIA      ? "true" : "false",
-        eva->time_at_UIA,    
+        eva->time_at_UIA,
         eva->started_DCU        ? "true" : "false",
         eva->completed_DCU      ? "true" : "false",
-        eva->time_at_DCU,    
+        eva->time_at_DCU,
         eva->started_ROVER      ? "true" : "false",
         eva->completed_ROVER    ? "true" : "false",
         eva->time_at_ROVER,
@@ -1354,10 +1354,10 @@ bool build_json_eva(struct eva_data_t* eva, int team_index, bool completed){
 
     char filenameTemplate[48] = "public/json_data/teams/%d/%sEVA.json";
     char out_filename[48];
-    sprintf(out_filename, filenameTemplate, 
+    sprintf(out_filename, filenameTemplate,
         team_index,
         completed ? "Completed_" : "");
-    
+
     // Write bytes to file
     FILE* fd_eva = fopen(out_filename, "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_eva);
@@ -1468,14 +1468,14 @@ bool update_eva(char* request_content, struct backend_data_t* backend){
     } else {
         return false;
     }
-        
+
     return true;
 
 }
 
 // -------------------------- Telemetry --------------------------------
 bool build_json_telemetry(struct eva_data_t* eva, int team_index, bool completed){
-    const char format_buffer[4096] = 
+    const char format_buffer[4096] =
     "\n{"
 	"\n\t\"telemetry\": {"
 
@@ -1532,7 +1532,7 @@ bool build_json_telemetry(struct eva_data_t* eva, int team_index, bool completed
     "\n}";
 
     char out_buffer[2048];
-    sprintf(out_buffer, format_buffer, 
+    sprintf(out_buffer, format_buffer,
         eva->total_time,
 
         eva->eva1.batt_time,
@@ -1584,7 +1584,7 @@ bool build_json_telemetry(struct eva_data_t* eva, int team_index, bool completed
 
     char filenameTemplate[128] = "public/json_data/teams/%d/%sTELEMETRY.json";
     char out_filename[256];
-    sprintf(out_filename, filenameTemplate, 
+    sprintf(out_filename, filenameTemplate,
         team_index,
         completed ? "Completed_" : "");
     // Write bytes to file
@@ -1655,13 +1655,13 @@ bool build_json_pr_telemetry(struct pr_data_t* rover, int team_index, bool compl
     cJSON_AddItemToObject(pr_telemetry, "latitude", cJSON_CreateNumber(rover->latitude));
     cJSON_AddItemToObject(pr_telemetry, "longitude", cJSON_CreateNumber(rover->longitude));
 
-    
+
     cJSON* lidar = cJSON_CreateArray();
 
     for (int i = 0; i < MAX_LIDAR_SIZE; i++){
         cJSON_AddItemToArray(lidar, cJSON_CreateNumber(rover->lidar[i]));
     }
-    cJSON_AddItemToObject(pr_telemetry, "lidar", lidar);    
+    cJSON_AddItemToObject(pr_telemetry, "lidar", lidar);
 
     char* json_str = cJSON_Print(json);
 
@@ -1673,9 +1673,9 @@ bool build_json_pr_telemetry(struct pr_data_t* rover, int team_index, bool compl
         sprintf(out_filename, filenameTemplate, team_index);
 
         fp = fopen(out_filename, "w");
-        if (fp == NULL) { 
-            printf("Error: Unable to open the file.\n"); 
-            return false; 
+        if (fp == NULL) {
+            printf("Error: Unable to open the file.\n");
+            return false;
         }
     }
     else{
@@ -1684,9 +1684,9 @@ bool build_json_pr_telemetry(struct pr_data_t* rover, int team_index, bool compl
         sprintf(out_filename, filenameTemplate, team_index);
 
         fp = fopen(out_filename, "w");
-        if (fp == NULL) { 
-            printf("Error: Unable to open the file.\n"); 
-            return false; 
+        if (fp == NULL) {
+            printf("Error: Unable to open the file.\n");
+            return false;
         }
     }
 
@@ -1702,7 +1702,7 @@ float fourier_sin(float x){
     float a = 0.5f;
     float f = 0.3333f;
     float p = 13.7516;
-    
+
     float sum = 0.0f;
     float a_prod = 1.0f;
     float f_prod = 1.0f;
@@ -1730,7 +1730,7 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
     struct eva_failures_t* error = &backend->failures;
 
     // ---------------------------- EVA1 vs EVA2 ------------------------
-    
+
     // uia switches
     bool uia_power_supply_connected;
     bool uia_water_supply_connected;
@@ -1809,7 +1809,7 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
         // Fill Battery
         telemetry->batt_time += randomized_sine_value(x, 0.8f, 0.2f, 60.0f, 0.1f) * BATT_FILL_RATE;
         if(telemetry->batt_time > BATT_TIME_CAP){ telemetry->batt_time = BATT_TIME_CAP; }
-        
+
         // Fill oxygen
         if(uia_o2_supply_connected) {
             // On primary Oxygen
@@ -1819,8 +1819,8 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
                     telemetry->oxy_pri_tank_fill = OXY_TIME_CAP;
                 }
                 telemetry->oxy_pri_tank_pressure = telemetry->oxy_pri_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-            } // On Secondary Oxygen 
-            else { 
+            } // On Secondary Oxygen
+            else {
                 telemetry->oxy_sec_tank_fill += randomized_sine_value(x, 0.8f, 0.2f, 120.0f, 0.1f) * OXY_FILL_RATE * ((OXY_TIME_CAP + 1) - telemetry->oxy_sec_tank_fill);
                 if(telemetry->oxy_sec_tank_fill > OXY_TIME_CAP){
                     telemetry->oxy_sec_tank_fill = OXY_TIME_CAP;
@@ -1834,10 +1834,10 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
             // Vents Both Oxygen at the same time
             telemetry->oxy_pri_tank_fill -= randomized_sine_value(x, 0.8f, 0.2f, 180.0f, 0.1f) * OXY_FILL_RATE * (telemetry->oxy_pri_tank_fill);
             telemetry->oxy_pri_tank_pressure = telemetry->oxy_pri_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-    
+
             telemetry->oxy_sec_tank_fill -= randomized_sine_value(x, 0.8f, 0.2f, 240.0f, 0.1f) * OXY_FILL_RATE * (telemetry->oxy_sec_tank_fill);
             telemetry->oxy_sec_tank_pressure = telemetry->oxy_sec_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-            
+
         }
 
         if(dcu_is_pump_open){
@@ -1860,17 +1860,19 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
 
         // depressurizing the suit
         if(uia_depress_active){
+            
+            telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_DEPRESS, x);
 
             if(telemetry->depress_time < DEPRESS_TIME){
-                
+
                 // telemetry->heart_rate += (EVA_HEART_RATE - RESTING_HEART_RATE) / DEPRESS_TIME; // the heart rate should go from RESTING_HEART_RATE to EVA_HEART_RATE over the course of depress
-                
+
                 telemetry->suit_oxy_pressure += (SUIT_OXY_PRESSURE - HAB_OXY_PRESSURE) / DEPRESS_TIME;
                 telemetry->suit_co2_pressure += (SUIT_CO2_PRESSURE - HAB_CO2_PRESSURE) / DEPRESS_TIME;
                 telemetry->suit_other_pressure += (SUIT_OTHER_PRESSURE - HAB_OTHER_PRESSURE) / DEPRESS_TIME;
 
                 telemetry->depress_time += 1;
-            
+
             }
 
         }
@@ -1883,11 +1885,11 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
         // Oxygen is consumed each second
         // On primary Oxygen
         if(dcu_using_pri_oxy){
-            telemetry->oxy_pri_tank_fill -= 1; 
+            telemetry->oxy_pri_tank_fill -= 1;
             if(telemetry->oxy_pri_tank_fill < 0) { telemetry->oxy_pri_tank_fill = 0; }
             telemetry->oxy_pri_tank_pressure = telemetry->oxy_pri_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-        } // On Secondary Oxygen 
-        else { 
+        } // On Secondary Oxygen
+        else {
             telemetry->oxy_sec_tank_fill -= 1;
             if(telemetry->oxy_sec_tank_fill < 0) { telemetry->oxy_sec_tank_fill = 0; }
             telemetry->oxy_sec_tank_pressure = telemetry->oxy_sec_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
@@ -1901,7 +1903,7 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
         // Distribute CO2 between helmet and suit
         float co2_pressure_diff_helmet_suit = (telemetry->helmet_co2_pressure - telemetry->suit_co2_pressure) / (telemetry->helmet_co2_pressure + telemetry->suit_co2_pressure);
         float co2_flow_rate = fmin(fmax(-0.1f, 2 * co2_pressure_diff_helmet_suit), .9f) + 0.1f;
-        float co2_blow_out_of_bubble = (float) fmax(telemetry->fan_pri_rpm, telemetry->fan_sec_rpm) / SUIT_FAN_RPM * telemetry->helmet_co2_pressure * 0.015f * co2_flow_rate; 
+        float co2_blow_out_of_bubble = (float) fmax(telemetry->fan_pri_rpm, telemetry->fan_sec_rpm) / SUIT_FAN_RPM * telemetry->helmet_co2_pressure * 0.015f * co2_flow_rate;
         // printf("%f -:- %f\n", telemetry->co2_production *  0.015f, co2_blow_out_of_bubble);
         telemetry->helmet_co2_pressure -= co2_blow_out_of_bubble;
         telemetry->suit_co2_pressure += co2_blow_out_of_bubble;
@@ -1928,8 +1930,8 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
         telemetry->coolant_gaseous_pressure = fmin(fmax((telemetry->temperature - 80.0f) / 10.0f, 0.0f), 1.0f) * total_coolant_pressure; // TODO update 85
         telemetry->coolant_liquid_pressure = total_coolant_pressure - telemetry->coolant_gaseous_pressure;
 
-    }    
-    
+    }
+
     // ---------------------------- Random Spice Updates ------------------------
     // These keep the values changing to make them seem more real
 
@@ -1940,7 +1942,8 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
 
     // telemetry->heart_rate += randomized_sine_value(x, 0, 1.0f, 360.0f, 0.023f);
 
-    //New stuff TODO
+    //New stuff TODO TESTING
+    /*
     if(eva_time > 15 && eva_time < 30){
         telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_TIRED, x);
     }
@@ -1953,8 +1956,9 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
     else{
         telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
     }
-
+    */
     //End new stuff
+    telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
 
     telemetry->suit_oxy_pressure += randomized_sine_value(x, 0, 0.00008f, 1320.0f, 0.0012f);
     telemetry->suit_co2_pressure += randomized_sine_value(x, 0, 0.00008f, 1380.0f, 0.0013f);
@@ -1971,6 +1975,14 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
 
     struct heart_sim_data_t* heart_sim = &(telemetry->heart_sim);
 
+    //prioritize first case called each second, avoiding repeated calls
+    if(eva_time == heart_sim->sim_in_progress_time){
+        printf("Heart rate prev case: %d\n", heart_sim->prev_case);
+        return randomized_sine_value(x, heart_sim->prev_heart_rate, 3.0f, 1.0f, 0.023f);
+    }
+
+    heart_sim->sim_in_progress_time = eva_time;
+
     float heart_rate = 0.0f;
     float target_heart_rate = 0.0f;
     float increase = 1.0f;
@@ -1978,12 +1990,13 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
     switch (heart_case)
     {
     case HEART_CASE_TIRED:
+
         if(heart_sim->prev_case != HEART_CASE_TIRED){
             heart_sim->start_time = eva_time;
             heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
-        } 
+        }
         heart_sim->prev_case = HEART_CASE_TIRED;
-    
+
         target_heart_rate = EVA_HEART_RATE;
         increase = 5.0f;
 
@@ -1996,10 +2009,7 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         heart_sim->prev_heart_rate = heart_rate;
         printf("Heart Rate TIRED: %.2f\n", heart_rate);
         return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
-        
-    case HEART_CASE_TIRED2:
 
-        break;
     case HEART_CASE_WORKSPACE:
         if(heart_sim->prev_case != HEART_CASE_WORKSPACE){
             heart_sim->start_time = eva_time;
@@ -2010,7 +2020,7 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
 
         target_heart_rate = WORKSPACE_HEART_RATE;
         increase = 5.0f;
-        
+
         if(heart_sim->prev_heart_rate >= WORKSPACE_HEART_RATE){
             increase = -1.0f;
         }
@@ -2022,7 +2032,7 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         }
         else if(heart_rate > target_heart_rate && increase > 0){
             heart_rate = target_heart_rate;
-        }  
+        }
 
         heart_sim->prev_heart_rate = heart_rate;
         printf("Heart Rate WORKSPACE: %.2f\n", heart_rate);
@@ -2032,7 +2042,7 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         if(heart_sim->prev_case != HEART_CASE_DEPRESS){
             heart_sim->start_time = eva_time;
             heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
-        } 
+        }
         heart_sim->prev_case = HEART_CASE_DEPRESS;
 
         target_heart_rate = EVA_HEART_RATE;
@@ -2048,7 +2058,7 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
 
     case HEART_CASE_RESTING:
-        
+
         if(heart_sim->prev_case != HEART_CASE_RESTING){
             heart_sim->start_time = eva_time;
             heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
@@ -2058,14 +2068,14 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         if(heart_sim->prev_heart_rate >= RESTING_HEART_RATE){
             increase = -1.0f;
         }
-            
+
         heart_rate = increase * heart_sim->heart_increase_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
 
         target_heart_rate = RESTING_HEART_RATE;
         if(heart_rate < target_heart_rate){
             heart_rate = target_heart_rate;
         }
-        
+
         heart_sim->prev_heart_rate = heart_rate;
         printf("Heart Rate RESTING: %.2f\n", heart_rate);
         return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
@@ -2074,7 +2084,7 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         break;
     }
 
-    return 0.0f;
+    return -1.0f;
 }
 
 bool update_pr_telemetry(char* request_content, struct backend_data_t* backend, int teamIndex){
@@ -2083,7 +2093,7 @@ bool update_pr_telemetry(char* request_content, struct backend_data_t* backend, 
 
     if (teamIndex >= 0 && teamIndex < NUMBER_OF_TEAMS) {
         p_rover = &backend->p_rover[teamIndex];
-    } 
+    }
 
     if(strncmp(request_content, "start_team=", strlen("start_team=")) == 0) {
         request_content += strlen("start_team=");
@@ -2133,7 +2143,7 @@ bool update_pr_telemetry(char* request_content, struct backend_data_t* backend, 
         backend->pr_sim_paused = true;
         backend->p_rover[teamIndex].sim_running = true;
         backend->p_rover[teamIndex].sim_paused = true;
-        
+
         //Write out json otherwise it will never write out
         build_json_pr_telemetry(&backend->p_rover[teamIndex], teamIndex, false);
         printf("Team %d PR Paused\n", teamIndex);
@@ -2228,7 +2238,7 @@ void simulate_pr_telemetry(struct pr_data_t* p_rover, uint32_t server_time, stru
     p_rover->mission_elapsed_time += 1;
     bool dcu_pump_is_open_eva1 = backend->dcu.eva1_pump;
     bool dcu_pump_is_open_eva2 = backend->dcu.eva2_pump;
-    
+
     bool uia_water_supply_connected_eva1 = backend->uia.eva1_water_supply;
     bool uia_water_supply_connected_eva2 = backend->uia.eva2_water_supply;
 
@@ -2245,7 +2255,7 @@ void simulate_pr_telemetry(struct pr_data_t* p_rover, uint32_t server_time, stru
     // EVA1
     if(uia_power_supply_connected_eva1 && dcu_using_umbilical_power_eva1){
 
-        // Fill EVA's coolant tank, drain PR's coolant tank 
+        // Fill EVA's coolant tank, drain PR's coolant tank
         if(dcu_pump_is_open_eva1){
             if(uia_water_supply_connected_eva1){
                 p_rover->pr_coolant_tank -= PR_COOLANT_TANK_DRAIN_RATE;
@@ -2265,7 +2275,7 @@ void simulate_pr_telemetry(struct pr_data_t* p_rover, uint32_t server_time, stru
     // EVA2
     if(uia_power_supply_connected_eva2 && dcu_using_umbilical_power_eva2){
 
-        // Fill EVA's coolant tank, drain PR's coolant tank 
+        // Fill EVA's coolant tank, drain PR's coolant tank
         if(dcu_pump_is_open_eva2){
             if(uia_water_supply_connected_eva2){
                 p_rover->pr_coolant_tank -= PR_COOLANT_TANK_DRAIN_RATE;
@@ -2376,7 +2386,7 @@ void simulate_pr_telemetry(struct pr_data_t* p_rover, uint32_t server_time, stru
 
     simulate_cabin_temperature(backend);
     simulate_external_temperature(backend);
-    
+
     //printf("Battery: %.2f\n", p_rover->battery_level);
 }
 
@@ -2424,7 +2434,7 @@ void simulate_cabin_temperature(struct backend_data_t* backend){
         new_target_temp = CABIN_HEATING_TEMP;
         k = CABIN_HEATING_RATE;
     }
-    
+
     if (cabin_sim->target_temp != new_target_temp || cabin_sim->old_k != k){
         cabin_sim->start_time = server_time;
         cabin_sim->object_temp = p_rover->cabin_temperature;
@@ -2485,12 +2495,12 @@ bool udp_get_telemetry(unsigned int command, unsigned int team_number, unsigned 
     sprintf(team, "%d", team_number);
     strcat(start_path, team);
     strcat(start_path, end_path);
-    
+
     FILE* fp = fopen(start_path, "r");
-    if (fp == NULL) { 
-        printf("Error: Unable to open the file.\n"); 
-        return false; 
-    } 
+    if (fp == NULL) {
+        printf("Error: Unable to open the file.\n");
+        return false;
+    }
 
     //Get file size
     fseek(fp, 0L, SEEK_END);
@@ -2500,20 +2510,20 @@ bool udp_get_telemetry(unsigned int command, unsigned int team_number, unsigned 
     //printf("file size: %d\n", file_size);
 
     //Save file to buffer
-    char *file_buffer = malloc(sizeof(char) * file_size); 
-    int len = fread(file_buffer, 1, file_size, fp); 
-    fclose(fp); 
+    char *file_buffer = malloc(sizeof(char) * file_size);
+    int len = fread(file_buffer, 1, file_size, fp);
+    fclose(fp);
 
     //Parse buffer to cJSON object
-    cJSON *json = cJSON_Parse(file_buffer); 
-    if (json == NULL) { 
-        const char *error_ptr = cJSON_GetErrorPtr(); 
-        if (error_ptr != NULL) { 
-            printf("Error: %s\n", error_ptr); 
-        } 
-        cJSON_Delete(json); 
-        return false; 
-    } 
+    cJSON *json = cJSON_Parse(file_buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error: %s\n", error_ptr);
+        }
+        cJSON_Delete(json);
+        return false;
+    }
 
     cJSON* telemetry = cJSON_GetObjectItemCaseSensitive(json, "telemetry");
     cJSON* eva_time = telemetry->child;
@@ -2528,7 +2538,7 @@ bool udp_get_telemetry(unsigned int command, unsigned int team_number, unsigned 
         float val;
         unsigned char temp[4];
     }u;
-            
+
     if(off_set < 23){
         if(off_set == 0){
             u.val = eva_time->valuedouble;
@@ -2544,7 +2554,7 @@ bool udp_get_telemetry(unsigned int command, unsigned int team_number, unsigned 
     }
     else{
         off_set -= 23;
-        
+
         for (int i = 0; i != off_set; i++){
             eva2_item = eva2_item->next;
         }
@@ -2578,10 +2588,10 @@ bool udp_get_pr_telemetry(unsigned int command, unsigned char* data, struct back
     strcat(start_path, end_path);
 
     FILE* fp = fopen(start_path, "r");
-    if (fp == NULL) { 
-        printf("Error: Unable to open the file.\n"); 
-        return false; 
-    } 
+    if (fp == NULL) {
+        printf("Error: Unable to open the file.\n");
+        return false;
+    }
 
     //Get file size
     fseek(fp, 0L, SEEK_END);
@@ -2589,24 +2599,24 @@ bool udp_get_pr_telemetry(unsigned int command, unsigned char* data, struct back
     rewind(fp);
 
     //Save file to buffer
-    char *file_buffer = malloc(sizeof(char) * file_size); 
-    int len = fread(file_buffer, 1, file_size, fp); 
-    fclose(fp); 
+    char *file_buffer = malloc(sizeof(char) * file_size);
+    int len = fread(file_buffer, 1, file_size, fp);
+    fclose(fp);
 
     //Parse buffer to cJSON object
-    cJSON *json = cJSON_Parse(file_buffer); 
-    if (json == NULL) { 
-        const char *error_ptr = cJSON_GetErrorPtr(); 
-        if (error_ptr != NULL) { 
-            printf("Error: %s\n", error_ptr); 
-        } 
-        cJSON_Delete(json); 
-        return false; 
-    } 
+    cJSON *json = cJSON_Parse(file_buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error: %s\n", error_ptr);
+        }
+        cJSON_Delete(json);
+        return false;
+    }
 
     cJSON* rover_telemetry = cJSON_GetObjectItemCaseSensitive(json, "pr_telemetry");
     cJSON* rover_item = rover_telemetry->child;
-    
+
     union {
         float val;
         unsigned char temp[4];
@@ -2644,12 +2654,12 @@ bool udp_get_eva(unsigned int command, unsigned int team_number, unsigned char* 
     sprintf(team, "%d", team_number);
     strcat(start_path, team);
     strcat(start_path, end_path);
-    
+
     FILE* fp = fopen(start_path, "r");
-    if (fp == NULL) { 
-        printf("Error: Unable to open the file.\n"); 
-        return false; 
-    } 
+    if (fp == NULL) {
+        printf("Error: Unable to open the file.\n");
+        return false;
+    }
 
     //Get file size
     fseek(fp, 0L, SEEK_END);
@@ -2659,20 +2669,20 @@ bool udp_get_eva(unsigned int command, unsigned int team_number, unsigned char* 
     //printf("file size: %d\n", file_size);
 
     //Save file to buffer
-    char *file_buffer = malloc(sizeof(char) * file_size); 
-    int len = fread(file_buffer, 1, file_size, fp); 
-    fclose(fp); 
+    char *file_buffer = malloc(sizeof(char) * file_size);
+    int len = fread(file_buffer, 1, file_size, fp);
+    fclose(fp);
 
     //Parse buffer to cJSON object
-    cJSON *json = cJSON_Parse(file_buffer); 
-    if (json == NULL) { 
-        const char *error_ptr = cJSON_GetErrorPtr(); 
-        if (error_ptr != NULL) { 
-            printf("Error: %s\n", error_ptr); 
-        } 
-        cJSON_Delete(json); 
-        return false; 
-    } 
+    cJSON *json = cJSON_Parse(file_buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            printf("Error: %s\n", error_ptr);
+        }
+        cJSON_Delete(json);
+        return false;
+    }
 
     cJSON* eva = cJSON_GetObjectItemCaseSensitive(json, "eva");
     cJSON* uia = cJSON_GetObjectItemCaseSensitive(eva, "uia");
@@ -2711,7 +2721,7 @@ bool udp_get_eva(unsigned int command, unsigned int team_number, unsigned char* 
         for(int i = 0; i != off_set; i++){
             uia_item = uia_item->next;
         }
-        
+
         if(cJSON_IsBool(uia_item)){
             union {
                 bool val;
@@ -2733,7 +2743,7 @@ bool udp_get_eva(unsigned int command, unsigned int team_number, unsigned char* 
         for(int i = 0; i != off_set; i++){
             dcu_item = dcu_item->next;
         }
-        
+
         if(cJSON_IsBool(dcu_item)){
             union {
                 bool val;
@@ -2755,7 +2765,7 @@ bool udp_get_eva(unsigned int command, unsigned int team_number, unsigned char* 
         for(int i = 0; i != off_set; i++){
             rover_item = rover_item->next;
         }
-        
+
         if(cJSON_IsBool(rover_item)){
             union {
                 bool val;
@@ -2776,7 +2786,7 @@ bool udp_get_eva(unsigned int command, unsigned int team_number, unsigned char* 
         for(int i = 0; i != off_set; i++){
             spec_item = spec_item->next;
         }
-        
+
         if(cJSON_IsBool(spec_item)){
             union {
                 bool val;
@@ -2798,7 +2808,7 @@ bool udp_post_pr_telemetry(unsigned int command, unsigned char* data, struct bac
     }
 
     if (command == 1117) {
-        //Calculate distance traveled 
+        //Calculate distance traveled
         float distToAdd = 0;
 
         if (prPrevX != 0 || prPrevY != 0) {
@@ -2807,7 +2817,7 @@ bool udp_post_pr_telemetry(unsigned int command, unsigned char* data, struct bac
 
             distToAdd = xDiff * xDiff + yDiff * yDiff;
             distToAdd = sqrt(distToAdd);
-        } 
+        }
 
         backend->p_rover[backend->running_pr_sim].distance_traveled += distToAdd;
 
@@ -2822,7 +2832,7 @@ bool udp_post_pr_telemetry(unsigned int command, unsigned char* data, struct bac
 
         return true;
     }
-    
+
     int off_set = command - 1103;
 
     if(off_set > 25){
@@ -2866,7 +2876,7 @@ void udp_post_pr_lidar(char* request, struct backend_data_t* backend, int receiv
 
     }
 
-    
+
     // printf("lidar arr: ");
     // for(int i = 0; i < total_floats; i++){
     //     printf("%f, ", backend->p_rover[backend->running_pr_sim].lidar[i]);
@@ -2874,8 +2884,8 @@ void udp_post_pr_lidar(char* request, struct backend_data_t* backend, int receiv
     // printf("\n");
 
     // printf("first: %f\n", backend->p_rover[backend->running_pr_sim].lidar[0]);
-    
-    
+
+
 }
 
 void udp_get_pr_lidar(char* lidar, struct backend_data_t* backend){
@@ -2888,7 +2898,7 @@ void udp_get_pr_lidar(char* lidar, struct backend_data_t* backend){
 
     unsigned char temp[4];
     for (int i = 0; i < lidar_size; i++){
-        
+
         memcpy(temp, backend->p_rover[backend->running_pr_sim].lidar + i, 4);
         if(!b_endian){
             reverse_bytes(temp);
@@ -2965,7 +2975,7 @@ void simulate_backend(struct backend_data_t* backend){
 
             // check that the EVA is in progress
             if(eva->started && !eva->completed && !eva->paused){
-                
+
                 // Increment timers
                 eva->total_time++;
                 if(eva->started_UIA   && !eva->completed_UIA)     { eva->time_at_UIA++; }
@@ -2990,7 +3000,7 @@ void simulate_backend(struct backend_data_t* backend){
                 // Update Pressurized Rover Telemetry (ROVER_TELEMETRY.json)
                 build_json_pr_telemetry(&backend->p_rover[i], i, false);
             }
-            
+
         }
 
     }
