@@ -1991,6 +1991,8 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
     }
     */
     //End new stuff
+
+    
     telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
 
     telemetry->suit_oxy_pressure += randomized_sine_value(x, 0, 0.00008f, 1320.0f, 0.0012f);
