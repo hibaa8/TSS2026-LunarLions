@@ -278,6 +278,16 @@
   justify-content: flex-end;
 }
 
+.errorButtonContainer {
+  width: 35%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  border-radius: 2rem;
+}
+
 .switch {
   width: 2.95rem;
   height: 1.25rem;

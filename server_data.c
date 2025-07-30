@@ -1264,8 +1264,11 @@ bool update_error(char* request_content, struct eva_failures_t* error){
             *update_heart_case = HEART_CASE_RESTING;
             printf("%d\n", HEART_CASE_RESTING);
         } else if(strncmp(request_content, "HEART_CASE_WORKSPACE", strlen("HEART_CASE_WORKSPACE")) == 0) {
-            *update_heart_case = HEART_CASE_DEPRESS;
+            *update_heart_case = HEART_CASE_WORKSPACE;
             printf("%d\n", HEART_CASE_WORKSPACE);
+        } else if(strncmp(request_content, "HEART_CASE_TIRED", strlen("HEART_CASE_TIRED")) == 0) {
+            *update_heart_case = HEART_CASE_TIRED;
+            printf("%d\n", HEART_CASE_TIRED);
         } else {
             return false;
         }
@@ -1892,10 +1895,10 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
         // depressurizing the suit
         if(uia_depress_active){
             
-            telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_DEPRESS, x);
 
             if(telemetry->depress_time < DEPRESS_TIME){
 
+                telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_DEPRESS, x);
                 // telemetry->heart_rate += (EVA_HEART_RATE - RESTING_HEART_RATE) / DEPRESS_TIME; // the heart rate should go from RESTING_HEART_RATE to EVA_HEART_RATE over the course of depress
 
                 telemetry->suit_oxy_pressure += (SUIT_OXY_PRESSURE - HAB_OXY_PRESSURE) / DEPRESS_TIME;
@@ -1992,7 +1995,24 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
     */
     //End new stuff
 
+    switch (error->heart_case)
+    {
+    case HEART_CASE_TIRED:
+        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_TIRED, x);
+
+        break;
+    case HEART_CASE_WORKSPACE:
+        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_WORKSPACE, x);
     
+        break;
+    case HEART_CASE_RESTING:
+        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
+
+        break;
+    default:
+        break;
+    }
+
     telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
 
     telemetry->suit_oxy_pressure += randomized_sine_value(x, 0, 0.00008f, 1320.0f, 0.0012f);
@@ -2015,7 +2035,7 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
 
     //prioritize first case called each second, avoiding repeated calls
     if(eva_time == heart_sim->sim_in_progress_time){
-        printf("Heart rate prev case: %d\n", heart_sim->prev_case);
+        //printf("Heart rate prev case: %d\n", heart_sim->prev_case);
         return randomized_sine_value(x, heart_sim->prev_heart_rate, 3.0f, 1.0f, 0.023f);
     }
 
@@ -2039,7 +2059,7 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         }
 
         heart_sim->prev_heart_rate = heart_rate;
-        printf("Heart Rate TIRED: %.2f\n", heart_rate);
+        //printf("Heart Rate TIRED: %.2f\n", heart_rate);
         return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
 
     case HEART_CASE_WORKSPACE:
@@ -2065,7 +2085,7 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         }
 
         heart_sim->prev_heart_rate = heart_rate;
-        printf("Heart Rate WORKSPACE: %.2f\n", heart_rate);
+        //printf("Heart Rate WORKSPACE: %.2f\n", heart_rate);
         return randomized_sine_value(x, heart_rate, 10.0f, 1.0f, 0.023f);
 
     case HEART_CASE_DEPRESS:
@@ -2083,7 +2103,7 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         }
 
         heart_sim->prev_heart_rate = heart_rate;
-        printf("Heart Rate DEPRESS: %.2f\n", heart_rate);
+        //printf("Heart Rate DEPRESS: %.2f\n", heart_rate);
         return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
 
     case HEART_CASE_RESTING:
@@ -2105,7 +2125,7 @@ float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time,
         }
 
         heart_sim->prev_heart_rate = heart_rate;
-        printf("Heart Rate RESTING: %.2f\n", heart_rate);
+        //printf("Heart Rate RESTING: %.2f\n", heart_rate);
         return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
 
     default:
