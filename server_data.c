@@ -1931,10 +1931,9 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
         }
 
         // Life Support Process
-        //TODO CO2 production and O2 consumption
         telemetry->oxy_consumption = simulate_oxy_consumption(telemetry, eva_time, 0, x);
         telemetry->co2_production  = simulate_co2_production(telemetry, eva_time, 0, x);
-        telemetry->helmet_co2_pressure += telemetry->co2_production * 0.015f;
+        telemetry->helmet_co2_pressure += telemetry->co2_production * 0.0000015f; //TODO
 
         // Distribute CO2 between helmet and suit
         float co2_pressure_diff_helmet_suit = (telemetry->helmet_co2_pressure - telemetry->suit_co2_pressure) / (telemetry->helmet_co2_pressure + telemetry->suit_co2_pressure);
