@@ -1895,7 +1895,6 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
         // depressurizing the suit
         if(uia_depress_active){
             
-
             if(telemetry->depress_time < DEPRESS_TIME){
 
                 telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_DEPRESS, x);
@@ -1906,9 +1905,11 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
                 telemetry->suit_other_pressure += (SUIT_OTHER_PRESSURE - HAB_OTHER_PRESSURE) / DEPRESS_TIME;
 
                 telemetry->depress_time += 1;
-
+                //Slowly return heart rate to resting
+                if(telemetry->depress_time == DEPRESS_TIME){
+                    telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
+                }
             }
-
         }
 
         telemetry->oxy_consumption = simulate_oxy_consumption(telemetry, eva_time, 0, x);
@@ -1976,23 +1977,6 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
     if(telemetry->oxy_sec_tank_pressure < 0.001 || telemetry->oxy_sec_tank_fill < 0.001f) {telemetry->oxy_sec_tank_pressure = 0.0f; }
 
     // telemetry->heart_rate += randomized_sine_value(x, 0, 1.0f, 360.0f, 0.023f);
-
-    //New stuff TODO TESTING
-    /*
-    if(eva_time > 15 && eva_time < 30){
-        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_TIRED, x);
-    }
-    else if (eva_time > 30 && eva_time < 45){
-        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
-    }
-    else if (eva_time > 80){
-        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_WORKSPACE, x);
-    }
-    else{
-        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
-    }
-    */
-    //End new stuff
 
     switch (error->heart_case)
     {
