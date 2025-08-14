@@ -2978,14 +2978,15 @@ bool update_resource(char* request_content, struct backend_data_t* backend){
         if (backend->running_pr_sim >= 0) {
             return false;
         }
-
         request_content += strlen("pr_");
         return update_pr_telemetry(request_content, backend, -1);
     } else if(strncmp(request_content, "pr_", strlen("pr_")) == 0){
+        
         if (backend->running_pr_sim < 0) {
-            return false;
+            printf("Start PR Telemetry before updating values!\n");
+            return true;
         }
-
+        
         int runningPRSim = backend->running_pr_sim;
         request_content += strlen("pr_");
         return update_pr_telemetry(request_content, backend, runningPRSim);
