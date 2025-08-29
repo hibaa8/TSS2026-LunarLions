@@ -2529,7 +2529,7 @@ bool udp_get_telemetry(unsigned int command, unsigned int team_number, unsigned 
 
     char start_path[50] = "public/json_data/teams/";
     char team[3] = "";
-    char* end_path = "/TELEMETRY.json";
+    char* end_path = "/EVA_TELEMETRY.json";
 
     sprintf(team, "%d", team_number);
     strcat(start_path, team);

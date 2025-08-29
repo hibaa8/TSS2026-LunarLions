@@ -1,0 +1,1 @@
+Add information about why this exists for future NASA SUITS challenges
