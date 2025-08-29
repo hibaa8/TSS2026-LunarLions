@@ -72,7 +72,7 @@ http://192.168.51.109:14141
 6. From this website, you can interact with the TSS.\
 This is where you can monitor the state of the server, verify the display of your system, and virtually interact with the EVA devices like you will be doing in May.
 
-![Image](Images/TSSMainPage.png)
+![Image](public/images/tss-main-page.png)
 
 
 

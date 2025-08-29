@@ -43,12 +43,12 @@ function loadPOI() {
 
 // Loads the rock yard maps
 function loadMap() {
-    map.src = "./images/rockYardMap-min.png";
+    map.src = "./images/rock-yard-map.png";
 }
 
 // Loads the rock yard maps
 function loadMap() {
-    map.src = "./images/rockYardMap-min.png";
+    map.src = "./images/rock-yard-map.png";
 }
 
 //Runs on load of the page
