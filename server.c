@@ -101,10 +101,6 @@ int main(int argc, char* argv[])
         get_ip_address(hostname);
     }
 
-    fptr = fopen("./public/server_ip.txt", "w");
-    fprintf(fptr, hostname);
-    fclose(fptr);
-
     char* whitelist[MAX_LINE_LENGHT];
     int whitelist_size = 0;
 

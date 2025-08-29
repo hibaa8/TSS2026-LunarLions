@@ -14,33 +14,6 @@ function loadVideoFeed() {
     video.src = "http://192.168.51.163:8080/stream?topic=/camera/image_raw&type=ros_compressed";
 }
 
-function loadPOI() {
-    fetch("../server_ip.txt")
-    .then(response => response.text())
-    .then(ip => {
-        return fetch(`http://${ip}:14141`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "text/plain",
-                "User-Agent": "rover_"
-            },
-            body: "rover_ping=true"
-        });
-    })
-    .then(response => response.text())
-    .then(data => {
-        $.getJSON("../json_data/ROVER.json", function(data) {
-            poi1x.innerText = (data.rover.poi_1_x).toFixed(5);
-            poi2x.innerText = (data.rover.poi_2_x).toFixed(5);
-            poi3x.innerText = (data.rover.poi_3_x).toFixed(5);
-            poi1y.innerText = (data.rover.poi_1_y).toFixed(5);
-            poi2y.innerText = (data.rover.poi_2_y).toFixed(5);
-            poi3y.innerText = (data.rover.poi_3_y).toFixed(5);
-        });
-    })
-    .catch(error => console.error("Error:", error));
-}
-
 // Loads the rock yard maps
 function loadMap() {
     map.src = "./images/rock-yard-map.png";
