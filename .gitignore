@@ -3,6 +3,8 @@
 *.exe
 *.lib
 *.exp
+server
+
 public/server_ip.txt
 public/json_data/teams/0/ROVER_TELEMETRY.json
 public/json_data/teams/1/ROVER_TELEMETRY.json
