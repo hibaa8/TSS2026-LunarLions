@@ -1,1 +1,1 @@
-gcc -g network.c server_data.c server.c cJSON.c -o server.exe -lm
+gcc -g src/network.c src/server_data.c src/server.c src/cJSON.c -o server.exe -lm

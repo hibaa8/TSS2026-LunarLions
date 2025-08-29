@@ -85,10 +85,6 @@ function loadRover() {
   video.src =
     "http://192.168.51.194:8080/stream?topic=/camera/image_raw&type=ros_compressed";
 
-  $.getJSON("json_data/ROVER.json", function (data) {
-    xCoordinateRover.innerText = data.rover.posx.toFixed(2);
-    yCoordinateRover.innerText = data.rover.posy.toFixed(2);
-  });
 }
 
 // Loads the coordinates of EVA 1 and EVA 2

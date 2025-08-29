@@ -31,22 +31,6 @@ function onload() {
     video = document.getElementById('videoFeed');
     map = document.getElementById('rockYardMap');
 
-    poi1x = document.getElementById('poi1x');
-    poi1y = document.getElementById('poi1y');
-    poi2x = document.getElementById('poi2x');
-    poi2y = document.getElementById('poi2y');
-    poi3x = document.getElementById('poi3x');
-    poi3y = document.getElementById('poi3y');
-
-    $.getJSON("../json_data/ROVER.json", function(data) {
-        poi1x.innerText = (data.rover.poi_1_x).toFixed(5);
-        poi2x.innerText = (data.rover.poi_2_x).toFixed(5);
-        poi3x.innerText = (data.rover.poi_3_x).toFixed(5);
-        poi1y.innerText = (data.rover.poi_1_y).toFixed(5);
-        poi2y.innerText = (data.rover.poi_2_y).toFixed(5);
-        poi3y.innerText = (data.rover.poi_3_y).toFixed(5);
-    });
-
     loadMap();
 
     // Continuously refreshes for the video feed

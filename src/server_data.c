@@ -209,9 +209,9 @@ struct backend_data_t* init_backend(){
     build_json_uia(&backend->uia);
     build_json_dcu(&backend->dcu);
     build_json_imu(&backend->imu);
-    build_json_rover(&backend->rover);
-    build_json_spec(&backend->spec);
-    build_json_comm(&backend->comm);
+    //build_json_rover(&backend->rover); Don't need POI for rover for SUITS 2026
+    //build_json_spec(&backend->spec); Don't need SPEC data for SUITS 2026
+    //build_json_comm(&backend->comm); Don't need COMM tower for SUITS 2026
 
     for(int i = 0; i < NUMBER_OF_TEAMS; i++){
         build_json_eva(&backend->evas[i], i, false);
