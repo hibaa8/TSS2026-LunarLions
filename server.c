@@ -74,7 +74,6 @@ int main(int argc, char* argv[])
     //clock_gettime(CLOCK_REALTIME, &time_begin);
 
     bool udp_only = false;
-    bool protected_mode = false;
     bool local = false;
     unsigned int old_time = 0;
 
@@ -83,10 +82,7 @@ int main(int argc, char* argv[])
     char port[6] = "14141";
     
     for (int i = 0; i < argc; i++){
-        if (strcmp(argv[i], "--protected") == 0){
-            protected_mode = true;
-        }
-        else if(strcmp(argv[i], "--udp") == 0){
+     if(strcmp(argv[i], "--udp") == 0){
             udp_only = true;
         }
         else if(strcmp(argv[i], "--local") == 0){
@@ -99,45 +95,6 @@ int main(int argc, char* argv[])
     }
     else{
         get_ip_address(hostname);
-    }
-
-    char* whitelist[MAX_LINE_LENGHT];
-    int whitelist_size = 0;
-
-    // Load Whitelist
-    if(protected_mode){
-        FILE* fp = fopen("whitelist.csv", "r");
-        if (fp == NULL){
-            printf("Error opening whitelist file.\n");
-        }
-        
-        char line[MAX_LINE_LENGHT];
-
-        int idx = 0;
-        while(fgets(line, sizeof(line), fp)){
-            line[strcspn(line, "\n")] = '\0';
-            
-            char* value = strtok(line, ",");
-
-            while(value){
-                whitelist[idx] = value;
-                idx++;
-                value = strtok(NULL, ",");
-            }
-        }
-        whitelist_size = idx;
-
-        #ifdef TESTING_MODE
-            printf("Whitelist: ");
-            for (int i = 0; i < whitelist_size; i++){
-                if(i == whitelist_size - 1){
-                    printf("%s\n\n", whitelist[i]);
-                }
-                else{
-                    printf("%s, " , whitelist[i]);
-                }
-            }
-        #endif
     }
 
     printf("Launching Server at IP: %s:%s\n", hostname, port);
@@ -160,7 +117,6 @@ int main(int argc, char* argv[])
 
     #ifdef TESTING_MODE
         printf("\nBig-endian system: %s\n", big_endian() ? "yes" : "no");
-        printf("Protected mode: %s\n", protected_mode ? "ON" : "OFF");
     #endif
 
     // "Data Base" Data
@@ -363,22 +319,6 @@ int main(int argc, char* argv[])
 
         // Server-Client Socket got a new message
         struct client_info_t* client = clients;
-
-        //Check if client is on the http whitelist
-        if(protected_mode && client){
-            bool found = false;
-
-            for (int i = 0; i < whitelist_size; i++){
-                if(strcmp(whitelist[i], get_client_address(client)) == 0){
-                    found = true;
-                }
-            }
-
-            if(!found){
-                drop_client(&clients, client);
-                printf("Client not in whitelist\n");
-            }
-        }
 
         if(!udp_only){
 
