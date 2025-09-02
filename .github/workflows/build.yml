@@ -20,6 +20,7 @@ jobs:
 
     - name: Build C project
       run: |
+        chmod +x build.bat
         ./build.bat
 
     - name: Create Release
