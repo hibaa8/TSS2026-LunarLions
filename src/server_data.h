@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <stdint.h>
-#include "deps/cJSON.h"
+#include "lib/cJSON.h"
 #include <stdlib.h>
 #include <stdio.h>
 
