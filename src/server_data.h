@@ -4,7 +4,8 @@
 #include <stdbool.h>
 #include <time.h>
 #include <stdint.h>
-#include "lib/cJSON.h"
+#include "lib/cjson/cJSON.h"
+#include "lib/simulation/sim_engine.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -470,6 +471,9 @@ struct backend_data_t {
 
     // Simulated Data
     struct eva_failures_t   failures;
+    
+    // Simulation Engine
+    sim_engine_t* sim_engine;
 };
 
 
@@ -481,6 +485,7 @@ struct backend_data_t {
 // initialize the backend with default values and clean up at the end
 struct backend_data_t* init_backend();
 void cleanup_backend(struct backend_data_t*  backend);
+void simulate_backend(struct backend_data_t* backend);
 void reset_telemetry(struct telemetry_data_t* telemetry, float seed);
 void reset_pr_telemetry(struct backend_data_t* backend, int teamIndex);
 
@@ -510,14 +515,10 @@ bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, str
 bool update_pr_telemetry(char* request_content, struct backend_data_t* backend, int teamIndex);
 bool update_resource(char* request_content, struct backend_data_t* backend); // Entry Point to all other update functions
 
-// Simulate the backend
-float fourier_sin(float x);
-float randomized_sine_value(float x, float avg, float amp, float phase, float freq);
-void simulate_telemetry(struct telemetry_data_t telemetry);
-void simulate_pr_telemetry(struct pr_data_t* p_rover, uint32_t server_time, struct backend_data_t* backend);
-void simulate_cabin_temperature(struct backend_data_t* backend);
-void simulate_external_temperature(struct backend_data_t* backend);
-void simulate_backend  (struct backend_data_t* backend);
+
+// Simulation Engine Bridge Functions
+bool update_telemetry_from_simulation(struct telemetry_data_t* telemetry, uint32_t eva_time, struct backend_data_t* backend, bool isEVA1);
+bool update_pr_telemetry_from_simulation(struct pr_data_t* p_rover, uint32_t server_time, struct backend_data_t* backend);
 
 // UDP GET functions
 bool udp_get_dcu(unsigned int command, unsigned char* data);

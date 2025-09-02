@@ -12,9 +12,6 @@
 
 // Helper functions
 size_t rover_index();
-float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time, int heart_case, float x);
-float simulate_oxy_consumption(struct telemetry_data_t* telemetry, uint32_t eva_time, int oxy_case, int x);
-float simulate_co2_production(struct telemetry_data_t* telemetry, uint32_t eva_time, int co2_case, int x);
 float prPrevX = 0;
 float prPrevY = 0;
 
@@ -219,11 +216,29 @@ struct backend_data_t* init_backend(){
         build_json_pr_telemetry(&backend->p_rover[i], i, false);
     }
 
+    // Initialize simulation engine
+    backend->sim_engine = sim_engine_create();
+    if (backend->sim_engine) {
+        if (!sim_engine_load_from_directory(backend->sim_engine, "simulation")) {
+            printf("Warning: Failed to load simulation configurations\n");
+        }
+        if (!sim_engine_initialize(backend->sim_engine)) {
+            printf("Warning: Failed to initialize simulation engine\n");
+        }
+    } else {
+        printf("Warning: Failed to create simulation engine\n");
+    }
+
     return backend;
 }
 
 void cleanup_backend(struct backend_data_t*  backend){
-
+    
+    // Cleanup simulation engine
+    if (backend && backend->sim_engine) {
+        sim_engine_destroy(backend->sim_engine);
+    }
+    
     free(backend);
 }
 
@@ -242,9 +257,9 @@ void reset_pr_telemetry(struct backend_data_t* backend, int teamIndex){
 
 void reset_telemetry(struct telemetry_data_t* telemetry, float seed){
 
-    telemetry->batt_time         = randomized_sine_value(seed, 0.2f, 0.1f, 060.0f, .02f) * BATT_TIME_CAP;
-    telemetry->oxy_pri_tank_fill = randomized_sine_value(seed, 0.2f, 0.1f, 160.0f, .02f) * OXY_TIME_CAP;
-    telemetry->oxy_sec_tank_fill = randomized_sine_value(seed, 0.2f, 0.1f, 260.0f, .02f) * OXY_TIME_CAP;
+    telemetry->batt_time         = 0.2f * BATT_TIME_CAP;
+    telemetry->oxy_pri_tank_fill = 0.2f * OXY_TIME_CAP;
+    telemetry->oxy_sec_tank_fill = 0.2f * OXY_TIME_CAP;
     telemetry->oxy_pri_tank_pressure = 0.0f;
     telemetry->oxy_sec_tank_pressure = 0.0f;
 
@@ -261,7 +276,7 @@ void reset_telemetry(struct telemetry_data_t* telemetry, float seed){
     telemetry->depress_time = 0;
 
     telemetry->temperature = 70.0f;
-    telemetry->coolant_tank = randomized_sine_value(seed, 0.2f, 0.1f, 360.0f, .02f) * 100.0f; // %
+    telemetry->coolant_tank = 20.0f; // % (static initial value)
     telemetry->coolant_liquid_pressure = 0.0f;
     telemetry->coolant_gaseous_pressure = 0.0f;
 
@@ -1731,400 +1746,9 @@ bool build_json_pr_telemetry(struct pr_data_t* rover, int team_index, bool compl
     cJSON_free(json);
 }
 
-float fourier_sin(float x){
-    // Constants
-    float a = 0.5f;
-    float f = 0.3333f;
-    float p = 13.7516;
 
-    float sum = 0.0f;
-    float a_prod = 1.0f;
-    float f_prod = 1.0f;
-    float p_prod = 1.0f;
-    for(int i = 0; i < 5; i++){
-        a_prod *= a;
-        f_prod *= f;
-        p_prod *= p;
-        sum += a_prod * sin((x + p_prod) / f_prod);
-    }
 
-    return sum;
 
-}
-
-float randomized_sine_value(float x, float avg, float amp, float phase, float freq){
-    return (float) avg + (amp * fourier_sin((x + phase) / (1000.0f * freq)));
-}
-
-bool update_telemetry(struct telemetry_data_t* telemetry, uint32_t eva_time, struct backend_data_t* backend, bool isEVA1){
-
-
-    struct uia_data_t* uia = &backend->uia;
-    struct dcu_data_t* dcu = &backend->dcu;
-    struct eva_failures_t* error = &backend->failures;
-
-    // ---------------------------- EVA1 vs EVA2 ------------------------
-
-    // uia switches
-    bool uia_power_supply_connected;
-    bool uia_water_supply_connected;
-    bool uia_water_waste_connected;
-    bool uia_o2_supply_connected;
-    bool uia_o2_vent_connected;
-    bool uia_depress_active;
-
-    // dcu switches
-    bool dcu_using_umbilical_power;
-    bool dcu_using_pri_oxy;
-    bool dcu_using_com_channel_A;
-    bool dcu_using_pri_fan;
-    bool dcu_is_pump_open;
-    bool dcu_using_co2_scrubber_A;
-
-    float x;
-    // grab the values for the current eva
-    if(isEVA1){
-        uia_power_supply_connected = uia->eva1_power;
-        uia_water_supply_connected = uia->eva1_water_supply;
-        uia_water_waste_connected  = uia->eva1_water_waste;
-        uia_o2_supply_connected    = uia->eva1_oxy;
-        uia_o2_vent_connected      = uia->oxy_vent;
-        uia_depress_active         = uia->depress;
-
-        dcu_using_umbilical_power = dcu->eva1_batt;
-        dcu_using_pri_oxy         = dcu->eva1_oxy;
-        dcu_using_com_channel_A   = dcu->eva1_comm;
-        dcu_using_pri_fan         = dcu->eva1_fan;
-        dcu_is_pump_open          = dcu->eva1_pump;
-        dcu_using_co2_scrubber_A  = dcu->eva1_co2;
-
-        x = (float) eva_time;
-    } else {
-        uia_power_supply_connected = uia->eva2_power;
-        uia_water_supply_connected = uia->eva2_water_supply;
-        uia_water_waste_connected  = uia->eva2_water_waste;
-        uia_o2_supply_connected    = uia->eva2_oxy;
-        uia_o2_vent_connected      = uia->oxy_vent;
-        uia_depress_active         = uia->depress;
-
-        dcu_using_umbilical_power = dcu->eva2_batt;
-        dcu_using_pri_oxy         = dcu->eva2_oxy;
-        dcu_using_com_channel_A   = dcu->eva2_comm;
-        dcu_using_pri_fan         = dcu->eva2_fan;
-        dcu_is_pump_open          = dcu->eva2_pump;
-        dcu_using_co2_scrubber_A  = dcu->eva2_co2;
-
-        x = (float) eva_time + 86400.0f; // this givens a different simulation seed than eva1
-    }
-    // ---------------------------- Updates ------------------------
-
-    telemetry->temperature = randomized_sine_value(x, 75.0f, 20.0f, 350.0f, 1.5f);
-
-    // ---------------------------- Conditional Updates ------------------------
-
-    // Fan Selection
-    if(dcu_using_pri_fan){
-        // spin up pri, spin down sec
-        if(!error->fan_error) {
-            telemetry->fan_pri_rpm += randomized_sine_value(x, 0.8f, 0.2f, 480.0f, 0.1f) * SUIT_FAN_SPIN_UP_RATE * ((SUIT_FAN_RPM + 1) - telemetry->fan_pri_rpm);
-        } else {
-            telemetry->fan_pri_rpm += randomized_sine_value(x, 0.8f, 0.2f, 480.0f, 0.1f) * SUIT_FAN_SPIN_UP_RATE * ((SUIT_FAN_ERROR_RPM + 1) - telemetry->fan_pri_rpm);
-        }
-        telemetry->fan_sec_rpm -= randomized_sine_value(x, 0.8f, 0.2f, 540.0f, 0.1f) * SUIT_FAN_SPIN_UP_RATE * (telemetry->fan_sec_rpm);
-    } else {
-        // spin up sec, spin down pri
-        telemetry->fan_sec_rpm += randomized_sine_value(x, 0.8f, 0.2f, 540.0f, 0.1f) * SUIT_FAN_SPIN_UP_RATE * ((SUIT_FAN_RPM + 1) - telemetry->fan_sec_rpm);
-        telemetry->fan_pri_rpm -= randomized_sine_value(x, 0.8f, 0.2f, 480.0f, 0.1f) * SUIT_FAN_SPIN_UP_RATE * (telemetry->fan_pri_rpm);
-    }
-    //here
-    // ---------------------------- Connected to the IMU
-    if(uia_power_supply_connected && dcu_using_umbilical_power){
-
-        // Fill Battery
-        telemetry->batt_time += randomized_sine_value(x, 0.8f, 0.2f, 60.0f, 0.1f) * BATT_FILL_RATE;
-        if(telemetry->batt_time > BATT_TIME_CAP){ telemetry->batt_time = BATT_TIME_CAP; }
-
-        // Fill oxygen
-        if(uia_o2_supply_connected) {
-            // On primary Oxygen
-            if(dcu_using_pri_oxy){
-                telemetry->oxy_pri_tank_fill += randomized_sine_value(x, 0.8f, 0.2f, 60.0f, 0.1f) * OXY_FILL_RATE * ((OXY_TIME_CAP + 1) - telemetry->oxy_pri_tank_fill);
-                if(telemetry->oxy_pri_tank_fill > OXY_TIME_CAP){
-                    telemetry->oxy_pri_tank_fill = OXY_TIME_CAP;
-                }
-                telemetry->oxy_pri_tank_pressure = telemetry->oxy_pri_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-            } // On Secondary Oxygen
-            else {
-                telemetry->oxy_sec_tank_fill += randomized_sine_value(x, 0.8f, 0.2f, 120.0f, 0.1f) * OXY_FILL_RATE * ((OXY_TIME_CAP + 1) - telemetry->oxy_sec_tank_fill);
-                if(telemetry->oxy_sec_tank_fill > OXY_TIME_CAP){
-                    telemetry->oxy_sec_tank_fill = OXY_TIME_CAP;
-                }
-                telemetry->oxy_sec_tank_pressure = telemetry->oxy_sec_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-            }
-        }
-
-        // Venting oxygen
-        if(uia_o2_vent_connected){
-            // Vents Both Oxygen at the same time
-            telemetry->oxy_pri_tank_fill -= randomized_sine_value(x, 0.8f, 0.2f, 180.0f, 0.1f) * OXY_FILL_RATE * (telemetry->oxy_pri_tank_fill);
-            telemetry->oxy_pri_tank_pressure = telemetry->oxy_pri_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-
-            telemetry->oxy_sec_tank_fill -= randomized_sine_value(x, 0.8f, 0.2f, 240.0f, 0.1f) * OXY_FILL_RATE * (telemetry->oxy_sec_tank_fill);
-            telemetry->oxy_sec_tank_pressure = telemetry->oxy_sec_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-
-        }
-
-        if(dcu_is_pump_open){
-            // Fill Water Coolant
-            if(uia_water_supply_connected){
-                telemetry->coolant_tank += randomized_sine_value(x, 12.5f, 5.0f, 1080.0f, 100.0f);
-                if(telemetry->coolant_tank > 100.0f){
-                    telemetry->coolant_tank = 100.0f;
-                }
-            }
-
-            // Flush Water Coolant
-            if(uia_water_waste_connected && telemetry->coolant_tank > 0.00001f){
-                telemetry->coolant_tank -= randomized_sine_value(x, 12.5f, 5.0f, 1140.0f, 100.0f);
-                if(telemetry->coolant_tank < 0.00001f){
-                    telemetry->coolant_tank = 0;
-                }
-            }
-        }
-
-        // depressurizing the suit
-        if(uia_depress_active){
-            
-            if(telemetry->depress_time < DEPRESS_TIME){
-
-                telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_DEPRESS, x);
-                // telemetry->heart_rate += (EVA_HEART_RATE - RESTING_HEART_RATE) / DEPRESS_TIME; // the heart rate should go from RESTING_HEART_RATE to EVA_HEART_RATE over the course of depress
-
-                telemetry->suit_oxy_pressure += (SUIT_OXY_PRESSURE - HAB_OXY_PRESSURE) / DEPRESS_TIME;
-                telemetry->suit_co2_pressure += (SUIT_CO2_PRESSURE - HAB_CO2_PRESSURE) / DEPRESS_TIME;
-                telemetry->suit_other_pressure += (SUIT_OTHER_PRESSURE - HAB_OTHER_PRESSURE) / DEPRESS_TIME;
-
-                telemetry->depress_time += 1;
-                //Slowly return heart rate to resting
-                if(telemetry->depress_time == DEPRESS_TIME){
-                    telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
-                }
-            }
-        }
-
-        telemetry->oxy_consumption = simulate_oxy_consumption(telemetry, eva_time, 0, x);
-        telemetry->co2_production  = simulate_co2_production(telemetry, eva_time, 0, x);
-
-        //printf("O2 Consumption: %f, CO2 Production: %f\n", telemetry->oxy_consumption, telemetry->co2_production);
-    } else { //----------------------------- Outside of HAB on EVA Mission
-
-        // Oxygen is consumed each second
-        // On primary Oxygen
-        if(dcu_using_pri_oxy){
-            telemetry->oxy_pri_tank_fill -= 1;
-            if(telemetry->oxy_pri_tank_fill < 0) { telemetry->oxy_pri_tank_fill = 0; }
-            telemetry->oxy_pri_tank_pressure = telemetry->oxy_pri_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-        } // On Secondary Oxygen
-        else {
-            telemetry->oxy_sec_tank_fill -= 1;
-            if(telemetry->oxy_sec_tank_fill < 0) { telemetry->oxy_sec_tank_fill = 0; }
-            telemetry->oxy_sec_tank_pressure = telemetry->oxy_sec_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-        }
-
-        // Life Support Process
-        telemetry->oxy_consumption = simulate_oxy_consumption(telemetry, eva_time, 0, x);
-        telemetry->co2_production  = simulate_co2_production(telemetry, eva_time, 0, x);
-        telemetry->helmet_co2_pressure += telemetry->co2_production * 0.0000015f; //TODO
-
-        // Distribute CO2 between helmet and suit
-        float co2_pressure_diff_helmet_suit = (telemetry->helmet_co2_pressure - telemetry->suit_co2_pressure) / (telemetry->helmet_co2_pressure + telemetry->suit_co2_pressure);
-        float co2_flow_rate = fmin(fmax(-0.1f, 2 * co2_pressure_diff_helmet_suit), .9f) + 0.1f;
-        float co2_blow_out_of_bubble = (float) fmax(telemetry->fan_pri_rpm, telemetry->fan_sec_rpm) / SUIT_FAN_RPM * telemetry->helmet_co2_pressure * 0.015f * co2_flow_rate;
-        // printf("%f -:- %f\n", telemetry->co2_production *  0.015f, co2_blow_out_of_bubble);
-        telemetry->helmet_co2_pressure -= co2_blow_out_of_bubble;
-        telemetry->suit_co2_pressure += co2_blow_out_of_bubble;
-
-        // Remove some of the CO2 from the suit
-        if(dcu_using_co2_scrubber_A){
-            if(telemetry->scrubber_A_co2_captured < SUIT_SCRUBBER_CAP){
-                float scrubbed_amount = randomized_sine_value(x, 0.8f, 0.2f, 720.0f, 0.1f) * SUIT_SCRUBBER_FILL_RATE * (telemetry->suit_co2_pressure - (SUIT_CO2_PRESSURE));
-                telemetry->suit_co2_pressure -= scrubbed_amount;
-                telemetry->scrubber_A_co2_captured += scrubbed_amount;
-            }
-            telemetry->scrubber_B_co2_captured -= randomized_sine_value(x, 0.8f, 0.2f, 780.0f, 0.1f) * SUIT_SCRUBBER_FLUSH_RATE * (telemetry->scrubber_B_co2_captured);
-        } else {
-            if(telemetry->scrubber_B_co2_captured < SUIT_SCRUBBER_CAP){
-                float scrubbed_amount = randomized_sine_value(x, 0.8f, 0.2f, 720.0f, 0.1f) * SUIT_SCRUBBER_FILL_RATE * (telemetry->suit_co2_pressure - (SUIT_CO2_PRESSURE));
-                telemetry->suit_co2_pressure -= scrubbed_amount;
-                telemetry->scrubber_B_co2_captured += scrubbed_amount;
-            }
-            telemetry->scrubber_A_co2_captured -= randomized_sine_value(x, 0.8f, 0.2f, 780.0f, 0.1f) * SUIT_SCRUBBER_FLUSH_RATE * (telemetry->scrubber_A_co2_captured);
-        }
-
-        // Temperature Regulations
-        float total_coolant_pressure = telemetry->coolant_tank / 100.0f * telemetry->temperature / SUIT_COOLANT_NOMINAL_TEMP * SUIT_COOLANT_NOMINAL_PRESSURE;
-        telemetry->coolant_gaseous_pressure = fmin(fmax((telemetry->temperature - 80.0f) / 10.0f, 0.0f), 1.0f) * total_coolant_pressure; // TODO update 85
-        telemetry->coolant_liquid_pressure = total_coolant_pressure - telemetry->coolant_gaseous_pressure;
-
-    }
-
-    // ---------------------------- Random Spice Updates ------------------------
-    // These keep the values changing to make them seem more real
-
-    telemetry->oxy_pri_tank_pressure += randomized_sine_value(x, 0, 0.01f, 1200.0f, 0.001f);
-    if(telemetry->oxy_pri_tank_pressure < 0.001 || telemetry->oxy_pri_tank_fill < 0.001f) {telemetry->oxy_pri_tank_pressure = 0.0f; }
-    telemetry->oxy_sec_tank_pressure += randomized_sine_value(x, 0, 0.01f, 1260.0f, 0.001f);
-    if(telemetry->oxy_sec_tank_pressure < 0.001 || telemetry->oxy_sec_tank_fill < 0.001f) {telemetry->oxy_sec_tank_pressure = 0.0f; }
-
-    // telemetry->heart_rate += randomized_sine_value(x, 0, 1.0f, 360.0f, 0.023f);
-
-    switch (error->heart_case)
-    {
-    case HEART_CASE_TIRED:
-        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_TIRED, x);
-
-        break;
-    case HEART_CASE_WORKSPACE:
-        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_WORKSPACE, x);
-    
-        break;
-    case HEART_CASE_RESTING:
-        telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
-
-        break;
-    default:
-        break;
-    }
-
-    telemetry->heart_rate = simulate_heart_rate(telemetry, eva_time, HEART_CASE_RESTING, x);
-
-    telemetry->suit_oxy_pressure += randomized_sine_value(x, 0, 0.00008f, 1320.0f, 0.0012f);
-    telemetry->suit_co2_pressure += randomized_sine_value(x, 0, 0.00008f, 1380.0f, 0.0013f);
-    if(telemetry->suit_co2_pressure < 0.00001f){
-        telemetry->suit_co2_pressure = 0.0f;
-    }
-    if(telemetry->depress_time >= DEPRESS_TIME){
-        telemetry->suit_other_pressure = 0.0f;
-    }
-
-}
-
-float simulate_heart_rate(struct telemetry_data_t* telemetry, uint32_t eva_time, int heart_case, float x){
-
-    struct heart_sim_data_t* heart_sim = &(telemetry->heart_sim);
-    
-    float heart_rate = 0.0f;
-    float increase = 1.0f;
-
-    //prioritize first case called each second, avoiding repeated calls
-    if(eva_time == heart_sim->sim_in_progress_time){
-        //printf("Heart rate prev case: %d\n", heart_sim->prev_case);
-        return randomized_sine_value(x, heart_sim->prev_heart_rate, 3.0f, 1.0f, 0.023f);
-    }
-
-    heart_sim->sim_in_progress_time = eva_time;
-
-    switch (heart_case)
-    {
-    case HEART_CASE_TIRED:
-
-        if(heart_sim->prev_case != HEART_CASE_TIRED){
-            heart_sim->start_time = eva_time;
-            heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
-        }
-        heart_sim->prev_case = HEART_CASE_TIRED;
-        increase = 5.0f;
-
-        heart_rate = increase * heart_sim->heart_increase_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
-
-        if(heart_rate > EVA_HEART_RATE){
-            heart_rate = EVA_HEART_RATE;
-        }
-
-        heart_sim->prev_heart_rate = heart_rate;
-        //printf("Heart Rate TIRED: %.2f\n", heart_rate);
-        return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
-
-    case HEART_CASE_WORKSPACE:
-        if(heart_sim->prev_case != HEART_CASE_WORKSPACE){
-            heart_sim->start_time = eva_time;
-            heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
-        }
-        heart_sim->prev_case = HEART_CASE_WORKSPACE;
-
-        increase = 5.0f;
-
-        if(heart_sim->prev_heart_rate >= WORKSPACE_HEART_RATE){
-            increase = -1.0f;
-        }
-
-        heart_rate = increase * heart_sim->heart_increase_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
-
-        if(heart_rate < WORKSPACE_HEART_RATE && increase < 0){
-            heart_rate = WORKSPACE_HEART_RATE;
-        }
-        else if(heart_rate > WORKSPACE_HEART_RATE && increase > 0){
-            heart_rate = WORKSPACE_HEART_RATE;
-        }
-
-        heart_sim->prev_heart_rate = heart_rate;
-        //printf("Heart Rate WORKSPACE: %.2f\n", heart_rate);
-        return randomized_sine_value(x, heart_rate, 10.0f, 1.0f, 0.023f);
-
-    case HEART_CASE_DEPRESS:
-        if(heart_sim->prev_case != HEART_CASE_DEPRESS){
-            heart_sim->start_time = eva_time;
-            heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
-        }
-        heart_sim->prev_case = HEART_CASE_DEPRESS;
-
-        float heart_rate_depress_rate = (EVA_HEART_RATE - heart_sim->start_heart_rate) / DEPRESS_TIME;
-        heart_rate = heart_rate_depress_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
-
-        if(heart_rate > EVA_HEART_RATE){
-            heart_rate = EVA_HEART_RATE;
-        }
-
-        heart_sim->prev_heart_rate = heart_rate;
-        //printf("Heart Rate DEPRESS: %.2f\n", heart_rate);
-        return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
-
-    case HEART_CASE_RESTING:
-
-        if(heart_sim->prev_case != HEART_CASE_RESTING){
-            heart_sim->start_time = eva_time;
-            heart_sim->start_heart_rate = heart_sim->prev_heart_rate;
-        }
-        heart_sim->prev_case = HEART_CASE_RESTING;
-
-        if(heart_sim->prev_heart_rate >= RESTING_HEART_RATE){
-            increase = -1.0f;
-        }
-
-        heart_rate = increase * heart_sim->heart_increase_rate * (eva_time - heart_sim->start_time) + heart_sim->start_heart_rate;
-
-        if(heart_rate < RESTING_HEART_RATE){
-            heart_rate = RESTING_HEART_RATE;
-        }
-
-        heart_sim->prev_heart_rate = heart_rate;
-        //printf("Heart Rate RESTING: %.2f\n", heart_rate);
-        return randomized_sine_value(x, heart_rate, 3.0f, 1.0f, 0.023f);
-
-    default:
-        break;
-    }
-
-    return -1.0f;
-}
-
-float simulate_oxy_consumption(struct telemetry_data_t* telemetry, uint32_t eva_time, int oxy_case, int x){
-    return randomized_sine_value(x, bpm_to_o2_consumption(telemetry->heart_rate), 0.1f, 1.0f, 0.023f);
-}
-
-float simulate_co2_production(struct telemetry_data_t* telemetry, uint32_t eva_time, int co2_case, int x){
-    return randomized_sine_value(x, bpm_to_co2_production(telemetry->heart_rate), 0.1f, 1.0f, 0.023f);
-}
 
 bool update_pr_telemetry(char* request_content, struct backend_data_t* backend, int teamIndex){
     bool* update_var = NULL;
@@ -2271,257 +1895,8 @@ bool update_pr_telemetry(char* request_content, struct backend_data_t* backend, 
     return true;
 }
 
-void simulate_pr_telemetry(struct pr_data_t* p_rover, uint32_t server_time, struct backend_data_t* backend){
 
-    int random_seed = backend->server_up_time;
-    p_rover->mission_elapsed_time += 1;
-    bool dcu_pump_is_open_eva1 = backend->dcu.eva1_pump;
-    bool dcu_pump_is_open_eva2 = backend->dcu.eva2_pump;
 
-    bool uia_water_supply_connected_eva1 = backend->uia.eva1_water_supply;
-    bool uia_water_supply_connected_eva2 = backend->uia.eva2_water_supply;
-
-    bool dcu_using_umbilical_power_eva1 = backend->dcu.eva1_batt;
-    bool dcu_using_umbilical_power_eva2 = backend->dcu.eva2_batt;
-
-    bool uia_power_supply_connected_eva1 = backend->uia.eva1_power;
-    bool uia_power_supply_connected_eva2 = backend->uia.eva2_power;
-
-    bool uia_oxy_connected_eva1 = backend->uia.eva1_oxy;
-    bool uia_oxy_connected_eva2 = backend->uia.eva2_oxy;
-
-    // Drain resources from the PR
-    // EVA1
-    if(uia_power_supply_connected_eva1 && dcu_using_umbilical_power_eva1){
-
-        // Fill EVA's coolant tank, drain PR's coolant tank
-        if(dcu_pump_is_open_eva1){
-            if(uia_water_supply_connected_eva1){
-                p_rover->pr_coolant_tank -= PR_COOLANT_TANK_DRAIN_RATE;
-                if(p_rover->pr_coolant_tank < 0){
-                    p_rover->pr_coolant_tank = 0;
-                }
-            }
-        }
-        // Fill EVA's oxygen tank, drain PR's oxygen tank
-        if(uia_oxy_connected_eva1){
-            p_rover->oxygen_tank -= PR_OXYGEN_TANK_DRAIN_RATE;
-            if(p_rover->oxygen_tank < 0){
-                p_rover->oxygen_tank = 0;
-            }
-        }
-    }
-    // EVA2
-    if(uia_power_supply_connected_eva2 && dcu_using_umbilical_power_eva2){
-
-        // Fill EVA's coolant tank, drain PR's coolant tank
-        if(dcu_pump_is_open_eva2){
-            if(uia_water_supply_connected_eva2){
-                p_rover->pr_coolant_tank -= PR_COOLANT_TANK_DRAIN_RATE;
-                if(p_rover->pr_coolant_tank < 0){
-                    p_rover->pr_coolant_tank = 0;
-                }
-            }
-        }
-        // Fill EVA's oxygen tank, drain PR's oxygen tank
-        if(uia_oxy_connected_eva2){
-            p_rover->oxygen_tank -= PR_OXYGEN_TANK_DRAIN_RATE;
-            if(p_rover->oxygen_tank < 0){
-                p_rover->oxygen_tank = 0;
-            }
-        }
-    }
-
-    //telemetry->temperature = randomized_sine_value(x, 75.0f, 20.0f, 350.0f, 1.5f);
-    //Oxygen levels
-    p_rover->oxygen_levels = randomized_sine_value((float)random_seed, 21.0f, 1.0f, 350.0f, 0.5f);
-
-    //Oxygen pressure
-    p_rover->oxygen_pressure = p_rover->oxygen_tank / PR_OXYGEN_TANK_CAP * PR_OXYGEN_PRESSURE_CAP;
-
-    //Passive Oxygen drain
-    p_rover->oxygen_tank -= PR_PASSIVE_OXYGEN_DRAIN;
-
-    //Dust accumulation
-    p_rover->solar_panel_dust_accum += randomized_sine_value((float)random_seed, 0.8f, 0.2f, 420.0f, 0.1f) * PANEL_DUST_ACCUM_RATE;
-
-    if(p_rover->solar_panel_dust_accum > MAX_SOLAR_PANEL_DUST_ACCUM){
-        p_rover->solar_panel_dust_accum = MAX_SOLAR_PANEL_DUST_ACCUM;
-    }
-
-    //Dust wiper
-    if(p_rover->dust_wiper){
-        p_rover->solar_panel_dust_accum -= PANEL_DUST_WIPER_CLEAN_RATE;
-        if(p_rover->solar_panel_dust_accum < 0){
-            p_rover->solar_panel_dust_accum = 0;
-        }
-    }
-
-    //Coolant pressure
-    float total_coolant_pressure = p_rover->pr_coolant_tank / PR_COOLANT_TANK_CAP * p_rover->cabin_temperature / NOMINAL_CABIN_TEMPERATURE * NOMINAL_COOLANT_PRESSURE;
-    p_rover->pr_coolant_pressure = total_coolant_pressure;
-
-    //Coolant level
-    p_rover->pr_coolant_level = randomized_sine_value((float)random_seed, NOMINAL_COOLANT_LEVEL, 0.6f, 420.0f, 0.5f);
-    if(p_rover->pr_coolant_tank == 0){p_rover->pr_coolant_level = 0;}
-
-    //Passive coolant drain
-    p_rover->pr_coolant_tank -= PR_PASSIVE_COOLANT_DRAIN;
-
-    // In Sunlight
-    if(p_rover->in_sunlight){
-        p_rover->solar_panel_efficiency = 1 - p_rover->solar_panel_dust_accum/MAX_SOLAR_PANEL_DUST_ACCUM;
-    }
-    else{
-        p_rover->solar_panel_efficiency = 0;
-    }
-
-    // Dust wiper consumption consumption rate
-    float dust_wiper_rate = p_rover->dust_wiper * PANEL_DUST_WIPER_CONSUMPTION_RATE;
-
-    // Internal/External Lights consumption rate
-    float external_light_rate = p_rover->lights_on * EXTERNAL_LIGHTS_CONSUMPTION_RATE;
-    float internal_light_rate = p_rover->internal_lights_on * INTERNAL_LIGHTS_CONSUMPTION_RATE;
-    float total_light_consumption = internal_light_rate + external_light_rate;
-
-    // CO2 Scrubber consumption rate
-    float co2_scrubber_rate = p_rover->co2_scrubber * CO2_SCRUBBER_CONSUMPTION_RATE;
-
-    // AC Cooling/Heating consumption rate
-    float ac_cooling_rate = p_rover->ac_cooling * AC_COOLING_CONSUMPTION_RATE;
-    float ac_heating_rate = p_rover->ac_heating * AC_HEATING_CONSUMPTION_RATE;
-    float total_ac_rate = ac_cooling_rate + ac_heating_rate;
-
-    // Throttle
-    float throttle = p_rover->throttle/THROTTLE_MAX_ABS_VALUE;
-    if (throttle < 0){
-        throttle *= -1;
-    }
-    p_rover->motor_power_consumption = throttle * THROTTLE_CONSUMPTION_RATE;
-
-    //Battery consumption
-    p_rover->power_consumption_rate = p_rover->motor_power_consumption + total_ac_rate + dust_wiper_rate
-        + total_light_consumption + co2_scrubber_rate + PASSIVE_POWER_CONSUMPTION_RATE - p_rover->solar_panel_efficiency * SOLAR_PANEL_RECHARGE_RATE;
-    p_rover->battery_level -= p_rover->power_consumption_rate;
-
-    if(p_rover->battery_level > 100){
-        p_rover->battery_level = 100;
-    }
-    else if(p_rover->battery_level < 0){
-        p_rover->battery_level = 0;
-    }
-
-    //Fans
-    if(p_rover->fan_pri){
-        p_rover->ac_fan_pri += randomized_sine_value(random_seed, 0.8f, 0.2f, 480.0f, 0.1f) * PR_FAN_SPIN_UP_RATE * ((PR_FAN_RPM + 1) - p_rover->ac_fan_pri);
-        p_rover->ac_fan_sec -= randomized_sine_value(random_seed, 0.8f, 0.2f, 480.0f, 0.1f) * PR_FAN_SPIN_UP_RATE * (p_rover->ac_fan_sec);
-    }
-    else{
-        p_rover->ac_fan_pri -= randomized_sine_value(random_seed, 0.8f, 0.2f, 480.0f, 0.1f) * PR_FAN_SPIN_UP_RATE * (p_rover->ac_fan_pri);
-        p_rover->ac_fan_sec += randomized_sine_value(random_seed, 0.8f, 0.2f, 480.0f, 0.1f) * PR_FAN_SPIN_UP_RATE * ((PR_FAN_RPM + 1) - p_rover->ac_fan_sec);
-    }
-
-    //printf("ac pri: %f\n", p_rover->ac_fan_pri);
-
-    simulate_cabin_temperature(backend);
-    simulate_external_temperature(backend);
-
-    //printf("Battery: %.2f\n", p_rover->battery_level);
-}
-
-void simulate_cabin_temperature(struct backend_data_t* backend){
-    if (backend->running_pr_sim < 0) {
-        return;
-    }
-
-    struct pr_data_t* p_rover = &backend->p_rover[backend->running_pr_sim];
-    struct pr_sim_data_t* cabin_sim = &backend->pr_sim[backend->running_pr_sim];
-    uint32_t server_time = backend->server_up_time;
-
-    float new_target_temp;
-
-    float k;
-    if(p_rover->in_sunlight && !p_rover->ac_cooling && !p_rover->ac_heating){
-        new_target_temp = CABIN_HIGH_TEMPERATURE;
-        k = CABIN_HIGH_RATE;
-    }
-    else if(p_rover->in_sunlight && p_rover->ac_cooling && p_rover->ac_heating){
-        new_target_temp = CABIN_HIGH_TEMPERATURE;
-        k = CABIN_HIGH_RATE;
-    }
-    else if(p_rover->in_sunlight && !p_rover->ac_cooling && p_rover->ac_heating){
-        new_target_temp = CABIN_HIGH_TEMPERATURE;
-        k = CABIN_HIGH_RATE * 4;
-    }
-    else if(!p_rover->in_sunlight && !p_rover->ac_cooling && !p_rover->ac_heating){
-        new_target_temp = CABIN_LOW_TEMPERATURE;
-        k = CABIN_LOW_RATE;
-    }
-    else if(!p_rover->in_sunlight && p_rover->ac_cooling && p_rover->ac_heating){
-        new_target_temp = CABIN_LOW_TEMPERATURE;
-        k = CABIN_LOW_RATE;
-    }
-    else if(!p_rover->in_sunlight && p_rover->ac_cooling && !p_rover->ac_heating){
-        new_target_temp = CABIN_LOW_TEMPERATURE;
-        k = CABIN_LOW_RATE * 4;
-    }
-    else if(p_rover->in_sunlight && p_rover->ac_cooling && !p_rover->ac_heating){
-        new_target_temp = CABIN_COOLING_TEMP;
-        k = CABIN_COOLING_RATE;
-    }
-    else if(!p_rover->in_sunlight && !p_rover->ac_cooling && p_rover->ac_heating){
-        new_target_temp = CABIN_HEATING_TEMP;
-        k = CABIN_HEATING_RATE;
-    }
-
-    if (cabin_sim->target_temp != new_target_temp || cabin_sim->old_k != k){
-        cabin_sim->start_time = server_time;
-        cabin_sim->object_temp = p_rover->cabin_temperature;
-        cabin_sim->target_temp = new_target_temp;
-        cabin_sim->old_k = k;
-    }
-
-    // Newton's cooling law
-    p_rover->cabin_temperature = cabin_sim->target_temp + ((cabin_sim->object_temp - cabin_sim->target_temp) * (pow(E, k*(server_time - cabin_sim->start_time))));
-
-    /*
-    printf("target_temp: %f\n", cabin_sim->target_temp);
-    printf("start_time: %d\n", cabin_sim->start_time);
-    printf("server_time: %d\n", backend->server_up_time);
-    */
-
-}
-
-void simulate_external_temperature(struct backend_data_t* backend){
-    if (backend->running_pr_sim < 0) {
-        return;
-    }
-
-    struct pr_data_t* p_rover = &backend->p_rover[backend->running_pr_sim];
-    struct pr_sim_data_t* cabin_sim = &backend->pr_sim[backend->running_pr_sim];
-    uint32_t server_time = backend->server_up_time;
-
-    float new_external_target_temp;
-    float k;
-
-    if(p_rover->in_sunlight){
-        new_external_target_temp = MOON_HIGH_TEMPERATURE;
-        k = MOON_HIGH_TEMP_RATE;
-    }
-    else{
-        new_external_target_temp = MOON_LOW_TEMPERATURE;
-        k = MOON_LOW_TEMP_RATE;
-    }
-
-    if(cabin_sim->external_target_temp != new_external_target_temp){
-        cabin_sim->external_target_temp = new_external_target_temp;
-        cabin_sim->external_start_time = server_time;
-        cabin_sim->external_object_temp = p_rover->external_temp;
-    }
-
-    // Newton's cooling law
-    p_rover->external_temp = cabin_sim->external_target_temp + ((cabin_sim->external_object_temp - cabin_sim->external_target_temp) * (pow(E, k*(server_time - cabin_sim->external_start_time))));
-}
 
 bool udp_get_telemetry(unsigned int command, unsigned int team_number, unsigned char* data){
 
@@ -2995,7 +2370,8 @@ bool update_resource(char* request_content, struct backend_data_t* backend){
     return false;
 }
 
-// -------------------------- Simulation --------------------------------
+// -------------------------- Legacy Simulation (Fallback Only) --------------------------------
+// These functions are kept for fallback when simulation engine is unavailable
 void simulate_backend(struct backend_data_t* backend){
 
     // increment server time
@@ -3006,8 +2382,12 @@ void simulate_backend(struct backend_data_t* backend){
         time_incremented = true;
     }
 
-    // Simulated EVA once per second
-    if(time_incremented){
+    // Update simulation engine once per second
+    if(time_incremented && backend->sim_engine){
+        
+        // Update simulation engine with elapsed time
+        float delta_time = 1.0f; // 1 second per update
+        sim_engine_update(backend->sim_engine, delta_time);
 
         // For each team
         for(int i = 0; i < NUMBER_OF_TEAMS; i++){
@@ -3026,16 +2406,16 @@ void simulate_backend(struct backend_data_t* backend){
                 // Update EVA Json
                 build_json_eva(&backend->evas[i], i, false);
 
-                // Simulate Telemetry
-                update_telemetry(&backend->evas[i].eva1, eva->total_time, backend, true);
-                update_telemetry(&backend->evas[i].eva2, eva->total_time, backend, false);
+                // Update telemetry from simulation engine
+                update_telemetry_from_simulation(&backend->evas[i].eva1, eva->total_time, backend, true);
+                update_telemetry_from_simulation(&backend->evas[i].eva2, eva->total_time, backend, false);
 
                 // Update Telemetry Json
                 build_json_telemetry(&backend->evas[i], i, false);
             }
 
             if (backend->running_pr_sim == i && !backend->pr_sim_paused) {
-                simulate_pr_telemetry(&backend->p_rover[i], backend->server_up_time, backend);
+                update_pr_telemetry_from_simulation(&backend->p_rover[i], backend->server_up_time, backend);
 
                 // Update Pressurized Rover Telemetry (ROVER_TELEMETRY.json)
                 build_json_pr_telemetry(&backend->p_rover[i], i, false);
@@ -3044,6 +2424,258 @@ void simulate_backend(struct backend_data_t* backend){
         }
 
     }
+}
+
+// -------------------------- Simulation Engine Bridge Functions --------------------------------
+
+/**
+ * Updates EVA telemetry data using the simulation engine instead of hardcoded calculations.
+ * This function replaces the old update_telemetry() while preserving control logic for switches.
+ */
+bool update_telemetry_from_simulation(struct telemetry_data_t* telemetry, uint32_t eva_time, struct backend_data_t* backend, bool isEVA1) {
+    
+    if (!backend->sim_engine) {
+        printf("Error: Simulation engine not available for EVA telemetry update\n");
+        return false;
+    }
+    
+    struct uia_data_t* uia = &backend->uia;
+    struct dcu_data_t* dcu = &backend->dcu;
+    struct eva_failures_t* error = &backend->failures;
+
+    // Get switch states (same logic as original)
+    bool uia_power_supply_connected, uia_water_supply_connected, uia_water_waste_connected;
+    bool uia_o2_supply_connected, uia_o2_vent_connected, uia_depress_active;
+    bool dcu_using_umbilical_power, dcu_using_pri_oxy, dcu_using_com_channel_A;
+    bool dcu_using_pri_fan, dcu_is_pump_open, dcu_using_co2_scrubber_A;
+
+    if(isEVA1) {
+        uia_power_supply_connected = uia->eva1_power;
+        uia_water_supply_connected = uia->eva1_water_supply;
+        uia_water_waste_connected  = uia->eva1_water_waste;
+        uia_o2_supply_connected    = uia->eva1_oxy;
+        uia_o2_vent_connected      = uia->oxy_vent;
+        uia_depress_active         = uia->depress;
+        
+        dcu_using_umbilical_power = dcu->eva1_batt;
+        dcu_using_pri_oxy         = dcu->eva1_oxy;
+        dcu_using_com_channel_A   = dcu->eva1_comm;
+        dcu_using_pri_fan         = dcu->eva1_fan;
+        dcu_is_pump_open          = dcu->eva1_pump;
+        dcu_using_co2_scrubber_A  = dcu->eva1_co2;
+    } else {
+        uia_power_supply_connected = uia->eva2_power;
+        uia_water_supply_connected = uia->eva2_water_supply;
+        uia_water_waste_connected  = uia->eva2_water_waste;
+        uia_o2_supply_connected    = uia->eva2_oxy;
+        uia_o2_vent_connected      = uia->oxy_vent;
+        uia_depress_active         = uia->depress;
+        
+        dcu_using_umbilical_power = dcu->eva2_batt;
+        dcu_using_pri_oxy         = dcu->eva2_oxy;
+        dcu_using_com_channel_A   = dcu->eva2_comm;
+        dcu_using_pri_fan         = dcu->eva2_fan;
+        dcu_is_pump_open          = dcu->eva2_pump;
+        dcu_using_co2_scrubber_A  = dcu->eva2_co2;
+    }
+
+    // Get simulated values from simulation engine
+    sim_value_t heart_rate = sim_engine_get_field_value(backend->sim_engine, "heart_rate");
+    sim_value_t oxy_consumption = sim_engine_get_field_value(backend->sim_engine, "oxy_consumption");
+    sim_value_t co2_production = sim_engine_get_field_value(backend->sim_engine, "co2_production");
+    sim_value_t temperature = sim_engine_get_field_value(backend->sim_engine, "temperature");
+    sim_value_t batt_time = sim_engine_get_field_value(backend->sim_engine, "batt_time");
+    sim_value_t oxy_pri_tank_fill = sim_engine_get_field_value(backend->sim_engine, "oxy_pri_tank_fill");
+    sim_value_t oxy_sec_tank_fill = sim_engine_get_field_value(backend->sim_engine, "oxy_sec_tank_fill");
+    sim_value_t fan_pri_rpm = sim_engine_get_field_value(backend->sim_engine, "fan_pri_rpm");
+    sim_value_t fan_sec_rpm = sim_engine_get_field_value(backend->sim_engine, "fan_sec_rpm");
+    sim_value_t coolant_tank = sim_engine_get_field_value(backend->sim_engine, "coolant_tank");
+    sim_value_t helmet_co2_pressure = sim_engine_get_field_value(backend->sim_engine, "helmet_co2_pressure");
+    sim_value_t scrubber_A_co2_captured = sim_engine_get_field_value(backend->sim_engine, "scrubber_A_co2_captured");
+    sim_value_t scrubber_B_co2_captured = sim_engine_get_field_value(backend->sim_engine, "scrubber_B_co2_captured");
+    sim_value_t suit_oxy_pressure = sim_engine_get_field_value(backend->sim_engine, "suit_oxy_pressure");
+    sim_value_t suit_co2_pressure = sim_engine_get_field_value(backend->sim_engine, "suit_co2_pressure");
+    sim_value_t suit_other_pressure = sim_engine_get_field_value(backend->sim_engine, "suit_other_pressure");
+    
+    // Apply simulated values
+    telemetry->heart_rate = heart_rate.f;
+    telemetry->oxy_consumption = oxy_consumption.f;
+    telemetry->co2_production = co2_production.f;
+    telemetry->temperature = temperature.f;
+    telemetry->batt_time = batt_time.f;
+    telemetry->oxy_pri_tank_fill = oxy_pri_tank_fill.f;
+    telemetry->oxy_sec_tank_fill = oxy_sec_tank_fill.f;
+    telemetry->fan_pri_rpm = fan_pri_rpm.f;
+    telemetry->fan_sec_rpm = fan_sec_rpm.f;
+    telemetry->coolant_tank = coolant_tank.f;
+    telemetry->helmet_co2_pressure = helmet_co2_pressure.f;
+    telemetry->scrubber_A_co2_captured = scrubber_A_co2_captured.f;
+    telemetry->scrubber_B_co2_captured = scrubber_B_co2_captured.f;
+    telemetry->suit_oxy_pressure = suit_oxy_pressure.f;
+    telemetry->suit_co2_pressure = suit_co2_pressure.f;
+    telemetry->suit_other_pressure = suit_other_pressure.f;
+    
+    // Calculate dependent values (same logic as original)
+    telemetry->oxy_pri_tank_pressure = telemetry->oxy_pri_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
+    telemetry->oxy_sec_tank_pressure = telemetry->oxy_sec_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
+    
+    // Calculate coolant pressures (same logic as original)
+    float total_coolant_pressure = telemetry->coolant_tank / 100.0f * telemetry->temperature / SUIT_COOLANT_NOMINAL_TEMP * SUIT_COOLANT_NOMINAL_PRESSURE;
+    telemetry->coolant_gaseous_pressure = fmin(fmax((telemetry->temperature - 80.0f) / 10.0f, 0.0f), 1.0f) * total_coolant_pressure;
+    telemetry->coolant_liquid_pressure = total_coolant_pressure - telemetry->coolant_gaseous_pressure;
+    
+    // Apply switch-based modifications (preserving original control logic)
+    
+    // Fan control based on DCU switch
+    if (!dcu_using_pri_fan) {
+        // Swap fan values if using secondary fan
+        float temp_rpm = telemetry->fan_pri_rpm;
+        telemetry->fan_pri_rpm = telemetry->fan_sec_rpm;
+        telemetry->fan_sec_rpm = temp_rpm;
+    }
+    
+    // Apply fan error if present
+    if (error->fan_error && dcu_using_pri_fan) {
+        telemetry->fan_pri_rpm = SUIT_FAN_ERROR_RPM;
+    }
+    
+    // UIA connection effects (preserve original resource filling/draining logic)
+    if (uia_power_supply_connected && dcu_using_umbilical_power) {
+        // Connected to umbilical - resources can be replenished
+        if (telemetry->batt_time < BATT_TIME_CAP) {
+            telemetry->batt_time = BATT_TIME_CAP; // Full recharge when connected
+        }
+        
+        if (uia_o2_supply_connected) {
+            if (dcu_using_pri_oxy && telemetry->oxy_pri_tank_fill < OXY_TIME_CAP) {
+                telemetry->oxy_pri_tank_fill = OXY_TIME_CAP;
+            } else if (!dcu_using_pri_oxy && telemetry->oxy_sec_tank_fill < OXY_TIME_CAP) {
+                telemetry->oxy_sec_tank_fill = OXY_TIME_CAP;
+            }
+        }
+        
+        // Oxygen venting
+        if (uia_o2_vent_connected) {
+            telemetry->oxy_pri_tank_fill = 0;
+            telemetry->oxy_sec_tank_fill = 0;
+        }
+        
+        // Coolant management
+        if (dcu_is_pump_open) {
+            if (uia_water_supply_connected && telemetry->coolant_tank < 100.0f) {
+                telemetry->coolant_tank = 100.0f;
+            }
+            if (uia_water_waste_connected) {
+                telemetry->coolant_tank = 0.0f;
+            }
+        }
+    }
+    
+    // Depress sequence (preserve original logic)
+    if (uia_depress_active) {
+        if (telemetry->depress_time < DEPRESS_TIME) {
+            telemetry->suit_oxy_pressure += (SUIT_OXY_PRESSURE - HAB_OXY_PRESSURE) / DEPRESS_TIME;
+            telemetry->suit_co2_pressure += (SUIT_CO2_PRESSURE - HAB_CO2_PRESSURE) / DEPRESS_TIME;
+            telemetry->suit_other_pressure += (SUIT_OTHER_PRESSURE - HAB_OTHER_PRESSURE) / DEPRESS_TIME;
+            telemetry->depress_time += 1;
+        }
+    }
+    
+    return true;
+}
+
+/**
+ * Updates pressurized rover telemetry using simulation engine for simulated values
+ * while preserving Unreal Engine data passthrough and resource interaction logic.
+ */
+bool update_pr_telemetry_from_simulation(struct pr_data_t* p_rover, uint32_t server_time, struct backend_data_t* backend) {
+    
+    if (!backend->sim_engine) {
+        printf("Error: Simulation engine not available for rover telemetry update\n");
+        return false;
+    }
+    
+    // Preserve EVA-rover resource interaction (same as original)
+    bool dcu_pump_is_open_eva1 = backend->dcu.eva1_pump;
+    bool dcu_pump_is_open_eva2 = backend->dcu.eva2_pump;
+    bool uia_water_supply_connected_eva1 = backend->uia.eva1_water_supply;
+    bool uia_water_supply_connected_eva2 = backend->uia.eva2_water_supply;
+    bool dcu_using_umbilical_power_eva1 = backend->dcu.eva1_batt;
+    bool dcu_using_umbilical_power_eva2 = backend->dcu.eva2_batt;
+    bool uia_power_supply_connected_eva1 = backend->uia.eva1_power;
+    bool uia_power_supply_connected_eva2 = backend->uia.eva2_power;
+    bool uia_oxy_connected_eva1 = backend->uia.eva1_oxy;
+    bool uia_oxy_connected_eva2 = backend->uia.eva2_oxy;
+    
+    // EVA resource draining (preserve original logic)
+    if(uia_power_supply_connected_eva1 && dcu_using_umbilical_power_eva1){
+        if(dcu_pump_is_open_eva1 && uia_water_supply_connected_eva1){
+            p_rover->pr_coolant_tank -= PR_COOLANT_TANK_DRAIN_RATE;
+            if(p_rover->pr_coolant_tank < 0) p_rover->pr_coolant_tank = 0;
+        }
+        if(uia_oxy_connected_eva1){
+            p_rover->oxygen_tank -= PR_OXYGEN_TANK_DRAIN_RATE;
+            if(p_rover->oxygen_tank < 0) p_rover->oxygen_tank = 0;
+        }
+    }
+    
+    if(uia_power_supply_connected_eva2 && dcu_using_umbilical_power_eva2){
+        if(dcu_pump_is_open_eva2 && uia_water_supply_connected_eva2){
+            p_rover->pr_coolant_tank -= PR_COOLANT_TANK_DRAIN_RATE;
+            if(p_rover->pr_coolant_tank < 0) p_rover->pr_coolant_tank = 0;
+        }
+        if(uia_oxy_connected_eva2){
+            p_rover->oxygen_tank -= PR_OXYGEN_TANK_DRAIN_RATE;
+            if(p_rover->oxygen_tank < 0) p_rover->oxygen_tank = 0;
+        }
+    }
+    
+    // Get simulated values from simulation engine (NOT the Unreal Engine values)
+    sim_value_t battery_level = sim_engine_get_field_value(backend->sim_engine, "battery_level");
+    sim_value_t oxygen_levels = sim_engine_get_field_value(backend->sim_engine, "oxygen_levels");
+    sim_value_t cabin_temperature = sim_engine_get_field_value(backend->sim_engine, "cabin_temperature");
+    sim_value_t cabin_pressure = sim_engine_get_field_value(backend->sim_engine, "cabin_pressure");
+    sim_value_t power_consumption_rate = sim_engine_get_field_value(backend->sim_engine, "power_consumption_rate");
+    sim_value_t solar_panel_efficiency = sim_engine_get_field_value(backend->sim_engine, "solar_panel_efficiency");
+    sim_value_t solar_panel_dust_accum = sim_engine_get_field_value(backend->sim_engine, "solar_panel_dust_accum");
+    sim_value_t pr_coolant_level = sim_engine_get_field_value(backend->sim_engine, "pr_coolant_level");
+    sim_value_t pr_coolant_pressure = sim_engine_get_field_value(backend->sim_engine, "pr_coolant_pressure");
+    sim_value_t ac_fan_pri = sim_engine_get_field_value(backend->sim_engine, "ac_fan_pri");
+    sim_value_t ac_fan_sec = sim_engine_get_field_value(backend->sim_engine, "ac_fan_sec");
+    
+    // Apply simulated values (NOT overwriting Unreal Engine data)
+    p_rover->battery_level = battery_level.f;
+    p_rover->oxygen_levels = oxygen_levels.f;
+    p_rover->cabin_temperature = cabin_temperature.f;  
+    p_rover->cabin_pressure = cabin_pressure.f;
+    p_rover->power_consumption_rate = power_consumption_rate.f;
+    p_rover->solar_panel_efficiency = solar_panel_efficiency.f;
+    p_rover->solar_panel_dust_accum = solar_panel_dust_accum.f;
+    p_rover->pr_coolant_level = pr_coolant_level.f;
+    p_rover->pr_coolant_pressure = pr_coolant_pressure.f;
+    p_rover->ac_fan_pri = ac_fan_pri.f;
+    p_rover->ac_fan_sec = ac_fan_sec.f;
+    
+    // Calculate dependent values
+    p_rover->oxygen_pressure = p_rover->oxygen_tank / PR_OXYGEN_TANK_CAP * PR_OXYGEN_PRESSURE_CAP;
+    
+    // Calculate motor power consumption based on throttle (preserve original logic)
+    float throttle = p_rover->throttle / THROTTLE_MAX_ABS_VALUE;
+    if (throttle < 0) throttle *= -1;
+    p_rover->motor_power_consumption = throttle * THROTTLE_CONSUMPTION_RATE;
+    
+    // Increment mission time
+    p_rover->mission_elapsed_time += 1;
+    
+    // NOTE: Unreal Engine values are preserved:
+    // - current_pos_x, current_pos_y, current_pos_alt
+    // - heading, pitch, roll  
+    // - speed, distance_traveled
+    // - surface_incline, in_sunlight
+    // - lidar array
+    // These should continue to be updated by Unreal Engine communication
+    
+    return true;
 }
 
 // Access pr_data_t struct by index

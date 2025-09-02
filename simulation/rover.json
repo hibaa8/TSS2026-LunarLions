@@ -251,13 +251,6 @@
       "growth_rate": 0.8,
       "max_value": 85.0
     },
-    "mission_elapsed_time": {
-      "type": "float",
-      "algorithm": "linear_growth",
-      "start_value": 0.0,
-      "growth_rate": 1.0,
-      "max_value": 28800.0
-    },
     "mission_planned_time": {
       "type": "float",
       "algorithm": "linear_decay",
