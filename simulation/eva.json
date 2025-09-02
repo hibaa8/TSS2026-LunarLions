@@ -1,0 +1,156 @@
+{
+  "component_name": "eva",
+  "fields": {
+    "eva_time": {
+      "type": "float",
+      "algorithm": "linear_growth",
+      "start_value": 0.0,
+      "growth_rate": 1.0,
+      "max_value": 28800.0
+    },
+    "batt_time_left": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 21600.0,
+      "end_value": 0.0,
+      "duration_seconds": 21600.0
+    },
+    "oxy_pri_storage": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 100.0,
+      "end_value": 0.0,
+      "duration_seconds": 10800.0
+    },
+    "oxy_sec_storage": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 100.0,
+      "end_value": 0.0,
+      "duration_seconds": 10800.0
+    },
+    "oxy_pri_pressure": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 2800.0,
+      "amplitude": 200.0,
+      "frequency": 0.001
+    },
+    "oxy_sec_pressure": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 2750.0,
+      "amplitude": 150.0,
+      "frequency": 0.0012
+    },
+    "oxy_time_left": {
+      "type": "int",
+      "algorithm": "dependent_value",
+      "formula": "oxy_pri_storage + oxy_sec_storage * 108",
+      "depends_on": ["oxy_pri_storage", "oxy_sec_storage"]
+    },
+    "heart_rate": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "120.0 + temperature * 0.8 - 56.0",
+      "depends_on": ["temperature"]
+    },
+    "oxy_consumption": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "heart_rate * 33.22114 - 2212.8225",
+      "depends_on": ["heart_rate"]
+    },
+    "co2_production": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "heart_rate * 32.05018 - 1770.93791",
+      "depends_on": ["heart_rate"]
+    },
+    "suit_pressure_oxy": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 4.0,
+      "amplitude": 0.5,
+      "frequency": 0.02
+    },
+    "suit_pressure_co2": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "co2_production * 0.0001 + 0.001",
+      "depends_on": ["co2_production"]
+    },
+    "suit_pressure_other": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 11.55,
+      "end_value": 0.0,
+      "duration_seconds": 900.0
+    },
+    "suit_pressure_total": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "suit_pressure_oxy + suit_pressure_co2 + suit_pressure_other",
+      "depends_on": ["suit_pressure_oxy", "suit_pressure_co2", "suit_pressure_other"]
+    },
+    "fan_pri_rpm": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "25000.0 + suit_pressure_co2 * 15000.0",
+      "depends_on": ["suit_pressure_co2"]
+    },
+    "fan_sec_rpm": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 20000.0,
+      "amplitude": 6000.0,
+      "frequency": 0.04
+    },
+    "helmet_pressure_co2": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "suit_pressure_co2 * 1.2",
+      "depends_on": ["suit_pressure_co2"]
+    },
+    "scrubber_a_co2_storage": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "helmet_pressure_co2 * 0.8 + 0.1",
+      "depends_on": ["helmet_pressure_co2"]
+    },
+    "scrubber_b_co2_storage": {
+      "type": "float",
+      "algorithm": "linear_growth",
+      "start_value": 0.0,
+      "growth_rate": 0.08,
+      "max_value": 1.0
+    },
+    "temperature": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 70.0,
+      "amplitude": 8.0,
+      "frequency": 0.015
+    },
+    "coolant_ml": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "100.0 - temperature * 1.2 + 54.0",
+      "depends_on": ["temperature"]
+    },
+    "coolant_gas_pressure": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 250.0,
+      "amplitude": 100.0,
+      "frequency": 0.008
+    },
+    "coolant_liquid_pressure": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 450.0,
+      "amplitude": 80.0,
+      "frequency": 0.006
+    }
+  }
+}
