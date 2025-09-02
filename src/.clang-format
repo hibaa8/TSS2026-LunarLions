@@ -1,0 +1,58 @@
+---
+# Based on Google C++ style with modifications for your preferences
+BasedOnStyle: Google
+Language: Cpp
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# Spacing preferences (addresses your bracket spacing concerns)
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 2
+SpacesInContainerLiterals: true
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Braces
+BreakBeforeBraces: Attach
+Cpp11BracedListStyle: true
+
+# Function formatting
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterDefinitionReturnType: None
+
+# Line length
+ColumnLimit: 100
+
+# Pointer alignment
+PointerAlignment: Right
+DerivePointerAlignment: false
+
+# Include sorting
+SortIncludes: true
+IncludeBlocks: Regroup
+
+# Other formatting options
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignOperands: true
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializersBeforeComma: false
+BreakStringLiterals: true
+ContinuationIndentWidth: 4
+IndentCaseLabels: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+ReflowComments: true
+SpaceAfterCStyleCast: false
+Standard: c++03
