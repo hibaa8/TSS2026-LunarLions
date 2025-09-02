@@ -78,7 +78,7 @@ sim_engine_t* sim_engine_create(void);
 void sim_engine_destroy(sim_engine_t* engine);
 
 // Configuration loading
-bool sim_engine_load_from_directory(sim_engine_t* engine, const char* directory_path);
+bool sim_engine_load_predefined_configs(sim_engine_t* engine);
 bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path);
 
 // Simulation control

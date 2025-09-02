@@ -5,6 +5,4 @@
 *.exp
 server
 
-src/README.md
-SIMULATION_README.md
-test_sim_engine.c
+C-src.md

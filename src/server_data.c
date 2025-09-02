@@ -207,7 +207,7 @@ struct backend_data_t *init_backend() {
     // Initialize simulation engine
     backend->sim_engine = sim_engine_create();
     if (backend->sim_engine) {
-        if (!sim_engine_load_from_directory(backend->sim_engine, "simulation")) {
+        if (!sim_engine_load_predefined_configs(backend->sim_engine)) {
             printf("Warning: Failed to load simulation configurations\n");
         }
         if (!sim_engine_initialize(backend->sim_engine)) {

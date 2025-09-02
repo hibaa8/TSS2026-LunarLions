@@ -74,79 +74,37 @@ void sim_engine_destroy(sim_engine_t* engine) {
 ///////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Loads all JSON simulation configuration files from a directory.
- * Automatically discovers and loads any .json files found in the specified directory.
+ * Loads predefined JSON simulation configuration files.
+ * Uses a hardcoded list of configuration files instead of scanning directories.
  * 
  * @param engine Pointer to the simulation engine
- * @param directory_path Path to directory containing JSON configuration files
- * @return true if at least one file was loaded successfully, false otherwise
+ * @return true if all files were loaded successfully, false otherwise
  */
-bool sim_engine_load_from_directory(sim_engine_t* engine, const char* directory_path) {
-    if (!engine || !directory_path) return false;
+bool sim_engine_load_predefined_configs(sim_engine_t* engine) {
+    if (!engine) return false;
     
-    char search_pattern[512];
-    char file_path[512];
+    // Predefined list of configuration files to load
+    const char* config_files[] = {
+        "config/eva.json",
+        "config/rover.json"
+    };
+    const int config_count = sizeof(config_files) / sizeof(config_files[0]);
+    
     bool success = true;
     int loaded_count = 0;
     
-#ifdef _WIN32
-    // Windows implementation using FindFirstFile/FindNextFile
-    WIN32_FIND_DATAA find_data;
-    HANDLE hFind;
-    
-    snprintf(search_pattern, sizeof(search_pattern), "%s\\*.json", directory_path);
-    hFind = FindFirstFileA(search_pattern, &find_data);
-    
-    if (hFind != INVALID_HANDLE_VALUE) {
-        do {
-            // Skip directories
-            if (!(find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-                snprintf(file_path, sizeof(file_path), "%s/%s", directory_path, find_data.cFileName);
-                
-                if (sim_engine_load_component(engine, file_path)) {
-                    loaded_count++;
-                    printf("Loaded: %s\n", find_data.cFileName);
-                } else {
-                    printf("Warning: Failed to load component file: %s\n", file_path);
-                    success = false;
-                }
-            }
-        } while (FindNextFileA(hFind, &find_data) != 0);
-        
-        FindClose(hFind);
-    }
-#else
-    // Unix/Linux implementation using opendir/readdir
-    DIR* dir = opendir(directory_path);
-    if (!dir) {
-        printf("Error: Cannot open simulation directory: %s\n", directory_path);
-        return false;
-    }
-    
-    struct dirent* entry;
-    while ((entry = readdir(dir)) != NULL) {
-        // Skip directories and non-JSON files
-        if (entry->d_type == DT_DIR) continue;
-        
-        const char* ext = strrchr(entry->d_name, '.');
-        if (!ext || strcmp(ext, ".json") != 0) continue;
-        
-        snprintf(file_path, sizeof(file_path), "%s/%s", directory_path, entry->d_name);
-        
-        if (sim_engine_load_component(engine, file_path)) {
+    for (int i = 0; i < config_count; i++) {
+        if (sim_engine_load_component(engine, config_files[i])) {
             loaded_count++;
-            printf("Loaded: %s\n", entry->d_name);
+            printf("Loaded: %s\n", config_files[i]);
         } else {
-            printf("Warning: Failed to load component file: %s\n", file_path);
+            printf("Warning: Failed to load component file: %s\n", config_files[i]);
             success = false;
         }
     }
     
-    closedir(dir);
-#endif
-    
     if (loaded_count == 0) {
-        printf("Error: No JSON simulation configuration files found in: %s\n", directory_path);
+        printf("Error: No configuration files were loaded successfully.\n");
         return false;
     }
     
