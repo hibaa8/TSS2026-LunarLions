@@ -1616,7 +1616,7 @@ bool build_json_telemetry(struct eva_data_t* eva, int team_index, bool completed
         eva->eva2.coolant_liquid_pressure
     );
 
-    char filenameTemplate[128] = "public/json_data/teams/%d/%sTELEMETRY.json";
+    char filenameTemplate[128] = "public/json_data/teams/%d/%sEVA_TELEMETRY.json";
     char out_filename[256];
     sprintf(out_filename, filenameTemplate,
         team_index,
