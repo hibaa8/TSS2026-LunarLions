@@ -2,7 +2,7 @@
 {
 	"dcu": {
 		"eva1": {
-			"batt": true,
+			"batt": false,
 			"oxy": false,
 			"comm": false,
 			"fan": false,
