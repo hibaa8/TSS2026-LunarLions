@@ -419,7 +419,7 @@ void serve_resource(struct client_info_t* client, const char* path){
     }
 
     char full_path[128];
-    sprintf(full_path, "public%s", path);
+    sprintf(full_path, "frontend%s", path);
 
     // Swap '/' to '\' on Windows
     #if defined(_WIN32)

@@ -141,7 +141,7 @@ char* itoa_custom(int val, int base){
 
 bool udp_get_teams(unsigned char* request_content){
     //Open file
-    FILE* fp = fopen("public/json_data/TEAMS.json", "r");
+    FILE* fp = fopen("frontend/data/TEAMS.json", "r");
     if (fp == NULL) {
         printf("Error: Unable to open the file.\n");
         return false;
@@ -315,7 +315,7 @@ bool build_json_uia(struct uia_data_t* uia){
     );
 
     // Write bytes to file
-    FILE* fd_uia = fopen("public/json_data/UIA.json", "w");
+    FILE* fd_uia = fopen("frontend/data/UIA.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_uia);
     fclose(fd_uia);
 
@@ -397,7 +397,7 @@ bool udp_get_uia(unsigned int command, unsigned char* data){
 
     int off_set = command - 53;
     //Open file
-    FILE* fp = fopen("public/json_data/UIA.json", "r");
+    FILE* fp = fopen("frontend/data/UIA.json", "r");
     if (fp == NULL) {
         printf("Error: Unable to open the file.\n");
         return false;
@@ -487,7 +487,7 @@ bool build_json_dcu(struct dcu_data_t* dcu){
     );
 
     // Write bytes to file
-    FILE* fd_uia = fopen("public/json_data/DCU.json", "w");
+    FILE* fd_uia = fopen("frontend/data/DCU.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_uia);
     fclose(fd_uia);
 
@@ -579,7 +579,7 @@ bool udp_get_dcu(unsigned int command, unsigned char* data){
     int off_set = command - 2;
 
     //Open file
-    FILE* fp = fopen("public/json_data/DCU.json", "r");
+    FILE* fp = fopen("frontend/data/DCU.json", "r");
     if (fp == NULL) {
         printf("Error: Unable to open the file.\n");
         return false;
@@ -666,7 +666,7 @@ bool build_json_imu(struct imu_data_t* imu){
     );
 
     // Write bytes to file
-    FILE* fd_imu = fopen("public/json_data/IMU.json", "w");
+    FILE* fd_imu = fopen("frontend/data/IMU.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_imu);
     fclose(fd_imu);
 
@@ -725,7 +725,7 @@ bool udp_get_imu(unsigned int command, unsigned char* data){
     int off_set = command - 17;
 
     //Open file
-    FILE* fp = fopen("public/json_data/IMU.json", "r");
+    FILE* fp = fopen("frontend/data/IMU.json", "r");
     if (fp == NULL) {
         printf("Error: Unable to open the file.\n");
         return false;
@@ -820,7 +820,7 @@ bool build_json_rover(struct rover_data_t* rover){
 
 
     // Write bytes to file
-    FILE* fd_rover = fopen("public/json_data/ROVER.json", "w");
+    FILE* fd_rover = fopen("frontend/data/ROVER.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_rover);
     fclose(fd_rover);
 
@@ -867,7 +867,7 @@ bool udp_get_rover(unsigned int command, unsigned char* data){
 
     int off_set = command - 23;
 
-    FILE* fp = fopen("public/json_data/ROVER.json", "r");
+    FILE* fp = fopen("frontend/data/ROVER.json", "r");
     if (fp == NULL) {
         printf("Error: Unable to open the file.\n");
         return false;
@@ -917,7 +917,7 @@ bool build_json_spec(struct spec_data_t* spec){
 
     // Read Rock Data Json File
     int rocks_in_db = 15;
-    FILE* fd_rocks = fopen("public/json_data/rocks/RockData.json", "r");
+    FILE* fd_rocks = fopen("frontend/data/rocks/RockData.json", "r");
     fseek(fd_rocks, 0, SEEK_END);
     long fsize = ftell(fd_rocks);
     fseek(fd_rocks, 0, SEEK_SET);
@@ -962,7 +962,7 @@ bool build_json_spec(struct spec_data_t* spec){
     );
 
     // Write bytes to file
-    FILE* fd_spec = fopen("public/json_data/SPEC.json", "w");
+    FILE* fd_spec = fopen("frontend/data/SPEC.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_spec);
     fclose(fd_spec);
 
@@ -1002,7 +1002,7 @@ bool udp_get_spec(unsigned int command, unsigned char* data){
 
     int off_set = command - 31;
     //Open file
-    FILE* fp = fopen("public/json_data/SPEC.json", "r");
+    FILE* fp = fopen("frontend/data/SPEC.json", "r");
     if (fp == NULL) {
         printf("Error: Unable to open the file.\n");
         return false;
@@ -1099,7 +1099,7 @@ bool build_json_comm(struct comm_data_t* comm){
     );
 
     // Write bytes to file
-    FILE* fd_spec = fopen("public/json_data/COMM.json", "w");
+    FILE* fd_spec = fopen("frontend/data/COMM.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_spec);
     fclose(fd_spec);
 
@@ -1135,7 +1135,7 @@ bool update_comm(char* request_content, struct comm_data_t* comm){
 
 bool udp_get_comm(unsigned char* data){
     //Open file
-    FILE* fp = fopen("public/json_data/COMM.json", "r");
+    FILE* fp = fopen("frontend/data/COMM.json", "r");
     if (fp == NULL) {
         printf("Error: Unable to open the file.\n");
         return false;
@@ -1200,7 +1200,7 @@ bool build_json_error(struct eva_failures_t* error){
     );
 
     // Write bytes to file
-    FILE* fd_eva = fopen("public/json_data/ERROR.json", "w");
+    FILE* fd_eva = fopen("frontend/data/ERROR.json", "w");
     size_t bytes_written = fwrite(out_buffer, 1, strlen(out_buffer), fd_eva);
     fclose(fd_eva);
 
@@ -1288,7 +1288,7 @@ bool udp_get_error(unsigned int command, unsigned char* data){
     int off_set = command - 14;
 
     //Open file
-    FILE* fp = fopen("public/json_data/ERROR.json", "r");
+    FILE* fp = fopen("frontend/data/ERROR.json", "r");
     if (fp == NULL) {
         printf("Error: Unable to open the file.\n");
         return false;
@@ -1386,7 +1386,7 @@ bool build_json_eva(struct eva_data_t* eva, int team_index, bool completed){
         eva->time_at_SPEC
     );
 
-    char filenameTemplate[48] = "public/json_data/teams/%d/%sEVA_STATUS.json";
+    char filenameTemplate[48] = "frontend/data/teams/%d/%sEVA_STATUS.json";
     char out_filename[48];
     sprintf(out_filename, filenameTemplate,
         team_index,
@@ -1616,7 +1616,7 @@ bool build_json_telemetry(struct eva_data_t* eva, int team_index, bool completed
         eva->eva2.coolant_liquid_pressure
     );
 
-    char filenameTemplate[128] = "public/json_data/teams/%d/%sEVA_TELEMETRY.json";
+    char filenameTemplate[128] = "frontend/data/teams/%d/%sEVA_TELEMETRY.json";
     char out_filename[256];
     sprintf(out_filename, filenameTemplate,
         team_index,
@@ -1702,7 +1702,7 @@ bool build_json_pr_telemetry(struct pr_data_t* rover, int team_index, bool compl
     FILE* fp;
 
     if(completed){
-        char filenameTemplate[128] = "public/json_data/teams/%d/COMPLETED_ROVER_TELEMETRY.json";
+        char filenameTemplate[128] = "frontend/data/teams/%d/COMPLETED_ROVER_TELEMETRY.json";
         char out_filename[256];
         sprintf(out_filename, filenameTemplate, team_index);
 
@@ -1713,7 +1713,7 @@ bool build_json_pr_telemetry(struct pr_data_t* rover, int team_index, bool compl
         }
     }
     else{
-        char filenameTemplate[128] = "public/json_data/teams/%d/ROVER_TELEMETRY.json";
+        char filenameTemplate[128] = "frontend/data/teams/%d/ROVER_TELEMETRY.json";
         char out_filename[256];
         sprintf(out_filename, filenameTemplate, team_index);
 
@@ -2527,7 +2527,7 @@ bool udp_get_telemetry(unsigned int command, unsigned int team_number, unsigned 
 
     int off_set = command - 63;
 
-    char start_path[50] = "public/json_data/teams/";
+    char start_path[50] = "frontend/data/teams/";
     char team[3] = "";
     char* end_path = "/EVA_TELEMETRY.json";
 
@@ -2618,7 +2618,7 @@ bool udp_get_pr_telemetry(unsigned int command, unsigned char* data, struct back
         return false;
     }
 
-    char start_path[50] = "public/json_data/teams/";
+    char start_path[50] = "frontend/data/teams/";
     char team[3] = "";
     char* end_path = "/ROVER_TELEMETRY.json";
 
@@ -2686,7 +2686,7 @@ bool udp_get_pr_telemetry(unsigned int command, unsigned char* data, struct back
 bool udp_get_eva(unsigned int command, unsigned int team_number, unsigned char* data){
     int off_set = command - 108;
 
-    char start_path[50] = "public/json_data/teams/";
+    char start_path[50] = "frontend/data/teams/";
     char team[3] = "";
     char* end_path = "/EVA_STATUS.json";
 

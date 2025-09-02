@@ -87,7 +87,7 @@ http://192.168.51.109:14141
 6. From this website, you can interact with the TSS.\
    This is where you can monitor the state of the server, verify the display of your system, and virtually interact with the EVA devices like you will be doing in May.
 
-![Image](public/images/tss-main-page.png)
+![Image](frontend/images/tss-main-page.png)
 
 ## TSS EVA Devices
 
@@ -169,7 +169,7 @@ Where your ip address is the ip address of the machine that is running TSS
 - Server.c: contains the main function with a loop that processes HTTP messages and simulates data in the backend.
 - Network.c: contains helper functions for the server to communicate with other devices.
 - Server_data.c: contains the data that the server maintains and how that data is updated.
-- public folder: contains a frontend for testing your device with TSS, along with all the json files that you will need from the server.
+- frontend folder: contains a frontend for testing your device with TSS, along with all the json files that you will need from the server.
 
 This server is based on "Network Programming in C" and builds off of the HTTPs example.
 
@@ -191,7 +191,7 @@ The command number will be the same one you sent, and the output data will eithe
 
 Note the one exception to the above output is the PR's LIDAR data, which will instead return 13 floats for it's output data. This will be explained further below.
 
-Here's a list of get commands you can send to the socket. They are mostly related to the json files in `public/json_data`, and will be listed as such. The command number order will match the order of data in the json file.
+Here's a list of get commands you can send to the socket. They are mostly related to the json files in `frontend/data`, and will be listed as such. The command number order will match the order of data in the json file.
 | Command number | Command | Referenced .json file|
 | -------------- | ------- | ---------
 | 2-7 | Get EVA1 DCU switch states | `DCU.json` |

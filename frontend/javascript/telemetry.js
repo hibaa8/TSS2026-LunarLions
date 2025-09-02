@@ -84,7 +84,7 @@ let yCoordinateRover = document.getElementById("yCoordinateRover");
 // function loadRover() {
 //     video.src = "http://192.168.51.194:8080/stream?topic=/camera/image_raw&type=ros_compressed";
 
-//     $.getJSON("json_data/ROVER.json", function(data) {
+//     $.getJSON("data/ROVER.json", function(data) {
 //         xCoordinateRover.innerText = (data.rover.posx).toFixed(2);
 //         yCoordinateRover.innerText = (data.rover.posy).toFixed(2);
 //     })
@@ -92,7 +92,7 @@ let yCoordinateRover = document.getElementById("yCoordinateRover");
 
 // Loads the coordinates of EVA 1 and EVA 2
 function loadGPS() {
-  $.getJSON("json_data/IMU.json", function (data) {
+  $.getJSON("data/IMU.json", function (data) {
     xCoordinateEV1.innerText = data.imu.eva1.posx.toFixed(2);
     yCoordinateEV1.innerText = data.imu.eva1.posy.toFixed(2);
     headingEV1.innerText = data.imu.eva1.heading.toFixed(2);
@@ -134,7 +134,7 @@ function getCookie(cname) {
 // Loads the UIA data and sets the light
 // function loadUIA(){
 
-//     $.getJSON("json_data/UIA.json", function( data ){
+//     $.getJSON("data/UIA.json", function( data ){
 //         if (data.uia.eva1_power == true){
 //             document.getElementById("eva1PowerSensor").style.backgroundColor = 'rgba(0, 240, 10, 1)';
 //         }
@@ -205,7 +205,7 @@ function getCookie(cname) {
 // // Loads the DCU data and sets the light
 // function loadDCU(){
 
-//     $.getJSON("json_data/DCU.json", function( data ){
+//     $.getJSON("data/DCU.json", function( data ){
 
 //         // console.log(data);
 //         if (data.dcu.eva1.batt == true){
@@ -297,7 +297,7 @@ function getCookie(cname) {
 
 // Loads the EVA timers depending on state(Started, Stopped, Paused, etc.) and sets light depending on state
 function loadEVA(team) {
-  $.getJSON("json_data/teams/" + team + "/EVA_STATUS.json", function (data) {
+  $.getJSON("data/teams/" + team + "/EVA_STATUS.json", function (data) {
     // Formats the total time for the EVA
     var h = Math.floor(data.eva.total_time / 3600);
     var m = Math.floor((data.eva.total_time % 3600) / 60);
@@ -413,7 +413,7 @@ function loadEVA(team) {
 // Loads the PR timers depending on state(Started, Stopped, Paused, etc.)
 // function loadPR(team){
 
-//     $.getJSON("json_data/teams/" + team + "/ROVER_TELEMETRY.json", function( data ){
+//     $.getJSON("data/teams/" + team + "/ROVER_TELEMETRY.json", function( data ){
 
 //         // Formats the total time for the EVA
 //         var h = Math.floor(data.pr_telemetry.mission_elapsed_time / 3600);
@@ -457,7 +457,7 @@ function loadEVA(team) {
 
 // Loads the Telemetry values of each EVA
 function loadTelemetry(team) {
-  $.getJSON("json_data/teams/" + team + "/EVA_TELEMETRY.json", function (data) {
+  $.getJSON("data/teams/" + team + "/EVA_TELEMETRY.json", function (data) {
     // EVA 1
     var h = Math.floor(Number(data.telemetry.eva_time) / 3600);
     var m = Math.floor((Number(data.telemetry.eva_time) % 3600) / 60);
@@ -589,7 +589,7 @@ function loadTelemetry(team) {
 
 // Loads title for team specific data depending on which team is selected
 function loadTitle(oldTeam) {
-  $.getJSON("json_data/TEAMS.json", function (data) {
+  $.getJSON("data/TEAMS.json", function (data) {
     var teamnames = Object.values(data.teams);
     document.getElementById("roomDataTitle").innerText =
       teamnames[oldTeam] + " - Room " + (oldTeam + 1);
@@ -598,7 +598,7 @@ function loadTitle(oldTeam) {
 
 // Loads team names for Rooms
 function loadTeams() {
-  $.getJSON("json_data/TEAMS.json", function (data) {
+  $.getJSON("data/TEAMS.json", function (data) {
     document.getElementById("room1Name").innerText = data.teams.team_1;
     document.getElementById("room2Name").innerText = data.teams.team_2;
     document.getElementById("room3Name").innerText = data.teams.team_3;
@@ -627,9 +627,9 @@ function loadTeams() {
 
 // Loads lights for Rooms depending on state
 function loadLights(team) {
-  $.getJSON("json_data/teams/" + team + "/EVA_STATUS.json", function (data) {
+  $.getJSON("data/teams/" + team + "/EVA_STATUS.json", function (data) {
     $.getJSON(
-      "json_data/teams/" + team + "/ROVER_TELEMETRY.json",
+      "data/teams/" + team + "/ROVER_TELEMETRY.json",
       function (pr_data) {
         // Button UI States Visuals
         var evaStarted = data.eva.started || pr_data.pr_telemetry.sim_running;
@@ -662,7 +662,7 @@ function loadLights(team) {
 
 // Load telemetry of Pressurized Rover
 // function loadPR_Telemetry(team){
-//     $.getJSON("json_data/teams/" + team + "/ROVER_TELEMETRY.json", function ( data ){
+//     $.getJSON("data/teams/" + team + "/ROVER_TELEMETRY.json", function ( data ){
 //         if(data.pr_telemetry.ac_heating == true){
 //             document.getElementById("acHeatingSensor").style.backgroundColor = 'rgba(0, 240, 10, 1)';
 //             document.getElementById("acHeatingSwitch").checked = true;

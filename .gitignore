@@ -4,3 +4,5 @@
 *.lib
 *.exp
 server
+
+src/README.md
