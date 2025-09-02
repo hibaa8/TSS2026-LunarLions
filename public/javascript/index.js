@@ -84,7 +84,6 @@ function swapTeams(newTeam) {
 function loadRover() {
   video.src =
     "http://192.168.51.194:8080/stream?topic=/camera/image_raw&type=ros_compressed";
-
 }
 
 // Loads the coordinates of EVA 1 and EVA 2
@@ -313,7 +312,7 @@ function loadDCU() {
 
 // Loads the EVA timers depending on state(Started, Stopped, Paused, etc.) and sets light depending on state
 function loadEVA(team) {
-  $.getJSON("json_data/teams/" + team + "/EVA.json", function (data) {
+  $.getJSON("json_data/teams/" + team + "/EVA_STATUS.json", function (data) {
     // Formats the total time for the EVA
     var h = Math.floor(data.eva.total_time / 3600);
     var m = Math.floor((data.eva.total_time % 3600) / 60);
@@ -653,7 +652,7 @@ function loadTeams() {
 
 // Loads lights for Rooms depending on state
 function loadLights(team) {
-  $.getJSON("json_data/teams/" + team + "/EVA.json", function (data) {
+  $.getJSON("json_data/teams/" + team + "/EVA_STATUS.json", function (data) {
     $.getJSON(
       "json_data/teams/" + team + "/ROVER_TELEMETRY.json",
       function (pr_data) {

@@ -1386,7 +1386,7 @@ bool build_json_eva(struct eva_data_t* eva, int team_index, bool completed){
         eva->time_at_SPEC
     );
 
-    char filenameTemplate[48] = "public/json_data/teams/%d/%sEVA.json";
+    char filenameTemplate[48] = "public/json_data/teams/%d/%sEVA_STATUS.json";
     char out_filename[48];
     sprintf(out_filename, filenameTemplate,
         team_index,
@@ -2688,7 +2688,7 @@ bool udp_get_eva(unsigned int command, unsigned int team_number, unsigned char* 
 
     char start_path[50] = "public/json_data/teams/";
     char team[3] = "";
-    char* end_path = "/EVA.json";
+    char* end_path = "/EVA_STATUS.json";
 
     sprintf(team, "%d", team_number);
     strcat(start_path, team);

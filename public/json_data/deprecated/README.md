@@ -1,1 +1,1 @@
-Add information about why this exists for future NASA SUITS challenges
+In past NASA SUITS iterations, this data has been used for various aspects of the challenge. These data points are not relevant to the current challenge for 2026, and exist within the deprecated folder if we opt to use them again for future challenges.
