@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdbool.h>
 //#include <time.h>
-#include "lib/cJSON.h"
+#include "lib/cjson/cJSON.h"
 
 // Networking Headers
 #include "network.h"
