@@ -486,11 +486,10 @@ struct backend_data_t {
 struct backend_data_t* init_backend();
 void cleanup_backend(struct backend_data_t*  backend);
 void simulate_backend(struct backend_data_t* backend);
-void reset_telemetry(struct telemetry_data_t* telemetry, float seed);
+void reset_eva_telemetry(struct telemetry_data_t* telemetry, float seed);
 void reset_pr_telemetry(struct backend_data_t* backend, int teamIndex);
 
 // build json files when values update
-bool build_json_meta_data(struct backend_data_t* backend);
 bool build_json_uia      (struct uia_data_t* uia);
 bool build_json_dcu      (struct dcu_data_t* dcu);
 bool build_json_imu      (struct imu_data_t* imu);
@@ -498,8 +497,8 @@ bool build_json_rover    (struct rover_data_t* rover);
 bool build_json_spec     (struct spec_data_t* spec);
 bool build_json_comm     (struct comm_data_t* comm);
 bool build_json_error    (struct eva_failures_t* error);
-bool build_json_eva      (struct eva_data_t* eva, int team_index, bool completed);
-bool build_json_telemetry(struct eva_data_t* eva, int team_index, bool completed);
+bool build_json_eva_status      (struct eva_data_t* eva, int team_index, bool completed);
+bool build_json_eva_telemetry(struct eva_data_t* eva, int team_index, bool completed);
 bool build_json_pr_telemetry(struct pr_data_t* rover, int team_index, bool completed);
 
 // Update locally stored variables
@@ -529,9 +528,9 @@ bool udp_get_error(unsigned int command, unsigned char* data);
 bool udp_get_rover(unsigned int command, unsigned char* data);
 bool udp_get_comm(unsigned char* data);
 bool udp_get_teams(unsigned char* request_content);
-bool udp_get_telemetry(unsigned int command, unsigned int team_number, unsigned char* data);
+bool udp_get_eva_telemetry(unsigned int command, unsigned int team_number, unsigned char* data);
 bool udp_get_pr_telemetry(unsigned int command, unsigned char* data, struct backend_data_t* backend);
-bool udp_get_eva(unsigned int command, unsigned int team_number, unsigned char* data);
+bool udp_get_eva_status(unsigned int command, unsigned int team_number, unsigned char* data);
 void handle_udp_get_request(unsigned int command, unsigned char* data, struct backend_data_t* backend);
 void udp_get_pr_lidar(char* lidar, struct backend_data_t* backend);
 

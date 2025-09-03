@@ -85,8 +85,8 @@ bool sim_engine_load_predefined_configs(sim_engine_t* engine) {
     
     // Predefined list of configuration files to load
     const char* config_files[] = {
-        "config/eva.json",
-        "config/rover.json"
+        "src/lib/simulation/config/eva.json",
+        "src/lib/simulation/config/rover.json"
     };
     const int config_count = sizeof(config_files) / sizeof(config_files[0]);
     

@@ -65,7 +65,7 @@ void handle_udp_get_request(unsigned int command, unsigned char *data,
         team_number = (unsigned int)fl;
         printf("Team number: %u\n", team_number);
 
-        udp_get_telemetry(command, team_number, data);
+        udp_get_eva_telemetry(command, team_number, data);
     } else if (command < 124) {
         printf("Getting EVA.\n");
         unsigned int team_number = 0;
@@ -74,7 +74,7 @@ void handle_udp_get_request(unsigned int command, unsigned char *data,
         team_number = (unsigned int)fl;
         printf("Team number: %u\n", team_number);
 
-        udp_get_eva(command, team_number, data);
+        udp_get_eva_status(command, team_number, data);
     } else if (command < 172) {
         printf("Getting Rover Telemetry.\n");
 
@@ -177,30 +177,36 @@ bool udp_get_teams(unsigned char *request_content) {
 
 // -------------------------- INIT --------------------------------
 struct backend_data_t *init_backend() {
-    // init backend
+
+    // Allocate memory for backend
     struct backend_data_t *backend = malloc(sizeof(struct backend_data_t));
     memset(backend, 0, sizeof(struct backend_data_t));
     backend->start_time = time(NULL);
     backend->running_pr_sim = -1;
     backend->pr_sim_paused = false;
 
+    // Loop through all teams and reset telemetry back to their default values
+    // @TODO check if I actually need to do this or not
     for (int i = 0; i < NUMBER_OF_TEAMS; i++) {
-        reset_telemetry(&(backend->evas[i].eva1), 0.0f);
-        reset_telemetry(&(backend->evas[i].eva2), 1000.0f);
+        reset_eva_telemetry(&(backend->evas[i].eva1), 0.0f);
+        reset_eva_telemetry(&(backend->evas[i].eva2), 1000.0f);
         reset_pr_telemetry(backend, i);
     }
 
-    // reset Json files
+    // Reset JSON data files
     build_json_uia(&backend->uia);
     build_json_dcu(&backend->dcu);
     build_json_imu(&backend->imu);
+
     // build_json_rover(&backend->rover); Don't need POI for rover for SUITS 2026
     // build_json_spec(&backend->spec); Don't need SPEC data for SUITS 2026
     // build_json_comm(&backend->comm); Don't need COMM tower for SUITS 2026
 
+    // Loop through all teams and build JSON data
+    // @TODO check if this is actually needed
     for (int i = 0; i < NUMBER_OF_TEAMS; i++) {
-        build_json_eva(&backend->evas[i], i, false);
-        build_json_telemetry(&backend->evas[i], i, false);
+        build_json_eva_status(&backend->evas[i], i, false);
+        build_json_eva_telemetry(&backend->evas[i], i, false);
         build_json_pr_telemetry(&backend->p_rover[i], i, false);
     }
 
@@ -210,6 +216,7 @@ struct backend_data_t *init_backend() {
         if (!sim_engine_load_predefined_configs(backend->sim_engine)) {
             printf("Warning: Failed to load simulation configurations\n");
         }
+
         if (!sim_engine_initialize(backend->sim_engine)) {
             printf("Warning: Failed to initialize simulation engine\n");
         }
@@ -221,11 +228,11 @@ struct backend_data_t *init_backend() {
 }
 
 /**
- * Cleans up backend data structure and releases resources
+ * Cleans up backend data structure and frees resources from memory, called in server.c
+ * 
  * @param backend Backend data structure to cleanup
  */
 void cleanup_backend(struct backend_data_t *backend) {
-    // Cleanup simulation engine
     if (backend && backend->sim_engine) {
         sim_engine_destroy(backend->sim_engine);
     }
@@ -246,7 +253,7 @@ void reset_pr_telemetry(struct backend_data_t *backend, int teamIndex) {
     backend->p_rover[teamIndex].pr_coolant_pressure = NOMINAL_COOLANT_PRESSURE;
 }
 
-void reset_telemetry(struct telemetry_data_t *telemetry, float seed) {
+void reset_eva_telemetry(struct telemetry_data_t *telemetry, float seed) {
     telemetry->batt_time = 0.2f * BATT_TIME_CAP;
     telemetry->oxy_pri_tank_fill = 0.2f * OXY_TIME_CAP;
     telemetry->oxy_sec_tank_fill = 0.2f * OXY_TIME_CAP;
@@ -279,10 +286,6 @@ void reset_telemetry(struct telemetry_data_t *telemetry, float seed) {
 
     // Communications
     int com_channel;
-}
-
-// -------------------------- Meta Data --------------------------------
-bool build_json_meta_data(struct backend_data_t *backend) {
 }
 
 // -------------------------- UIA --------------------------------
@@ -782,11 +785,6 @@ bool build_json_rover(struct rover_data_t *rover) {
 }
 
 bool update_rover(char *request_content, struct rover_data_t *rover) {
-    // if(strncmp(request_content, "qr=", strlen("qr=")) == 0) {
-    //     request_content += strlen("qr=");
-    //     rover->prev_qr_scan = atoi(request_content);
-    //     printf("ROVER QR: %d\n", rover->prev_qr_scan);
-    //} else
     if (strncmp(request_content, "posx=", strlen("posx=")) == 0) {
         request_content += strlen("posx=");
         rover->pos_x = atof(request_content);
@@ -813,6 +811,7 @@ bool update_rover(char *request_content, struct rover_data_t *rover) {
 
     return true;
 }
+
 bool udp_get_rover(unsigned int command, unsigned char *data) {
     int off_set = command - 23;
 
@@ -1251,8 +1250,8 @@ bool udp_get_error(unsigned int command, unsigned char *data) {
     return true;
 }
 
-// -------------------------- EVA --------------------------------
-bool build_json_eva(struct eva_data_t *eva, int team_index, bool completed) {
+// -------------------------- EVA STATUS --------------------------------
+bool build_json_eva_status(struct eva_data_t *eva, int team_index, bool completed) {
     const char format_buffer[512] =
         "\n{"
         "\n\t\"eva\": {"
@@ -1315,8 +1314,8 @@ bool update_eva(char *request_content, struct backend_data_t *backend) {
             return false;
         }
         memset(&backend->evas[team], 0, sizeof(struct eva_data_t));
-        reset_telemetry(&(backend->evas[team].eva1), 0.0f + team * 5000.0f);
-        reset_telemetry(&(backend->evas[team].eva2), 1000.0f + team * 5000.0f);
+        reset_eva_telemetry(&(backend->evas[team].eva1), 0.0f + team * 5000.0f);
+        reset_eva_telemetry(&(backend->evas[team].eva2), 1000.0f + team * 5000.0f);
         backend->evas[team].started = true;
         printf("Team %d Started\n", team);
     } else if (strncmp(request_content, "end_team=", strlen("end_team=")) == 0) {
@@ -1331,9 +1330,9 @@ bool update_eva(char *request_content, struct backend_data_t *backend) {
         backend->evas[team].completed_DCU = true;
         backend->evas[team].completed_ROVER = true;
         backend->evas[team].completed_SPEC = true;
-        build_json_eva(&backend->evas[team], team, false);
-        build_json_eva(&backend->evas[team], team, true);
-        build_json_telemetry(&backend->evas[team], team, true);
+        build_json_eva_status(&backend->evas[team], team, false);
+        build_json_eva_status(&backend->evas[team], team, true);
+        build_json_eva_telemetry(&backend->evas[team], team, true);
         printf("Team %d Completed\n", team);
     } else if (strncmp(request_content, "pause_team=", strlen("pause_team=")) == 0) {
         // Pause the current EVA for team #
@@ -1343,7 +1342,7 @@ bool update_eva(char *request_content, struct backend_data_t *backend) {
             return false;
         }
         backend->evas[team].paused = true;
-        build_json_eva(&backend->evas[team], team, false);
+        build_json_eva_status(&backend->evas[team], team, false);
         printf("Team %d Paused\n", team);
     } else if (strncmp(request_content, "unpause_team=", strlen("unpause_team=")) == 0) {
         // Unpause the current EVA for team #
@@ -1434,7 +1433,7 @@ bool update_eva(char *request_content, struct backend_data_t *backend) {
 }
 
 // -------------------------- Telemetry --------------------------------
-bool build_json_telemetry(struct eva_data_t *eva, int team_index, bool completed) {
+bool build_json_eva_telemetry(struct eva_data_t *eva, int team_index, bool completed) {
     const char format_buffer[4096] =
         "\n{"
         "\n\t\"telemetry\": {"
@@ -1664,8 +1663,8 @@ bool update_pr_telemetry(char *request_content, struct backend_data_t *backend, 
         }
         memset(&backend->pr_sim[teamIndex], 0, sizeof(struct pr_sim_data_t));
         memset(&backend->p_rover[teamIndex], 0, sizeof(struct pr_data_t));
-        // reset_telemetry(&(backend->evas[team].eva1), 0.0f + team * 5000.0f);
-        // reset_telemetry(&(backend->evas[team].eva2), 1000.0f + team * 5000.0f);
+        // reset_eva_telemetry(&(backend->evas[team].eva1), 0.0f + team * 5000.0f);
+        // reset_eva_telemetry(&(backend->evas[team].eva2), 1000.0f + team * 5000.0f);
 
         reset_pr_telemetry(backend, teamIndex);
         backend->running_pr_sim = teamIndex;
@@ -1794,7 +1793,7 @@ bool update_pr_telemetry(char *request_content, struct backend_data_t *backend, 
     return true;
 }
 
-bool udp_get_telemetry(unsigned int command, unsigned int team_number, unsigned char *data) {
+bool udp_get_eva_telemetry(unsigned int command, unsigned int team_number, unsigned char *data) {
     int off_set = command - 63;
 
     char start_path[50] = "frontend/data/teams/";
@@ -1952,7 +1951,7 @@ bool udp_get_pr_telemetry(unsigned int command, unsigned char *data,
     return true;
 }
 
-bool udp_get_eva(unsigned int command, unsigned int team_number, unsigned char *data) {
+bool udp_get_eva_status(unsigned int command, unsigned int team_number, unsigned char *data) {
     int off_set = command - 108;
 
     char start_path[50] = "frontend/data/teams/";
@@ -2160,7 +2159,6 @@ void udp_post_pr_lidar(char *request, struct backend_data_t *backend, int receiv
 
     char *lidar = request + 8;
 
-    // printf("received bytes: %d\n", received_bytes);
     float firstOne = 0;
     bool b_endian = big_endian();
     memcpy(&firstOne, request + 8, 4);
@@ -2174,14 +2172,6 @@ void udp_post_pr_lidar(char *request, struct backend_data_t *backend, int receiv
         }
         memcpy(&backend->p_rover[backend->running_pr_sim].lidar[i], lidar + 4 * i, 4);
     }
-
-    // printf("lidar arr: ");
-    // for(int i = 0; i < total_floats; i++){
-    //     printf("%f, ", backend->p_rover[backend->running_pr_sim].lidar[i]);
-    // }
-    // printf("\n");
-
-    // printf("first: %f\n", backend->p_rover[backend->running_pr_sim].lidar[0]);
 }
 
 void udp_get_pr_lidar(char *lidar, struct backend_data_t *backend) {
@@ -2204,8 +2194,6 @@ void udp_get_pr_lidar(char *lidar, struct backend_data_t *backend) {
 
 // -------------------------- Update --------------------------------
 bool update_resource(char *request_content, struct backend_data_t *backend) {
-    // printf("request content: %s\n", request_content);
-
     if (strncmp(request_content, "uia_", 4) == 0) {
         request_content += 4;
         return update_uia(request_content, &(backend->uia));
@@ -2250,8 +2238,6 @@ bool update_resource(char *request_content, struct backend_data_t *backend) {
     return false;
 }
 
-// -------------------------- Legacy Simulation (Fallback Only) --------------------------------
-// These functions are kept for fallback when simulation engine is unavailable
 /**
  * Main simulation function that updates all backend telemetry data
  * @param backend Backend data structure containing all telemetry
@@ -2293,7 +2279,7 @@ void simulate_backend(struct backend_data_t *backend) {
                 }
 
                 // Update EVA Json
-                build_json_eva(&backend->evas[i], i, false);
+                build_json_eva_status(&backend->evas[i], i, false);
 
                 // Update telemetry from simulation engine
                 update_telemetry_from_simulation(&backend->evas[i].eva1, eva->total_time, backend,
@@ -2302,7 +2288,7 @@ void simulate_backend(struct backend_data_t *backend) {
                                                  false);
 
                 // Update Telemetry Json
-                build_json_telemetry(&backend->evas[i], i, false);
+                build_json_eva_telemetry(&backend->evas[i], i, false);
             }
 
             if (backend->running_pr_sim == i && !backend->pr_sim_paused) {
