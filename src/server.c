@@ -164,42 +164,6 @@ int main(int argc, char *argv[]) {
 
             get_contents(client->udp_request, &time, &command, data);
 
-            // if(!((command >= 1100 && command <= 1130) || command == 3000 || command == 0)) {
-            //  if((strcmp(get_client_udp_address(client), dust_ip) != 0)){
-            //      printf("Command: %d\n", command);
-
-            //     int client_index = get_client_index(client); //check if our client is new or not
-
-            //     if (!client) {
-            //         fprintf(stderr, "[ERROR] NULL client passed to rate_limit_required\n");
-            //     }
-
-            //     if(client_index == -1) { //case that client isnt stored yet
-
-            //         //add it to our list and then update its time
-            //         add_client(client);
-            //         update_client_time(client);
-
-            //     } else { //case that it is stored
-
-            //         set_dust_rate = (((command >= 1100 && command <= 1130) || command == 3000 ||
-            //         command == 0)) ? 0 : 1; //if we are getting a dust command we set the rate to
-            //         0, otherwise we set it to 1
-
-            //         if(rate_limit_required(client, set_dust_rate)) { //if we need to rate limit
-            //         we dont update the time
-
-            //             printf("Rate Limit hit\n");
-            //             continue; //this drops the udp message
-
-            //         } else {
-
-            //             //otherwise the client is able to send so we just update its' time
-            //             update_client_time(client);
-            //         }
-
-            //     }
-            // }
 
 #ifdef TESTING_MODE
             printf("\nNew datagram received.\n");

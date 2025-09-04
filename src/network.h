@@ -84,7 +84,6 @@ int compare_clients(struct client_info_t* client1, struct client_info_t* client2
 int get_client_index(struct client_info_t* client);
 int add_client(struct client_info_t* client);
 double update_client_time(struct client_info_t* client);
-int rate_limit_required(struct client_info_t* client, int dust_rate);
 struct client_info_t* get_recent_client(int index);
 
 ///////////////////////////////////////////////////////////////////////////////////

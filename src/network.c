@@ -1,30 +1,15 @@
-///////////////////////////////////////////////////////////////////////////////////
-//                                  Headers
-///////////////////////////////////////////////////////////////////////////////////
-
 #include "network.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// variables for rate limiting
 #define RECENT_CLIENT_CAPACITY 100
-#define RATE_LIMIT_THRESHOLD 0.00f
-#define RATE_LIMIT_THRESHOLD_DUST 0.00f  // seconds
 
-struct client_info_t *recent_clients[RECENT_CLIENT_CAPACITY] = {0};  // global circular buffer
-// pointers for buffer
+struct client_info_t *recent_clients[RECENT_CLIENT_CAPACITY] = {0};
 int lru_index = 0;
 int recent_client_size = 0;
 
-// struct profile_context_t {
-//     void* pInternal;
-// };
-
-///////////////////////////////////////////////////////////////////////////////////
-//                                 Clock Functions
-///////////////////////////////////////////////////////////////////////////////////
 
 void clock_setup(struct profile_context_t *ptContext) {
 #ifdef _WIN32
@@ -56,12 +41,8 @@ void clock_setup(struct profile_context_t *ptContext) {
 #endif
 }
 
-///////////////////////////////////////////////////////////////////////////////////
-//                                 Functions
-///////////////////////////////////////////////////////////////////////////////////
 
 void get_ip_address(char *hostname_out) {
-    // initialize default hostname
     memset(hostname_out, 0, 16);
     strcpy(hostname_out, "127.0.0.1");
 
@@ -76,8 +57,6 @@ void get_ip_address(char *hostname_out) {
         printf("Error allocating memory needed to call GetAdaptersinfo\n");
         return;
     }
-    // Make an initial call to GetAdaptersInfo to get
-    // the necessary size into the ulOutBufLen variable
     if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW) {
         free(pAdapterInfo);
         pAdapterInfo = (IP_ADAPTER_INFO *)malloc(ulOutBufLen);
@@ -105,29 +84,24 @@ void get_ip_address(char *hostname_out) {
         free(pAdapterInfo);
 
 #else
-    // Get all addresses
     struct ifaddrs *addresses;
     if (getifaddrs(&addresses) == -1) {
         printf("getifaddrs call failed\n");
         return;
     }
 
-    // Loop through addresses and find a non local host IP4 address
     struct ifaddrs *address = addresses;
     while (address) {
-        // skip if the address is NULL
         if (address->ifa_addr == NULL) {
             address = address->ifa_next;
             continue;
         }
 
-        // Check that it is IP4
         int family = address->ifa_addr->sa_family;
         if (family == AF_INET) {
             char ap[100];
             const int family_size = sizeof(struct sockaddr_in);
             getnameinfo(address->ifa_addr, family_size, ap, sizeof(ap), 0, 0, NI_NUMERICHOST);
-            // Check that it isn't local host
             if (strcmp(ap, "127.0.0.1") != 0) {
                 memset(hostname_out, 0, 16);
                 strcpy(hostname_out, ap);
@@ -261,16 +235,12 @@ struct client_info_t *get_client(struct client_info_t **clients, SOCKET socket) 
         exit(1);
     }
 
-    // Set struct to zero, this is mainly for the char request buffer (since 0 is the NULL
-    // Terminator)
     memset(new_client, 0, sizeof(struct client_info_t));
 
-    // Initialize local variables
     new_client->address_length = sizeof(new_client->address);
     new_client->received = 0;
     new_client->message_size = -1;
 
-    // Push to clients list
     new_client->next = *clients;
     *clients = new_client;
 
@@ -336,7 +306,6 @@ fd_set wait_on_clients(struct client_info_t *clients, SOCKET server, SOCKET udp_
     FD_SET(udp_socket, &reads);
     SOCKET max_socket = server > udp_socket ? server : udp_socket;
 
-    // Push all the clients to reads
     struct client_info_t *client = clients;
     while (client) {
         FD_SET(client->socket, &reads);
@@ -346,8 +315,6 @@ fd_set wait_on_clients(struct client_info_t *clients, SOCKET server, SOCKET udp_
         client = client->next;
     }
 
-    // Wait on sockets
-    // printf("This select. \n");
     if (select(max_socket + 1, &reads, 0, 0, &select_wait) < 0) {
         fprintf(stderr, "select() failed with error: %d", GETSOCKETERRNO());
         exit(1);
@@ -416,7 +383,6 @@ void serve_resource(struct client_info_t *client, const char *path) {
     char full_path[128];
     sprintf(full_path, "frontend%s", path);
 
-// Swap '/' to '\' on Windows
 #if defined(_WIN32)
     char *p = full_path;
     while (*p) {
@@ -427,16 +393,13 @@ void serve_resource(struct client_info_t *client, const char *path) {
     }
 #endif
 
-    // Get the requested file
     FILE *fp = fopen(full_path, "rb");
 
-    // if not found
     if (!fp) {
         send_404(client);
         return;
     }
 
-    // if found
     fseek(fp, 0L, SEEK_END);
     size_t content_length = ftell(fp);
     rewind(fp);
@@ -447,7 +410,6 @@ void serve_resource(struct client_info_t *client, const char *path) {
 
     char content_buffer[BSIZE];
 
-    // Send Header
     sprintf(content_buffer, "HTTP/1.1 200 OK\r\n");
     send(client->socket, content_buffer, strlen(content_buffer), 0);
 
@@ -463,25 +425,21 @@ void serve_resource(struct client_info_t *client, const char *path) {
     sprintf(content_buffer, "\r\n");
     send(client->socket, content_buffer, strlen(content_buffer), 0);
 
-    // Send Content
     int bytes_read = fread(content_buffer, 1, BSIZE, fp);
     while (bytes_read) {
         send(client->socket, content_buffer, bytes_read, 0);
         bytes_read = fread(content_buffer, 1, BSIZE, fp);
     }
 
-    // Clean up
     fclose(fp);
 }
 
-/*Makes a copy of a client info struct*/
 struct client_info_t *client_constructor(struct client_info_t *client) {
     if (!client) {
         return NULL;
     }
     struct client_info_t *new_client = malloc(sizeof(struct client_info_t));
 
-    // copy variables
     new_client->last_request_time = client->last_request_time;
     new_client->address_length = client->address_length;
     new_client->address = client->address;
@@ -490,68 +448,46 @@ struct client_info_t *client_constructor(struct client_info_t *client) {
     new_client->received = client->received;
     new_client->message_size = client->message_size;
 
-    // copy arrays
     memcpy(new_client->request, client->request, MAX_REQUEST_SIZE + 1);
     memcpy(new_client->udp_request, client->udp_request, MAX_UDP_REQUEST_SIZE);
 
-    // //copy timestruct
-    // if(client->ts) { //check that timespec exists before we allocate variables
-    //     new_client->ts = malloc(sizeof(struct timespec));
-    //     new_client->ts->tv_nsec = client->ts->tv_nsec;
-    //     new_client->ts->tv_sec = client->ts->tv_sec;
-    // } else {
-    //     new_client->ts = NULL;
-    // }
 
-    // next isnt used in the context of rate limiting but setting it just in case
     new_client->next = client->next;
 
     return new_client;
 }
 
-/*Returns whether or not 2 clients are the same,
-right now the code just checks whether or not
-sockets use the same IP, this can be changed tho*/
 int compare_clients(struct client_info_t *client1, struct client_info_t *client2) {
     if (!client1 || !client2) {
         return 0;
     }
 
     if (client1->udp_addr.sin_family != client2->udp_addr.sin_family) {
-        // if one is ipv4 and the other is ipv6 they are not the same
         return 0;
     }
 
-    if (client1->udp_addr.sin_family == AF_INET) {  // checks if both clients are IPV4
-
-        // special struct just for ipv4
+    if (client1->udp_addr.sin_family == AF_INET) {
         struct sockaddr_in *addr1 = (struct sockaddr_in *)&client1->udp_addr;
         struct sockaddr_in *addr2 = (struct sockaddr_in *)&client2->udp_addr;
 
-        // compare ipv4 addresses
 
         if (addr1->sin_addr.s_addr == addr2->sin_addr.s_addr) {
             return 1;
         }
 
-        // check if theyre same on 127.0.0.1
         if (addr1->sin_addr.s_addr == htonl(INADDR_LOOPBACK) ||
             addr2->sin_addr.s_addr == htonl(INADDR_LOOPBACK)) {
             return 1;
         }
 
-    } else if (client1->udp_addr.sin_family == AF_INET6) {  // both must be IPV6
-
-        // special struct just for ipv6
+    } else if (client1->udp_addr.sin_family == AF_INET6) {
         struct sockaddr_in6 *addr1 = (struct sockaddr_in6 *)&client1->udp_addr;
         struct sockaddr_in6 *addr2 = (struct sockaddr_in6 *)&client2->udp_addr;
 
-        // now we compare ipv6
         if (!memcmp(&addr1->sin6_addr, &addr2->sin6_addr, sizeof(struct in6_addr))) {
             return 1;
         }
 
-        // check 127.0.0.1
         struct in6_addr loopback = IN6ADDR_LOOPBACK_INIT;
         if (!memcmp(&addr1->sin6_addr, &loopback, sizeof(loopback)) ||
             !memcmp(&addr2->sin6_addr, &loopback, sizeof(loopback))) {
@@ -561,31 +497,22 @@ int compare_clients(struct client_info_t *client1, struct client_info_t *client2
     return 0;
 }
 
-/* Returns index in recent_clients array if the client is already there
-/* or -1 otherwise
-*/
 int get_client_index(struct client_info_t *client) {
-    // if its null it doesnt exist
     if (!client) {
         return -1;
     }
 
-    // goes through every client in our list
     for (int i = 0; i < recent_client_size; i++) {
         if (compare_clients(recent_clients[i], client)) {
-            // if they're the same we return the index at which its found
             return i;
         }
     }
-    // otherwise we return -1 as an indicator that it wasnt found ):
     return -1;
 }
 
-/*This function adds a client to the recent clients buffer and returns whether or not it
-was successfull*/
 int add_client(struct client_info_t *client) {
     if (!client)
-        return 0;  // null check first
+        return 0;
 
     double time_now = get_wall_clock(&profile_context);
     struct client_info_t *new_client = client_constructor(client);
@@ -602,7 +529,6 @@ int add_client(struct client_info_t *client) {
     return 1;
 }
 
-/*Updates client time to new time (cause they just sent another message) and returns new time*/
 double update_client_time(struct client_info_t *client) {
     if (!client)
         return -1;
@@ -617,24 +543,6 @@ double update_client_time(struct client_info_t *client) {
     }
 
     return time_now;
-}
-
-// returns whether or not the client has sent a message within last threshold
-int rate_limit_required(struct client_info_t *client, int dust_rate) {
-    float rate = (dust_rate == 0) ? RATE_LIMIT_THRESHOLD_DUST : RATE_LIMIT_THRESHOLD;  // seconds
-
-    // printf("rate limit: %f\n", rate);
-    double time_now = get_wall_clock(&profile_context);
-    int idx = get_client_index(client);
-    if (idx == -1) {
-        printf("client not found in recent_clients\n");
-        return 0;
-    }
-
-    double last = recent_clients[idx]->last_request_time;
-    double diff = time_now - last;
-
-    return diff <= rate;
 }
 
 struct client_info_t *get_recent_client(int index) {
