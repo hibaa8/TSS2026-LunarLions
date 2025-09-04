@@ -9,9 +9,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Implements sine wave algorithm for oscillating values.
- * Generates values that oscillate in a sine wave pattern over time.
- * Parameters: base_value, amplitude, frequency, phase_offset (optional)
+ * Sine wave algorithm for oscillating values.
  * 
  * @param field Pointer to the field containing algorithm parameters
  * @param current_time Current simulation time in seconds
@@ -22,7 +20,7 @@ sim_value_t sim_algo_sine_wave(sim_field_t* field, float current_time) {
     
     if (!field || !field->params) return result;
     
-    // Get parameters
+    // Get parameters for the sine wave calculation
     cJSON* base_value = cJSON_GetObjectItem(field->params, "base_value");
     cJSON* amplitude = cJSON_GetObjectItem(field->params, "amplitude");
     cJSON* frequency = cJSON_GetObjectItem(field->params, "frequency");
@@ -45,18 +43,14 @@ sim_value_t sim_algo_sine_wave(sim_field_t* field, float current_time) {
         case SIM_TYPE_INT:
             result.i = (int)roundf(sine_value);
             break;
-        case SIM_TYPE_BOOL:
-            result.b = sine_value > base;
-            break;
     }
     
     return result;
 }
 
 /**
- * Implements linear decay algorithm for decreasing values over time.
+ * Llinear decay algorithm for decreasing values over time.
  * Values decrease linearly from start_value to end_value over duration_seconds.
- * Parameters: start_value, end_value, duration_seconds
  * 
  * @param field Pointer to the field containing algorithm parameters
  * @param current_time Current simulation time in seconds
@@ -95,18 +89,14 @@ sim_value_t sim_algo_linear_decay(sim_field_t* field, float current_time) {
         case SIM_TYPE_INT:
             result.i = (int)roundf(current_value);
             break;
-        case SIM_TYPE_BOOL:
-            result.b = current_value > ((start_val + end_val) * 0.5f);
-            break;
     }
     
     return result;
 }
 
 /**
- * Implements linear growth algorithm for increasing values over time.
+ * Linear growth algorithm for increasing values over time.
  * Values increase linearly from start_value at growth_rate per second.
- * Parameters: start_value (optional, default 0), growth_rate, max_value (optional)
  * 
  * @param field Pointer to the field containing algorithm parameters
  * @param current_time Current simulation time in seconds
@@ -143,9 +133,6 @@ sim_value_t sim_algo_linear_growth(sim_field_t* field, float current_time) {
         case SIM_TYPE_INT:
             result.i = (int)roundf(current_value);
             break;
-        case SIM_TYPE_BOOL:
-            result.b = current_value > start_val;
-            break;
     }
     
     return result;
@@ -154,7 +141,6 @@ sim_value_t sim_algo_linear_growth(sim_field_t* field, float current_time) {
 /**
  * Implements dependent value algorithm for fields calculated from other fields.
  * Evaluates a mathematical formula using values from other fields as inputs.
- * Parameters: formula (string expression), depends_on (array of field names)
  * 
  * @param field Pointer to the field containing algorithm parameters
  * @param current_time Current simulation time in seconds (unused for dependent values)
@@ -183,9 +169,6 @@ sim_value_t sim_algo_dependent_value(sim_field_t* field, float current_time, sim
             break;
         case SIM_TYPE_INT:
             result.i = (int)roundf(calculated_value);
-            break;
-        case SIM_TYPE_BOOL:
-            result.b = calculated_value > 0.0f;
             break;
     }
     
@@ -363,7 +346,7 @@ sim_algorithm_type_t sim_algo_parse_type_string(const char* algo_string) {
         return SIM_ALGO_DEPENDENT_VALUE;
     }
     
-    return SIM_ALGO_SINE_WAVE;  // Default
+    return SIM_ALGO_SINE_WAVE;  // Default algorithm
 }
 
 /**

@@ -96,7 +96,7 @@ void handle_udp_get_request(unsigned int command, unsigned char *data,
 void handle_udp_post_request(unsigned int command, char *data, char *request,
                              struct backend_data_t *backend, int received_bytes) {
     if (command < 1103) {
-        printf("Not yet implemented.\n");  // TODO: what does this mean?
+        printf("Not yet implemented.\n");  // TODO: add the heating and other commands
     } else if (command < 1131) {
         if (command == 1130) {
             udp_post_pr_lidar(request, backend, received_bytes);
@@ -1474,7 +1474,7 @@ bool build_json_eva_telemetry(struct eva_data_t *eva, int team_index, bool compl
         "\n\t\t\t\"oxy_consumption\": %f,"
         "\n\t\t\t\"co2_production\": %f,"
         "\n\t\t\t\"suit_pressure_oxy\": %f,"
-        "\n\t\t\t\"suit_pressure_cO2\": %f,"
+        "\n\t\t\t\"suit_pressure_co2\": %f,"
         "\n\t\t\t\"suit_pressure_other\": %f,"
         "\n\t\t\t\"suit_pressure_total\": %f,"
         "\n\t\t\t\"fan_pri_rpm\": %f,"
@@ -2365,26 +2365,36 @@ bool update_telemetry_from_simulation(struct telemetry_data_t *telemetry, uint32
         sim_engine_get_field_value(backend->sim_engine, "oxy_consumption");
     sim_value_t co2_production = sim_engine_get_field_value(backend->sim_engine, "co2_production");
     sim_value_t temperature = sim_engine_get_field_value(backend->sim_engine, "temperature");
-    sim_value_t batt_time = sim_engine_get_field_value(backend->sim_engine, "batt_time");
-    sim_value_t oxy_pri_tank_fill =
-        sim_engine_get_field_value(backend->sim_engine, "oxy_pri_tank_fill");
-    sim_value_t oxy_sec_tank_fill =
-        sim_engine_get_field_value(backend->sim_engine, "oxy_sec_tank_fill");
+    sim_value_t batt_time = sim_engine_get_field_value(backend->sim_engine, "batt_time_left");
+    sim_value_t oxy_pri_storage =
+        sim_engine_get_field_value(backend->sim_engine, "oxy_pri_storage");
+    sim_value_t oxy_sec_storage =
+        sim_engine_get_field_value(backend->sim_engine, "oxy_sec_storage");
+    sim_value_t oxy_pri_pressure =
+        sim_engine_get_field_value(backend->sim_engine, "oxy_pri_pressure");
+    sim_value_t oxy_sec_pressure =
+        sim_engine_get_field_value(backend->sim_engine, "oxy_sec_pressure");
     sim_value_t fan_pri_rpm = sim_engine_get_field_value(backend->sim_engine, "fan_pri_rpm");
     sim_value_t fan_sec_rpm = sim_engine_get_field_value(backend->sim_engine, "fan_sec_rpm");
-    sim_value_t coolant_tank = sim_engine_get_field_value(backend->sim_engine, "coolant_tank");
-    sim_value_t helmet_co2_pressure =
-        sim_engine_get_field_value(backend->sim_engine, "helmet_co2_pressure");
-    sim_value_t scrubber_A_co2_captured =
-        sim_engine_get_field_value(backend->sim_engine, "scrubber_A_co2_captured");
-    sim_value_t scrubber_B_co2_captured =
-        sim_engine_get_field_value(backend->sim_engine, "scrubber_B_co2_captured");
-    sim_value_t suit_oxy_pressure =
-        sim_engine_get_field_value(backend->sim_engine, "suit_oxy_pressure");
-    sim_value_t suit_co2_pressure =
-        sim_engine_get_field_value(backend->sim_engine, "suit_co2_pressure");
-    sim_value_t suit_other_pressure =
-        sim_engine_get_field_value(backend->sim_engine, "suit_other_pressure");
+    sim_value_t coolant_ml = sim_engine_get_field_value(backend->sim_engine, "coolant_ml");
+    sim_value_t coolant_gas_pressure =
+        sim_engine_get_field_value(backend->sim_engine, "coolant_gas_pressure");
+    sim_value_t coolant_liquid_pressure =
+        sim_engine_get_field_value(backend->sim_engine, "coolant_liquid_pressure");
+    sim_value_t helmet_pressure_co2 =
+        sim_engine_get_field_value(backend->sim_engine, "helmet_pressure_co2");
+    sim_value_t scrubber_a_co2_storage =
+        sim_engine_get_field_value(backend->sim_engine, "scrubber_a_co2_storage");
+    sim_value_t scrubber_b_co2_storage =
+        sim_engine_get_field_value(backend->sim_engine, "scrubber_b_co2_storage");
+    sim_value_t suit_pressure_oxy =
+        sim_engine_get_field_value(backend->sim_engine, "suit_pressure_oxy");
+    sim_value_t suit_pressure_co2 =
+        sim_engine_get_field_value(backend->sim_engine, "suit_pressure_co2");
+    sim_value_t suit_pressure_other =
+        sim_engine_get_field_value(backend->sim_engine, "suit_pressure_other");
+    sim_value_t suit_pressure_total =
+        sim_engine_get_field_value(backend->sim_engine, "suit_pressure_total");
 
     // Apply simulated values
     telemetry->heart_rate = heart_rate.f;
@@ -2392,31 +2402,24 @@ bool update_telemetry_from_simulation(struct telemetry_data_t *telemetry, uint32
     telemetry->co2_production = co2_production.f;
     telemetry->temperature = temperature.f;
     telemetry->batt_time = batt_time.f;
-    telemetry->oxy_pri_tank_fill = oxy_pri_tank_fill.f;
-    telemetry->oxy_sec_tank_fill = oxy_sec_tank_fill.f;
+    telemetry->oxy_pri_tank_fill = oxy_pri_storage.f;
+    telemetry->oxy_sec_tank_fill = oxy_sec_storage.f;
+    telemetry->oxy_pri_tank_pressure = oxy_pri_pressure.f;
+    telemetry->oxy_sec_tank_pressure = oxy_sec_pressure.f;
     telemetry->fan_pri_rpm = fan_pri_rpm.f;
     telemetry->fan_sec_rpm = fan_sec_rpm.f;
-    telemetry->coolant_tank = coolant_tank.f;
-    telemetry->helmet_co2_pressure = helmet_co2_pressure.f;
-    telemetry->scrubber_A_co2_captured = scrubber_A_co2_captured.f;
-    telemetry->scrubber_B_co2_captured = scrubber_B_co2_captured.f;
-    telemetry->suit_oxy_pressure = suit_oxy_pressure.f;
-    telemetry->suit_co2_pressure = suit_co2_pressure.f;
-    telemetry->suit_other_pressure = suit_other_pressure.f;
+    telemetry->coolant_tank = coolant_ml.f;
+    telemetry->coolant_gaseous_pressure = coolant_gas_pressure.f;
+    telemetry->coolant_liquid_pressure = coolant_liquid_pressure.f;
+    telemetry->helmet_co2_pressure = helmet_pressure_co2.f;
+    telemetry->scrubber_A_co2_captured = scrubber_a_co2_storage.f;
+    telemetry->scrubber_B_co2_captured = scrubber_b_co2_storage.f;
+    telemetry->suit_oxy_pressure = suit_pressure_oxy.f;
+    telemetry->suit_co2_pressure = suit_pressure_co2.f;
+    telemetry->suit_other_pressure = suit_pressure_other.f;
 
-    // Calculate dependent values (same logic as original)
-    telemetry->oxy_pri_tank_pressure =
-        telemetry->oxy_pri_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-    telemetry->oxy_sec_tank_pressure =
-        telemetry->oxy_sec_tank_fill / OXY_TIME_CAP * OXY_PRESSURE_CAP;
-
-    // Calculate coolant pressures (same logic as original)
-    float total_coolant_pressure = telemetry->coolant_tank / 100.0f * telemetry->temperature /
-                                   SUIT_COOLANT_NOMINAL_TEMP * SUIT_COOLANT_NOMINAL_PRESSURE;
-    telemetry->coolant_gaseous_pressure =
-        fmin(fmax((telemetry->temperature - 80.0f) / 10.0f, 0.0f), 1.0f) * total_coolant_pressure;
-    telemetry->coolant_liquid_pressure =
-        total_coolant_pressure - telemetry->coolant_gaseous_pressure;
+    // Note: Pressure values are now retrieved directly from simulation engine
+    // No additional calculations needed as simulation handles all pressure dependencies
 
     // Apply switch-based modifications (preserving original control logic)
 
@@ -2575,14 +2578,6 @@ bool update_pr_telemetry_from_simulation(struct pr_data_t *p_rover, uint32_t ser
 
     // Increment mission time
     p_rover->mission_elapsed_time += 1;
-
-    // NOTE: Unreal Engine values are preserved:
-    // - current_pos_x, current_pos_y, current_pos_alt
-    // - heading, pitch, roll
-    // - speed, distance_traveled
-    // - surface_incline, in_sunlight
-    // - lidar array
-    // These should continue to be updated by Unreal Engine communication
 
     return true;
 }

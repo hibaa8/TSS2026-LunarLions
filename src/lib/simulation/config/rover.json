@@ -1,54 +1,6 @@
 {
   "component_name": "rover",
   "fields": {
-    "ac_heating": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.3,
-      "amplitude": 0.3,
-      "frequency": 0.002
-    },
-    "ac_cooling": {
-      "type": "bool",
-      "algorithm": "dependent_value",
-      "formula": "cabin_temperature - 24.0",
-      "depends_on": ["cabin_temperature"]
-    },
-    "co2_scrubber": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.8,
-      "amplitude": 0.2,
-      "frequency": 0.001
-    },
-    "lights_on": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.6,
-      "amplitude": 0.4,
-      "frequency": 0.003
-    },
-    "internal_lights_on": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.9,
-      "amplitude": 0.1,
-      "frequency": 0.0005
-    },
-    "brakes": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.1,
-      "amplitude": 0.1,
-      "frequency": 0.05
-    },
-    "in_sunlight": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.7,
-      "amplitude": 0.3,
-      "frequency": 0.0001
-    },
     "throttle": {
       "type": "float",
       "algorithm": "sine_wave",
@@ -62,20 +14,6 @@
       "base_value": 0.0,
       "amplitude": 0.8,
       "frequency": 0.015
-    },
-    "current_pos_x": {
-      "type": "float",
-      "algorithm": "linear_growth",
-      "start_value": 0.0,
-      "growth_rate": 2.5,
-      "max_value": 10000.0
-    },
-    "current_pos_y": {
-      "type": "float",
-      "algorithm": "linear_growth",
-      "start_value": 0.0,
-      "growth_rate": 1.8,
-      "max_value": 8000.0
     },
     "current_pos_alt": {
       "type": "float",
@@ -129,7 +67,7 @@
       "algorithm": "linear_decay",
       "start_value": 100.0,
       "end_value": 20.0,
-      "duration_seconds": 14400.0
+      "duration_seconds": 675.0
     },
     "oxygen_pressure": {
       "type": "float",
@@ -142,14 +80,7 @@
       "algorithm": "linear_decay",
       "start_value": 21.0,
       "end_value": 16.0,
-      "duration_seconds": 18000.0
-    },
-    "fan_pri": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.85,
-      "amplitude": 0.15,
-      "frequency": 0.001
+      "duration_seconds": 843.0
     },
     "ac_fan_pri": {
       "type": "float",
@@ -183,7 +114,7 @@
       "algorithm": "linear_decay",
       "start_value": 100.0,
       "end_value": 5.0,
-      "duration_seconds": 28800.0
+      "duration_seconds": 1350.0
     },
     "power_consumption_rate": {
       "type": "float",
@@ -200,9 +131,9 @@
     "external_temp": {
       "type": "float",
       "algorithm": "sine_wave",
-      "base_value": -30.0,
-      "amplitude": 100.0,
-      "frequency": 0.0002
+      "base_value": 0.0,
+      "amplitude": 250.0,
+      "frequency": 0.0008
     },
     "pr_coolant_level": {
       "type": "float",
@@ -254,28 +185,9 @@
     "mission_planned_time": {
       "type": "float",
       "algorithm": "linear_decay",
-      "start_value": 28800.0,
+      "start_value": 1350.0,
       "end_value": 0.0,
-      "duration_seconds": 28800.0
-    },
-    "point_of_no_return": {
-      "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "distance_traveled * 0.6",
-      "depends_on": ["distance_traveled"]
-    },
-    "distance_from_base": {
-      "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "current_pos_x * current_pos_x + current_pos_y * current_pos_y",
-      "depends_on": ["current_pos_x", "current_pos_y"]
-    },
-    "switch_dest": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.1,
-      "amplitude": 0.1,
-      "frequency": 0.0008
+      "duration_seconds": 1350.0
     },
     "dest_x": {
       "type": "float",
@@ -297,46 +209,6 @@
       "base_value": 150.0,
       "amplitude": 50.0,
       "frequency": 0.0002
-    },
-    "dust_wiper": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.05,
-      "amplitude": 0.05,
-      "frequency": 0.002
-    },
-    "sim_running": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.9,
-      "amplitude": 0.1,
-      "frequency": 0.0001
-    },
-    "sim_paused": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.05,
-      "amplitude": 0.05,
-      "frequency": 0.001
-    },
-    "sim_completed": {
-      "type": "bool",
-      "algorithm": "sine_wave",
-      "base_value": 0.01,
-      "amplitude": 0.01,
-      "frequency": 0.0001
-    },
-    "latitude": {
-      "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "current_pos_y * 0.00001 + 28.5",
-      "depends_on": ["current_pos_y"]
-    },
-    "longitude": {
-      "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "current_pos_x * 0.00001 - 80.5",
-      "depends_on": ["current_pos_x"]
     }
   }
 }

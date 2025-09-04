@@ -14,8 +14,7 @@
 
 typedef enum {
     SIM_TYPE_FLOAT,
-    SIM_TYPE_INT, 
-    SIM_TYPE_BOOL
+    SIM_TYPE_INT
 } sim_field_type_t;
 
 typedef enum {
@@ -28,7 +27,6 @@ typedef enum {
 typedef union {
     float f;
     int i;
-    bool b;
 } sim_value_t;
 
 typedef struct {
@@ -84,15 +82,11 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
 // Simulation control
 bool sim_engine_initialize(sim_engine_t* engine);
 void sim_engine_update(sim_engine_t* engine, float delta_time);
-void sim_engine_reset(sim_engine_t* engine);
 
 // Field access
 sim_value_t sim_engine_get_field_value(sim_engine_t* engine, const char* field_name);
-sim_value_t sim_engine_get_component_field_value(sim_engine_t* engine, const char* component_name, const char* field_name);
-bool sim_engine_set_field_value(sim_engine_t* engine, const char* field_name, sim_value_t value);
 
 // Utility functions
 sim_field_t* sim_engine_find_field(sim_engine_t* engine, const char* field_name);
-void sim_engine_print_status(sim_engine_t* engine);
 
 #endif // SIM_ENGINE_H

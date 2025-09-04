@@ -84,6 +84,7 @@ bool sim_engine_load_predefined_configs(sim_engine_t* engine) {
     if (!engine) return false;
     
     // Predefined list of configuration files to load
+    // @TODO can generalize this more in some way?
     const char* config_files[] = {
         "src/lib/simulation/config/eva.json",
         "src/lib/simulation/config/rover.json"
@@ -209,8 +210,6 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
                 field->type = SIM_TYPE_FLOAT;
             } else if (strcmp(type_str, "int") == 0) {
                 field->type = SIM_TYPE_INT;
-            } else if (strcmp(type_str, "bool") == 0) {
-                field->type = SIM_TYPE_BOOL;
             } else {
                 field->type = SIM_TYPE_FLOAT;  // Default
             }
@@ -254,7 +253,7 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
 ///////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Checks if a field has any unresolved dependencies.
+ * Checks if a field has any unresolved dependencies that do not exist in the config files.
  * 
  * @param field The field to check for dependencies
  * @param resolved_fields Array of fields that have already been resolved
@@ -438,29 +437,6 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
     engine->last_update_time = engine->simulation_time;
 }
 
-/**
- * Resets the simulation engine to its initial state.
- * Resets simulation time to zero and marks all fields as uninitialized.
- * 
- * @param engine Pointer to the simulation engine
- */
-void sim_engine_reset(sim_engine_t* engine) {
-    if (!engine) return;
-    
-    engine->simulation_time = 0.0f;
-    engine->last_update_time = 0.0f;
-    engine->initialized = false;
-    
-    // Reset all field states
-    for (int i = 0; i < engine->component_count; i++) {
-        for (int j = 0; j < engine->components[i].field_count; j++) {
-            sim_field_t* field = &engine->components[i].fields[j];
-            field->initialized = false;
-            field->start_time = 0.0f;
-        }
-    }
-}
-
 ///////////////////////////////////////////////////////////////////////////////////
 //                              Field Access
 ///////////////////////////////////////////////////////////////////////////////////
@@ -501,83 +477,4 @@ sim_value_t sim_engine_get_field_value(sim_engine_t* engine, const char* field_n
     if (!field) return empty;
     
     return field->current_value;
-}
-
-/**
- * Gets the current value of a field by component name and field name.
- * 
- * @param engine Pointer to the simulation engine
- * @param component_name Name of the component containing the field
- * @param field_name Name of the field to get the value for
- * @return The current value of the field, or a zero-initialized value if not found
- */
-sim_value_t sim_engine_get_component_field_value(sim_engine_t* engine, const char* component_name, const char* field_name) {
-    sim_value_t empty = {0};
-    
-    if (!engine || !component_name || !field_name) return empty;
-    
-    for (int i = 0; i < engine->component_count; i++) {
-        if (strcmp(engine->components[i].component_name, component_name) == 0) {
-            for (int j = 0; j < engine->components[i].field_count; j++) {
-                if (strcmp(engine->components[i].fields[j].field_name, field_name) == 0) {
-                    return engine->components[i].fields[j].current_value;
-                }
-            }
-        }
-    }
-    
-    return empty;
-}
-
-/**
- * Sets the current value of a field by name.
- * 
- * @param engine Pointer to the simulation engine
- * @param field_name Name of the field to set the value for
- * @param value New value to set for the field
- * @return true if the value was set successfully, false if field not found
- */
-bool sim_engine_set_field_value(sim_engine_t* engine, const char* field_name, sim_value_t value) {
-    sim_field_t* field = sim_engine_find_field(engine, field_name);
-    if (!field) return false;
-    
-    field->current_value = value;
-    return true;
-}
-
-/**
- * Prints detailed status information about the simulation engine.
- * Displays component count, field count, initialization status, and current field values.
- * Useful for debugging and monitoring simulation state.
- * 
- * @param engine Pointer to the simulation engine
- */
-void sim_engine_print_status(sim_engine_t* engine) {
-    if (!engine) return;
-    
-    printf("=== Simulation Engine Status ===\n");
-    printf("Simulation Time: %.2f seconds\n", engine->simulation_time);
-    printf("Components: %d\n", engine->component_count);
-    printf("Total Fields: %d\n", engine->total_field_count);
-    printf("Initialized: %s\n", engine->initialized ? "Yes" : "No");
-    
-    printf("\nFields by Update Order:\n");
-    for (int i = 0; i < engine->total_field_count; i++) {
-        sim_field_t* field = engine->update_order[i];
-        printf("  %d. %s.%s (%s) = ", i+1, field->component_name, field->field_name, 
-               sim_algo_type_to_string(field->algorithm));
-        
-        switch (field->type) {
-            case SIM_TYPE_FLOAT:
-                printf("%.3f\n", field->current_value.f);
-                break;
-            case SIM_TYPE_INT:
-                printf("%d\n", field->current_value.i);
-                break;
-            case SIM_TYPE_BOOL:
-                printf("%s\n", field->current_value.b ? "true" : "false");
-                break;
-        }
-    }
-    printf("\n");
 }

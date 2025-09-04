@@ -37,7 +37,7 @@
 			"oxy_consumption": 0.000000,
 			"co2_production": 0.000000,
 			"suit_pressure_oxy": 3.072300,
-			"suit_pressure_cO2": 0.005900,
+			"suit_pressure_co2": 0.005900,
 			"suit_pressure_other": 11.554200,
 			"suit_pressure_total": 14.632401,
 			"fan_pri_rpm": 0.000000,
