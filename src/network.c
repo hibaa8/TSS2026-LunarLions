@@ -1,16 +1,16 @@
+// network.c - handles all socket operations, HTTP server functionality
+
 #include "network.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define RECENT_CLIENT_CAPACITY 100
-
-struct client_info_t *recent_clients[RECENT_CLIENT_CAPACITY] = {0};
-int lru_index = 0;
-int recent_client_size = 0;
-
-
+/**
+ * Initializes high-precision timing for the given platform.
+ * Sets up performance counters on Windows, monotonic clock on Linux,
+ * and uptime clock on macOS for accurate time measurements.
+ */
 void clock_setup(struct profile_context_t *ptContext) {
 #ifdef _WIN32
     static LARGE_INTEGER perf_freq;
@@ -42,7 +42,18 @@ void clock_setup(struct profile_context_t *ptContext) {
 }
 
 
+/**
+ * Discovers the first non-loopback IP address of the local machine.
+ * Falls back to 127.0.0.1 if no network interface is found.
+ * 
+ * @param hostname_out Buffer to store the IP address (minimum 16 bytes)
+ */
 void get_ip_address(char *hostname_out) {
+    if (!hostname_out) {
+        fprintf(stderr, "get_ip_address: hostname_out is NULL\n");
+        return;
+    }
+    
     memset(hostname_out, 0, 16);
     strcpy(hostname_out, "127.0.0.1");
 
@@ -54,14 +65,14 @@ void get_ip_address(char *hostname_out) {
     ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
     pAdapterInfo = (IP_ADAPTER_INFO *)malloc(sizeof(IP_ADAPTER_INFO));
     if (pAdapterInfo == NULL) {
-        printf("Error allocating memory needed to call GetAdaptersinfo\n");
+        fprintf(stderr, "Error allocating memory needed to call GetAdaptersinfo\n");
         return;
     }
     if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW) {
         free(pAdapterInfo);
         pAdapterInfo = (IP_ADAPTER_INFO *)malloc(ulOutBufLen);
         if (pAdapterInfo == NULL) {
-            printf("Error allocating memory needed to call GetAdaptersinfo\n");
+            fprintf(stderr, "Error allocating memory needed to call GetAdaptersinfo\n");
             return;
         }
     }
@@ -113,7 +124,18 @@ void get_ip_address(char *hostname_out) {
 #endif
 }
 
+/**
+ * Determines the MIME content type based on file extension.
+ * Used for HTTP responses to set proper Content-Type headers.
+ * 
+ * @param path File path with extension
+ * @return MIME type string, defaults to "application/octet-stream"
+ */
 const char *get_content_type(const char *path) {
+    if (!path) {
+        return "application/octet-stream";
+    }
+    
     const char *last_dot = strstr(path, ".");
     if (last_dot) {
         if (strcmp(last_dot, ".css") == 0)
@@ -149,6 +171,14 @@ const char *get_content_type(const char *path) {
     return "application/octet-stream";
 }
 
+/**
+ * Creates and binds a UDP socket for datagram communication.
+ * Used for real-time telemetry data exchange with clients.
+ * 
+ * @param hostname IP address to bind to
+ * @param port Port number to bind to
+ * @return Socket descriptor, or -1 on failure
+ */
 SOCKET create_udp_socket(char *hostname, char *port) {
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
@@ -176,7 +206,15 @@ SOCKET create_udp_socket(char *hostname, char *port) {
     return server_socket;
 }
 
-SOCKET create_socket(char *hostname, char *port) {
+/**
+ * Creates and configures a TCP listening socket for HTTP connections.
+ * Sets up socket options for reuse and begins listening for connections.
+ * 
+ * @param hostname IP address to bind to
+ * @param port Port number to bind to  
+ * @return Socket descriptor, exits on failure
+ */
+SOCKET create_tcp_socket(char *hostname, char *port) {
     printf("Configuring Local Address...\n");
     struct addrinfo hints;
     memset(&hints, 0, sizeof(struct addrinfo));
@@ -198,6 +236,7 @@ SOCKET create_socket(char *hostname, char *port) {
         exit(1);
     }
 
+    // Enable socket reuse to avoid "Address already in use" errors
     char c = 1;
     setsockopt(socket_listen, SOL_SOCKET, SO_REUSEADDR, &c, sizeof(int));
 
@@ -218,6 +257,14 @@ SOCKET create_socket(char *hostname, char *port) {
     return socket_listen;
 }
 
+/**
+ * Finds an existing client by socket or creates a new client entry.
+ * Maintains a linked list of active client connections.
+ * 
+ * @param clients Pointer to head of client list
+ * @param socket Socket descriptor to search for
+ * @return Client structure, newly allocated if not found
+ */
 struct client_info_t *get_client(struct client_info_t **clients, SOCKET socket) {
     // look for the client in the linked list
     struct client_info_t *client = *clients;
@@ -231,10 +278,11 @@ struct client_info_t *get_client(struct client_info_t **clients, SOCKET socket) 
     // client not found, make one
     struct client_info_t *new_client = (struct client_info_t *)malloc(sizeof(struct client_info_t));
     if (new_client == NULL) {
-        fprintf(stderr, "Out of memory\n");
-        exit(1);
+        fprintf(stderr, "Failed to allocate memory for new client\n");
+        return NULL;
     }
 
+    // Zero-initialize struct, especially the request buffer for null termination
     memset(new_client, 0, sizeof(struct client_info_t));
 
     new_client->address_length = sizeof(new_client->address);
@@ -247,6 +295,10 @@ struct client_info_t *get_client(struct client_info_t **clients, SOCKET socket) 
     return new_client;
 }
 
+/**
+ * Removes a UDP client from the client list without closing the socket.
+ * UDP clients don't maintain persistent connections like TCP clients.
+ */
 void drop_udp_client(struct client_info_t **clients, struct client_info_t *client) {
     struct client_info_t **p = clients;
 
@@ -263,7 +315,11 @@ void drop_udp_client(struct client_info_t **clients, struct client_info_t *clien
     exit(1);
 }
 
-void drop_client(struct client_info_t **clients, struct client_info_t *client) {
+/**
+ * Removes a TCP client, closes the socket, and frees memory.
+ * Maintains the integrity of the client linked list.
+ */
+void drop_tcp_client(struct client_info_t **clients, struct client_info_t *client) {
     CLOSESOCKET(client->socket);
 
     struct client_info_t **p = clients;
@@ -281,21 +337,63 @@ void drop_client(struct client_info_t **clients, struct client_info_t *client) {
     exit(1);
 }
 
+/**
+ * Converts client's TCP socket address to a readable IP string.
+ * Uses a static buffer, so subsequent calls overwrite previous results.
+ * 
+ * @param client Client structure with address information
+ * @return IP address string or "unknown" on error
+ */
 const char *get_client_address(struct client_info_t *client) {
     static char address_buffer[100];
-    getnameinfo((struct sockaddr *)&client->address, client->address_length, address_buffer,
-                sizeof(address_buffer), 0, 0, NI_NUMERICHOST);
+    
+    if (!client) {
+        strcpy(address_buffer, "unknown");
+        return address_buffer;
+    }
+    
+    if (getnameinfo((struct sockaddr *)&client->address, client->address_length, address_buffer,
+                    sizeof(address_buffer), 0, 0, NI_NUMERICHOST) != 0) {
+        strcpy(address_buffer, "unknown");
+    }
+    
     return address_buffer;
 }
 
+/**
+ * Converts client's UDP address to a readable IP string.
+ * Separate from TCP address as UDP clients can have different addressing.
+ * 
+ * @param client Client structure with UDP address information  
+ * @return IP address string or "unknown" on error
+ */
 const char *get_client_udp_address(struct client_info_t *client) {
     static char address_buffer[100];
-    getnameinfo((struct sockaddr *)&client->udp_addr, client->address_length, address_buffer,
-                sizeof(address_buffer), 0, 0, NI_NUMERICHOST);
+    
+    if (!client) {
+        strcpy(address_buffer, "unknown");
+        return address_buffer;
+    }
+    
+    if (getnameinfo((struct sockaddr *)&client->udp_addr, client->address_length, address_buffer,
+                    sizeof(address_buffer), 0, 0, NI_NUMERICHOST) != 0) {
+        strcpy(address_buffer, "unknown");
+    }
+    
     return address_buffer;
 }
 
+/**
+ * Sets up a select() call to monitor multiple sockets for activity.
+ * Monitors the server listening socket, UDP socket, and all client connections.
+ * 
+ * @param clients Linked list of active clients
+ * @param server TCP listening socket
+ * @param udp_socket UDP socket for datagram communication
+ * @return File descriptor set with sockets ready for I/O
+ */
 fd_set wait_on_clients(struct client_info_t *clients, SOCKET server, SOCKET udp_socket) {
+    // Non-blocking select with 100ms timeout for responsive server loop
     struct timeval select_wait;
     select_wait.tv_sec = 0;
     select_wait.tv_usec = 100000;
@@ -323,6 +421,10 @@ fd_set wait_on_clients(struct client_info_t *clients, SOCKET server, SOCKET udp_
     return reads;
 }
 
+/**
+ * Sends HTTP 400 Bad Request response to client.
+ * Used for malformed requests or invalid data.
+ */
 void send_400(struct client_info_t *client) {
     const char *c400 =
         "HTTP/1.1 400 Bad Request\r\n"
@@ -332,6 +434,10 @@ void send_400(struct client_info_t *client) {
     send(client->socket, c400, strlen(c400), 0);
 }
 
+/**
+ * Sends HTTP 404 Not Found response to client.
+ * Used when requested resource doesn't exist.
+ */
 void send_404(struct client_info_t *client) {
     const char *c404 =
         "HTTP/1.1 404 Not Found\r\n"
@@ -341,6 +447,10 @@ void send_404(struct client_info_t *client) {
     send(client->socket, c404, strlen(c404), 0);
 }
 
+/**
+ * Sends HTTP 201 Created response to client.
+ * Used after successfully creating a new resource.
+ */
 void send_201(struct client_info_t *client) {
     const char *c201 =
         "HTTP/1.1 201 Created\r\n"
@@ -350,22 +460,42 @@ void send_201(struct client_info_t *client) {
     send(client->socket, c201, strlen(c201), 0);
 }
 
+/**
+ * Sends HTTP 304 Not Modified response to client.
+ * Used when resource hasn't changed since last request.
+ */
 void send_304(struct client_info_t *client) {
     const char *c304 =
         "HTTP/1.1 304 Not Modified\r\n"
         "Connection: keep-alive\r\n"
         "Content-Length: 12\r\n\r\nNot Modified";
 
-    int bytes_sent = send(client->socket, c304, strlen(c304), 0);
+    send(client->socket, c304, strlen(c304), 0);
 }
 
+/**
+ * Resets client's request buffer for reuse on persistent connections.
+ * Allows the same TCP connection to handle multiple HTTP requests.
+ */
 void reset_client_request_buffer(struct client_info_t *client) {
     // This allows a client to send a new request over the same socket
     client->received = 0;
     memset(client->request, 0, MAX_REQUEST_SIZE);
 }
 
+/**
+ * Serves static files from the frontend directory via HTTP.
+ * Handles path validation, file reading, and proper HTTP headers.
+ * 
+ * @param client Client requesting the resource
+ * @param path Requested file path (relative to frontend/)
+ */
 void serve_resource(struct client_info_t *client, const char *path) {
+    if (!client || !path) {
+        if (client) send_400(client);
+        return;
+    }
+    
     if (strcmp(path, "/") == 0) {
         path = "/index.html";
     }
@@ -375,6 +505,7 @@ void serve_resource(struct client_info_t *client, const char *path) {
         return;
     }
 
+    // Prevent directory traversal attacks
     if (strstr(path, "..")) {
         send_404(client);
         return;
@@ -383,6 +514,7 @@ void serve_resource(struct client_info_t *client, const char *path) {
     char full_path[128];
     sprintf(full_path, "frontend%s", path);
 
+    // Convert Unix-style paths to Windows paths when needed
 #if defined(_WIN32)
     char *p = full_path;
     while (*p) {
@@ -400,13 +532,14 @@ void serve_resource(struct client_info_t *client, const char *path) {
         return;
     }
 
+    // Determine file size for Content-Length header
     fseek(fp, 0L, SEEK_END);
     size_t content_length = ftell(fp);
     rewind(fp);
 
     const char *content_type = get_content_type(full_path);
 
-#define BSIZE 1024
+#define BSIZE 1024  // Buffer size for file reading and HTTP headers
 
     char content_buffer[BSIZE];
 
@@ -425,6 +558,7 @@ void serve_resource(struct client_info_t *client, const char *path) {
     sprintf(content_buffer, "\r\n");
     send(client->socket, content_buffer, strlen(content_buffer), 0);
 
+    // Send file content in chunks
     int bytes_read = fread(content_buffer, 1, BSIZE, fp);
     while (bytes_read) {
         send(client->socket, content_buffer, bytes_read, 0);
@@ -434,117 +568,3 @@ void serve_resource(struct client_info_t *client, const char *path) {
     fclose(fp);
 }
 
-struct client_info_t *client_constructor(struct client_info_t *client) {
-    if (!client) {
-        return NULL;
-    }
-    struct client_info_t *new_client = malloc(sizeof(struct client_info_t));
-
-    new_client->last_request_time = client->last_request_time;
-    new_client->address_length = client->address_length;
-    new_client->address = client->address;
-    new_client->udp_addr = client->udp_addr;
-    new_client->socket = client->socket;
-    new_client->received = client->received;
-    new_client->message_size = client->message_size;
-
-    memcpy(new_client->request, client->request, MAX_REQUEST_SIZE + 1);
-    memcpy(new_client->udp_request, client->udp_request, MAX_UDP_REQUEST_SIZE);
-
-
-    new_client->next = client->next;
-
-    return new_client;
-}
-
-int compare_clients(struct client_info_t *client1, struct client_info_t *client2) {
-    if (!client1 || !client2) {
-        return 0;
-    }
-
-    if (client1->udp_addr.sin_family != client2->udp_addr.sin_family) {
-        return 0;
-    }
-
-    if (client1->udp_addr.sin_family == AF_INET) {
-        struct sockaddr_in *addr1 = (struct sockaddr_in *)&client1->udp_addr;
-        struct sockaddr_in *addr2 = (struct sockaddr_in *)&client2->udp_addr;
-
-
-        if (addr1->sin_addr.s_addr == addr2->sin_addr.s_addr) {
-            return 1;
-        }
-
-        if (addr1->sin_addr.s_addr == htonl(INADDR_LOOPBACK) ||
-            addr2->sin_addr.s_addr == htonl(INADDR_LOOPBACK)) {
-            return 1;
-        }
-
-    } else if (client1->udp_addr.sin_family == AF_INET6) {
-        struct sockaddr_in6 *addr1 = (struct sockaddr_in6 *)&client1->udp_addr;
-        struct sockaddr_in6 *addr2 = (struct sockaddr_in6 *)&client2->udp_addr;
-
-        if (!memcmp(&addr1->sin6_addr, &addr2->sin6_addr, sizeof(struct in6_addr))) {
-            return 1;
-        }
-
-        struct in6_addr loopback = IN6ADDR_LOOPBACK_INIT;
-        if (!memcmp(&addr1->sin6_addr, &loopback, sizeof(loopback)) ||
-            !memcmp(&addr2->sin6_addr, &loopback, sizeof(loopback))) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-int get_client_index(struct client_info_t *client) {
-    if (!client) {
-        return -1;
-    }
-
-    for (int i = 0; i < recent_client_size; i++) {
-        if (compare_clients(recent_clients[i], client)) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-int add_client(struct client_info_t *client) {
-    if (!client)
-        return 0;
-
-    double time_now = get_wall_clock(&profile_context);
-    struct client_info_t *new_client = client_constructor(client);
-    new_client->last_request_time = time_now;
-
-    if (recent_client_size == RECENT_CLIENT_CAPACITY) {
-        recent_clients[lru_index] = new_client;
-        lru_index = (lru_index + 1) % RECENT_CLIENT_CAPACITY;
-    } else {
-        recent_clients[recent_client_size] = new_client;
-        recent_client_size++;
-    }
-
-    return 1;
-}
-
-double update_client_time(struct client_info_t *client) {
-    if (!client)
-        return -1;
-
-    double time_now = get_wall_clock(&profile_context);
-    client->last_request_time = time_now;
-
-    int client_index = get_client_index(client);
-    if (client_index != -1) {
-        recent_clients[client_index] = client_constructor(client);
-        recent_clients[client_index]->last_request_time = time_now;
-    }
-
-    return time_now;
-}
-
-struct client_info_t *get_recent_client(int index) {
-    return recent_clients[index];
-}

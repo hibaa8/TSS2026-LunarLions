@@ -1,5 +1,5 @@
-#ifndef SERVER_DATA_H
-#define SERVER_DATA_H
+#ifndef DATA_H
+#define DATA_H
 
 #include <stdbool.h>
 #include <time.h>

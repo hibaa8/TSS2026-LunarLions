@@ -168,7 +168,7 @@ Where your ip address is the ip address of the machine that is running TSS
 
 - Server.c: contains the main function with a loop that processes HTTP messages and simulates data in the backend.
 - Network.c: contains helper functions for the server to communicate with other devices.
-- Server_data.c: contains the data that the server maintains and how that data is updated.
+- Data.c: contains the data that the server maintains and how that data is updated.
 - frontend folder: contains a frontend for testing your device with TSS, along with all the json files that you will need from the server.
 
 This server is based on "Network Programming in C" and builds off of the HTTPs example.

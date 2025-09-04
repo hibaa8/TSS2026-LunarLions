@@ -15,7 +15,7 @@
 struct profile_context_t profile_context;
 
 // Application
-#include "server_data.h"
+#include "data.h"
 
 // Server Variables
 #define MAX_LINE_LENGHT 1024
@@ -47,7 +47,6 @@ void tss_to_unreal();
 enum { NS_PER_SECOND = 1000000000 };
 
 int main(int argc, char *argv[]) {
-    int set_dust_rate;
     printf("Hello World\n\n");
 
     clock_setup(&profile_context);
@@ -104,7 +103,7 @@ int main(int argc, char *argv[]) {
     if (udp_only) {
         udp_socket = create_udp_socket(hostname, port);
     } else {
-        server = create_socket(hostname, port);
+        server = create_tcp_socket(hostname, port);
         udp_socket = create_udp_socket(hostname, port);
     }
 
@@ -126,6 +125,10 @@ int main(int argc, char *argv[]) {
         // Server Listen Socket got a new message
         if (FD_ISSET(server, &reads)) {
             struct client_info_t *client = get_client(&clients, -1);
+            if (!client) {
+                fprintf(stderr, "Failed to allocate memory for new client connection\n");
+                continue;
+            }
 
             // create client socket
             client->socket =
@@ -145,6 +148,10 @@ int main(int argc, char *argv[]) {
         if (FD_ISSET(udp_socket, &reads)) {
             struct client_info_t *udp_clients = NULL;
             struct client_info_t *client = get_client(&udp_clients, -1);
+            if (!client) {
+                fprintf(stderr, "Failed to allocate memory for UDP client\n");
+                continue;
+            }
 
             int received_bytes =
                 recvfrom(udp_socket, client->udp_request, MAX_UDP_REQUEST_SIZE, 0,
@@ -286,7 +293,7 @@ int main(int argc, char *argv[]) {
                     // Request too big
                     if (MAX_REQUEST_SIZE <= client->received) {
                         send_400(client);
-                        drop_client(&clients, client);
+                        drop_tcp_client(&clients, client);
                         client = next_client;
                         continue;
                     }
@@ -300,7 +307,7 @@ int main(int argc, char *argv[]) {
                         fprintf(stderr, "Unexpected Disconnect from %s\n",
                                 get_client_address(client));
 #endif
-                        drop_client(&clients, client);
+                        drop_tcp_client(&clients, client);
                     } else {
                         if (strncmp(client->request, "GET/", 4) == 0) {
 #ifdef VERBOSE_MODE
@@ -321,7 +328,7 @@ int main(int argc, char *argv[]) {
 
                                 if (!end_path) {
                                     send_400(client);
-                                    drop_client(&clients, client);
+                                    drop_tcp_client(&clients, client);
                                 } else {
                                     *end_path = 0;
                                     serve_resource(client, path);
@@ -329,7 +336,7 @@ int main(int argc, char *argv[]) {
                                     printf("serve_resource %s %s\n", get_client_address(client),
                                            path);
 #endif
-                                    drop_client(&clients, client);
+                                    drop_tcp_client(&clients, client);
                                 }
                             }  // Received a POST Request
                             else if (strncmp(client->request, "POST /", 6) == 0) {
@@ -345,7 +352,7 @@ int main(int argc, char *argv[]) {
                                     } else {
                                         // There is no content size
                                         send_400(client);
-                                        drop_client(&clients, client);
+                                        drop_tcp_client(&clients, client);
                                     }
                                 }
 
@@ -360,21 +367,21 @@ int main(int argc, char *argv[]) {
 
                                     if (!request_content) {
                                         send_400(client);
-                                        drop_client(&clients, client);
+                                        drop_tcp_client(&clients, client);
                                     } else {
                                         if (update_resource(request_content, backend)) {
                                             send_304(client);
                                         } else {
                                             send_400(client);
                                         }
-                                        drop_client(&clients, client);
+                                        drop_tcp_client(&clients, client);
                                     }
                                 }
 
                             }  // Received some other request
                             else {
                                 send_400(client);
-                                drop_client(&clients, client);
+                                drop_tcp_client(&clients, client);
                             }
                         }
                     }
@@ -407,7 +414,7 @@ int main(int argc, char *argv[]) {
     int leftover_clients = 0;
     struct client_info_t *client = clients;
     while (client) {
-        drop_client(&clients, client);
+        drop_tcp_client(&clients, client);
         leftover_clients++;
         client = client->next;
     }

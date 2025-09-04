@@ -65,11 +65,11 @@ extern struct profile_context_t profile_context;
 
 void get_ip_address(char* hostname_out);
 const char* get_content_type(const char* path);
-SOCKET create_socket(char* hostname, char* port);
+SOCKET create_tcp_socket(char* hostname, char* port);
 SOCKET create_udp_socket(char* hostname, char* port);
 struct client_info_t* get_client(struct client_info_t** clients, SOCKET socket);
 void drop_udp_client(struct client_info_t** clients, struct client_info_t* client);
-void drop_client(struct client_info_t** clients, struct client_info_t* client);
+void drop_tcp_client(struct client_info_t** clients, struct client_info_t* client);
 const char* get_client_address(struct client_info_t* client);
 const char* get_client_udp_address(struct client_info_t* client);
 fd_set wait_on_clients(struct client_info_t* clients, SOCKET server, SOCKET udp_socket);
@@ -79,12 +79,6 @@ void send_201(struct client_info_t* client);
 void send_304(struct client_info_t* client);
 void reset_client_request_buffer(struct client_info_t* client);
 void serve_resource(struct client_info_t* client, const char* path);
-struct client_info_t* client_constructor(struct client_info_t* client);
-int compare_clients(struct client_info_t* client1, struct client_info_t* client2);
-int get_client_index(struct client_info_t* client);
-int add_client(struct client_info_t* client);
-double update_client_time(struct client_info_t* client);
-struct client_info_t* get_recent_client(int index);
 
 ///////////////////////////////////////////////////////////////////////////////////
 //                        Cross-Platform High-Precision Timing
