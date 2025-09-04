@@ -1,24 +1,16 @@
-///////////////////////////////////////////////////////////////////////////////////
-//                                   Headers
-///////////////////////////////////////////////////////////////////////////////////
+// server.c - Main application server handling TCP/UDP connections, manages telemetry data, web interface, and Unreal Engine communication
 
-// Standard C Stuff
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// #include <time.h>
 #include "lib/cjson/cJSON.h"
 
-// Networking Headers
 #include "network.h"
-struct profile_context_t profile_context;
-
-// Application
 #include "data.h"
 
-// Server Variables
-#define MAX_LINE_LENGHT 1024
+struct profile_context_t profile_context;
+
 
 #define TSS_TO_UNREAL_BRAKES_COMMAND 2000
 #define TSS_TO_UNREAL_LIGHTS_COMMAND 2001
@@ -26,25 +18,11 @@ struct profile_context_t profile_context;
 #define TSS_TO_UNREAL_THROTTLE_COMMAND 2003
 #define TSS_TO_UNREAL_SWITCH_DEST_COMMAND 2004
 
-// Uncomment this for extra print statements
-// #define VERBOSE_MODE
-// #define TESTING_MODE
+static bool continue_server(void);
+static void get_contents(char *buffer, unsigned int *time, unsigned int *command, unsigned char *data);
+static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t len, struct backend_data_t *backend);
 
-///////////////////////////////////////////////////////////////////////////////////
-//                      Helper Functions Declarations
-///////////////////////////////////////////////////////////////////////////////////
-
-bool continue_server();
-// bool big_endian();
-void get_contents();
-// void reverse_bytes();
-void tss_to_unreal();
-
-///////////////////////////////////////////////////////////////////////////////////
-//                               Main Functions
-///////////////////////////////////////////////////////////////////////////////////
-
-enum { NS_PER_SECOND = 1000000000 };
+#define UNREAL_UPDATE_INTERVAL_SEC 0.2
 
 int main(int argc, char *argv[]) {
     printf("Hello World\n\n");
@@ -59,24 +37,17 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 #endif
-    FILE *fptr;
-
-    // ----------------- Begin Main Program Space -------------------------
-    // struct timespec time_begin, time_end, time_delta;
 
     double time_begin = get_wall_clock(&profile_context);
 
-    // clock_gettime(CLOCK_REALTIME, &time_begin);
-
     bool udp_only = false;
     bool local = false;
-    unsigned int old_time = 0;
 
-    // Check for running in local host
+    // Parse command line arguments
     char hostname[16];
     char port[6] = "14141";
 
-    for (int i = 0; i < argc; i++) {
+for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--udp") == 0) {
             udp_only = true;
         } else if (strcmp(argv[i], "--local") == 0) {
@@ -107,22 +78,22 @@ int main(int argc, char *argv[]) {
         udp_socket = create_udp_socket(hostname, port);
     }
 
-#ifdef TESTING_MODE
-    printf("\nBig-endian system: %s\n", big_endian() ? "yes" : "no");
-#endif
 
-    // "Data Base" Data
-    struct backend_data_t *backend = init_backend(backend);
+    // Initialize backend data system
+    struct backend_data_t *backend = init_backend(NULL);
+    if (!backend) {
+        fprintf(stderr, "Failed to initialize backend\n");
+        return -1;
+    }
 
-    // Client connection Data
+    // Initialize client connection list
     struct client_info_t *clients = NULL;
-    //////////////////////////////////////////////////////////////////// Server
-    ////////////////////////////////////////////////////////////////////////////////////
+    // Main server loop
     while (true) {
         fd_set reads;
         reads = wait_on_clients(clients, server, udp_socket);
 
-        // Server Listen Socket got a new message
+        // Handle new TCP client connections
         if (FD_ISSET(server, &reads)) {
             struct client_info_t *client = get_client(&clients, -1);
             if (!client) {
@@ -130,11 +101,13 @@ int main(int argc, char *argv[]) {
                 continue;
             }
 
-            // create client socket
+            // Accept the new connection
             client->socket =
                 accept(server, (struct sockaddr *)&client->address, &client->address_length);
             if (!ISVALIDSOCKET(client->socket)) {
-                fprintf(stderr, "accept() failed with error: %d", GETSOCKETERRNO());
+                fprintf(stderr, "accept() failed with error: %d\n", GETSOCKETERRNO());
+                drop_tcp_client(&clients, client);
+                continue;
             }
 
 #ifdef VERBOSE_MODE
@@ -144,7 +117,7 @@ int main(int argc, char *argv[]) {
 #endif
         }
 
-        // Handle UDP
+        // Handle UDP datagram packets
         if (FD_ISSET(udp_socket, &reads)) {
             struct client_info_t *udp_clients = NULL;
             struct client_info_t *client = get_client(&udp_clients, -1);
@@ -165,9 +138,6 @@ int main(int argc, char *argv[]) {
             unsigned int time = 0;
             unsigned int command = 0;
             char data[4] = {0};
-            // char* dust_ip = "192.168.51.201";
-
-            // printf("UDP IP: %s\n", get_client_udp_address(client));
 
             get_contents(client->udp_request, &time, &command, data);
 
@@ -185,8 +155,8 @@ int main(int argc, char *argv[]) {
             printf("data int: %d\n\n", valuei);
 #endif
 
-            // check if it's a GET request
-            if (command < 1000) {
+            // Process UDP command based on command range
+            if (command < 1000) {  // GET requests
 #ifdef VERBOSE_MODE
                 printf("Received a GET request from %s:%d \n", inet_ntoa(client->udp_addr.sin_addr),
                        ntohs(client->udp_addr.sin_port));
@@ -194,11 +164,16 @@ int main(int argc, char *argv[]) {
                 unsigned char *response_buffer;
                 int buffer_size = 0;
 
-                // Send lidar
+                // Handle special LIDAR data request
+                // @TODO look into the multiple ways that are currently available to fetch lidar
                 if (command == 172 && backend->running_pr_sim >= 0) {
-                    response_buffer =
-                        malloc(sizeof(backend->p_rover[backend->running_pr_sim].lidar) + 8);
                     buffer_size = sizeof(backend->p_rover[backend->running_pr_sim].lidar) + 8;
+                    response_buffer = malloc(buffer_size);
+                    if (!response_buffer) {
+                        fprintf(stderr, "Failed to allocate memory for lidar response\n");
+                        drop_udp_client(&udp_clients, client);
+                        continue;
+                    }
 
                     udp_get_pr_lidar(response_buffer + 8, backend);
 
@@ -211,11 +186,17 @@ int main(int argc, char *argv[]) {
                     }
 
                 }
+
                 // Handle normal GET request
                 else {
                     handle_udp_get_request(command, data, backend);
-                    response_buffer = malloc(12);
                     buffer_size = 12;
+                    response_buffer = malloc(buffer_size);
+                    if (!response_buffer) {
+                        fprintf(stderr, "Failed to allocate memory for GET response\n");
+                        drop_udp_client(&udp_clients, client);
+                        continue;
+                    }
 
                     memcpy(response_buffer, &backend->server_up_time, 4);
                     memcpy(response_buffer + 4, &command, 4);
@@ -242,8 +223,7 @@ int main(int argc, char *argv[]) {
                 free(response_buffer);
 
             }
-            // check if it's a POST request
-            else if (command < 2000) {
+            else if (command < 2000) {  // POST requests
 #ifdef VERBOSE_MODE
                 printf("Received a POST request from %s:%d \n",
                        inet_ntoa(client->udp_addr.sin_addr), ntohs(client->udp_addr.sin_port));
@@ -253,44 +233,41 @@ int main(int argc, char *argv[]) {
 
                 drop_udp_client(&udp_clients, client);
             }
-            // Save address of Unreal
-            else if (command == 3000) {
+            else if (command == 3000) {  // Unreal Engine registration
                 unreal_addr = client->udp_addr;
                 unreal_addr_len = client->address_length;
                 unreal = true;
 
-                // #ifdef TESTING_MODE
                 printf("Unreal address set to %s:%d\n", inet_ntoa(client->udp_addr.sin_addr),
                        ntohs(client->udp_addr.sin_port));
-                // #endif
 
                 drop_udp_client(&udp_clients, client);
             }
 
-            else {
+            else {  // Unknown command
                 drop_udp_client(&udp_clients, client);
             }
         }
 
-        // Send telemetry values to Unreal if there's an address saved
+        // Send periodic telemetry updates to Unreal Engine
         if (unreal) {
             double time_end = get_wall_clock(&profile_context);
-            if ((time_end - time_begin) > 0.2) {
+            if ((time_end - time_begin) > UNREAL_UPDATE_INTERVAL_SEC) {
                 tss_to_unreal(udp_socket, unreal_addr, unreal_addr_len, backend);
                 time_begin = time_end;
             }
         }
 
-        // Server-Client Socket got a new message
+        // Handle existing TCP client requests
         struct client_info_t *client = clients;
 
         if (!udp_only) {
             while (client) {
                 struct client_info_t *next_client = client->next;
 
-                // Check if this client has pending request
+                // Process data from this client
                 if (FD_ISSET(client->socket, &reads)) {
-                    // Request too big
+                    // Reject oversized requests
                     if (MAX_REQUEST_SIZE <= client->received) {
                         send_400(client);
                         drop_tcp_client(&clients, client);
@@ -298,7 +275,7 @@ int main(int argc, char *argv[]) {
                         continue;
                     }
 
-                    // read new bytes in
+                    // Read incoming data from client
                     int bytes_received = recv(client->socket, client->request + client->received,
                                               MAX_REQUEST_SIZE - client->received, 0);
 
@@ -309,19 +286,14 @@ int main(int argc, char *argv[]) {
 #endif
                         drop_tcp_client(&clients, client);
                     } else {
-                        if (strncmp(client->request, "GET/", 4) == 0) {
-#ifdef VERBOSE_MODE
-                            printf("UDP request\n");
-#endif
-                        }
 
                         client->received += bytes_received;
                         client->request[client->received] = 0;
 
-                        // Find marker for the end of the header
+                        // Check if we have a complete HTTP request
                         char *q = strstr(client->request, "\r\n\r\n");
                         if (q) {
-                            // Received a GET Request
+                            // Handle HTTP GET request
                             if (strncmp(client->request, "GET /", 5) == 0) {
                                 char *path = client->request + 4;
                                 char *end_path = strstr(path, " ");
@@ -338,28 +310,28 @@ int main(int argc, char *argv[]) {
 #endif
                                     drop_tcp_client(&clients, client);
                                 }
-                            }  // Received a POST Request
+                            }
+                            // Handle HTTP POST request
                             else if (strncmp(client->request, "POST /", 6) == 0) {
-                                // Get the size of the post request
+                                // Parse Content-Length header
                                 if (client->message_size == -1) {
                                     char *request_content_size_ptr =
                                         strstr(client->request, "Content-Length: ");
                                     if (request_content_size_ptr) {
                                         request_content_size_ptr += strlen("Content-Length: ");
-                                        client->message_size =
-                                            atoi(request_content_size_ptr) + (q - client->request) +
-                                            4;  // The size of the content plus size of the header
+                                        client->message_size = atoi(request_content_size_ptr) + 
+                                                              (q - client->request) + 4;
                                     } else {
-                                        // There is no content size
+                                        // Missing Content-Length header
                                         send_400(client);
                                         drop_tcp_client(&clients, client);
                                     }
                                 }
 
                                 if (client->received == client->message_size) {
-                                    // all bytes loaded
+                                    // Complete POST request received
                                     char *request_content = strstr(client->request, "\r\n\r\n");
-                                    request_content += 4;  // Jump to the beginning of the context
+                                    request_content += 4;  // Skip past header delimiter
 
 #ifdef VERBOSE_MODE
                                     printf("Received Post Content: \n%s\n", request_content);
@@ -378,7 +350,8 @@ int main(int argc, char *argv[]) {
                                     }
                                 }
 
-                            }  // Received some other request
+                            }
+                            // Handle unsupported HTTP methods
                             else {
                                 send_400(client);
                                 drop_tcp_client(&clients, client);
@@ -395,11 +368,11 @@ int main(int argc, char *argv[]) {
             break;
         }
 
-        // Simulate the variables
+        // Update simulation state
         simulate_backend(backend);
     }
 
-    // Clean up
+    // Cleanup phase - shutdown server gracefully
     printf("Clean up Database...\n");
     cleanup_backend(backend);
 
@@ -420,9 +393,7 @@ int main(int argc, char *argv[]) {
     }
     printf("Cleaned up %d client sockets\n", leftover_clients);
 
-// ------------------ End Main Program Space -------------------------
-
-// Windows Specific Cleanup
+    // Platform-specific cleanup
 #if defined(_WIN32)
     WSACleanup();
 #endif
@@ -431,12 +402,13 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////
-//                             Helper Functions
-///////////////////////////////////////////////////////////////////////////////////
+/**
+ * Checks if the user wants to stop the server by pressing ENTER.
+ * Non-blocking check using select() with zero timeout.
+ * @return false if ENTER was pressed, true to continue running
+ */
+static bool continue_server(void) {
 
-bool continue_server() {
-    // if the user presses the ENTER key, the program will end gracefully
     struct timeval select_wait;
     select_wait.tv_sec = 0;
     select_wait.tv_usec = 0;
@@ -451,17 +423,35 @@ bool continue_server() {
     }
 }
 
-void get_contents(char *buffer, unsigned int *time, unsigned int *command, unsigned char *data) {
+/**
+ * Extracts UDP packet contents into separate fields.
+ * UDP packet format: [time:4][command:4][data:4]
+ * @param buffer Raw UDP packet data
+ * @param time Pointer to store timestamp
+ * @param command Pointer to store command code  
+ * @param data Pointer to store 4-byte data payload
+ */
+static void get_contents(char *buffer, unsigned int *time, unsigned int *command, unsigned char *data) {
     memcpy(time, buffer, 4);
     memcpy(command, buffer + 4, 4);
     memcpy(data, buffer + 8, 4);
 }
 
-void tss_to_unreal(int socket, struct sockaddr_in address, socklen_t len,
-                   struct backend_data_t *backend) {
+/**
+ * Sends telemetry data to Unreal Engine via UDP packets.
+ * Transmits rover state (brakes, lights, steering, throttle, switch) as separate packets.
+ * @param socket UDP socket for transmission
+ * @param address Unreal Engine's network address
+ * @param len Length of address structure
+ * @param backend Backend data containing rover state
+ */
+static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t len,
+                         struct backend_data_t *backend) {
     if (backend->running_pr_sim < 0) {
         return;
     }
+    
+    // Extract current rover state
     int brakes = backend->p_rover[backend->running_pr_sim].brakes;
     int lights_on = backend->p_rover[backend->running_pr_sim].lights_on;
     float steering = backend->p_rover[backend->running_pr_sim].steering;
@@ -469,56 +459,52 @@ void tss_to_unreal(int socket, struct sockaddr_in address, socklen_t len,
     int switch_dest = backend->p_rover[backend->running_pr_sim].switch_dest;
 
     unsigned int time = backend->server_up_time;
-    unsigned int command = TSS_TO_UNREAL_BRAKES_COMMAND;
-    unsigned int command2 = TSS_TO_UNREAL_LIGHTS_COMMAND;
-    unsigned int command3 = TSS_TO_UNREAL_STEERING_COMMAND;
-    unsigned int command4 = TSS_TO_UNREAL_THROTTLE_COMMAND;
-    unsigned int command5 = TSS_TO_UNREAL_SWITCH_DEST_COMMAND;
-
     unsigned char buffer[12];
-    unsigned char buffer2[12];
-    unsigned char buffer3[12];
-    unsigned char buffer4[12];
-    unsigned char buffer5[12];
-
+    
+    // Convert endianness if needed
     if (!big_endian()) {
         reverse_bytes((unsigned char *)&time);
-        reverse_bytes((unsigned char *)&command);
-        reverse_bytes((unsigned char *)&command2);
-        reverse_bytes((unsigned char *)&command3);
-        reverse_bytes((unsigned char *)&command4);
-        reverse_bytes((unsigned char *)&command5);
         reverse_bytes((unsigned char *)&steering);
         reverse_bytes((unsigned char *)&throttle);
     }
 
+    // Send brakes command
+    unsigned int command = TSS_TO_UNREAL_BRAKES_COMMAND;
+    if (!big_endian()) reverse_bytes((unsigned char *)&command);
     memcpy(buffer, &time, 4);
     memcpy(buffer + 4, &command, 4);
     memcpy(buffer + 8, &brakes, 4);
-
     sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
-    memcpy(buffer2, &time, 4);
-    memcpy(buffer2 + 4, &command2, 4);
-    memcpy(buffer2 + 8, &lights_on, 4);
+    // Send lights command
+    command = TSS_TO_UNREAL_LIGHTS_COMMAND;
+    if (!big_endian()) reverse_bytes((unsigned char *)&command);
+    memcpy(buffer, &time, 4);
+    memcpy(buffer + 4, &command, 4);
+    memcpy(buffer + 8, &lights_on, 4);
+    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
-    sendto(socket, buffer2, sizeof(buffer2), 0, (struct sockaddr *)&address, len);
+    // Send steering command
+    command = TSS_TO_UNREAL_STEERING_COMMAND;
+    if (!big_endian()) reverse_bytes((unsigned char *)&command);
+    memcpy(buffer, &time, 4);
+    memcpy(buffer + 4, &command, 4);
+    memcpy(buffer + 8, &steering, 4);
+    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
-    memcpy(buffer3, &time, 4);
-    memcpy(buffer3 + 4, &command3, 4);
-    memcpy(buffer3 + 8, &steering, 4);
+    // Send throttle command
+    command = TSS_TO_UNREAL_THROTTLE_COMMAND;
+    if (!big_endian()) reverse_bytes((unsigned char *)&command);
+    memcpy(buffer, &time, 4);
+    memcpy(buffer + 4, &command, 4);
+    memcpy(buffer + 8, &throttle, 4);
+    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
-    sendto(socket, buffer3, sizeof(buffer3), 0, (struct sockaddr *)&address, len);
-
-    memcpy(buffer4, &time, 4);
-    memcpy(buffer4 + 4, &command4, 4);
-    memcpy(buffer4 + 8, &throttle, 4);
-
-    sendto(socket, buffer4, sizeof(buffer4), 0, (struct sockaddr *)&address, len);
-
-    memcpy(buffer5, &time, 4);
-    memcpy(buffer5 + 4, &command5, 4);
-    memcpy(buffer5 + 8, &switch_dest, 4);
-
-    sendto(socket, buffer5, sizeof(buffer5), 0, (struct sockaddr *)&address, len);
+    // Send switch destination command
+    command = TSS_TO_UNREAL_SWITCH_DEST_COMMAND;
+    if (!big_endian()) reverse_bytes((unsigned char *)&command);
+    memcpy(buffer, &time, 4);
+    memcpy(buffer + 4, &command, 4);
+    memcpy(buffer + 8, &switch_dest, 4);
+    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 }
