@@ -429,7 +429,7 @@
                                 <div class="roomDataMainBodySubContainer">
                                     <div id="specName" class="stationNameContainer">
                                         <span id="specNameFont" class="stationName">
-                                            SPEC
+                                            LTV Repair
                                         </span>
                                     </div>
                                     <div id="specBulletPoint" class="stationBulletPoint">     
@@ -447,32 +447,6 @@
                                     <div class="stationButtonContainer">
                                         <form action="" method="post">
                                             <button name="eva_start_SPEC_team" value="0" id="assignSPEC" class="stationButton">ASSIGN</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="roomDataMainBodySubContainer">
-                                    <div id="rovName" class="stationNameContainer">
-                                        <span id="rovNameFont" class="stationName">
-                                            ROVER
-                                        </span>
-                                    </div>
-                                    <div id="rovBulletPoint" class="stationBulletPoint">       
-                                    </div>
-                                    <div class="stationStatusContainer">
-                                        <span id="rovStatus"class="stationStatus">
-                                            Incomplete
-                                        </span>
-                                    </div>
-                                    <div id="rovTimerContainer" class="stationTimerContainer">
-                                        <span id="rovTimer" class="stationTimer">
-                                            00:00
-                                        </span>
-                                    </div>
-                                    <div class="stationButtonContainer">
-                                        <form action="" method="post">
-                                            <button name="eva_start_ROVER_team" value="0" id="assignROV" class="stationButton">ASSIGN</button>
                                         </form>
                                     </div>
                                 </div>
@@ -645,11 +619,11 @@
                         </div>
 
 
-                        <!------------------------------------------ Rover Section ------------------------------------------>
+                        <!------------------------------------------ LTV Section ------------------------------------------>
                         <div class="roomDataSubContainer">
                             <div class="roomDataTitleContainer">
                                 <span class="roomDataTitle">
-                                    Rover 
+                                    LTV
                                 </span>
                             </div>
                             <div class="roomDataMainBodyContainer">
@@ -674,11 +648,6 @@
                                             ------
                                         </span>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="roomDataMainBodySubContainer">
-                                    <img id="videoFeed" class="roverFeed">
                                 </div>
                             </div>
                         </div>
@@ -1308,26 +1277,9 @@
                             </div>
                             <div class="roomDataMainBodyContainer">
                             </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="data" style="color: gray;">
-                                    Destination Coordinates
-                                </div>
-                            </div>
+               
                             <div class="roomDataMainBodyContainer">
                                 <div class="roomDataMainBodySubContainer">
-                                    <!--
-                                    <div class="dataNameContainer">
-                                        <span class="data">
-                                            Switch destination
-                                        </span>
-                                    </div>
-                                    <div class="dataContainer">
-                                        <form action="" method="post">
-                                            <input type="submit" id="switch_dest_button" value="" onChange="this.form.submit()" class="errorButton"/>
-                                            <input type="hidden" name="pr_switch_dest" value="true" />
-                                        </form>
-                                    </div>
-                                    -->
                                     <div class="stateSensorContainer">
                                         <div id="switchDestSensor" class="stateSensor">
                                         </div>
@@ -1358,30 +1310,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="roomDataMainBodySubContainer">
-                                    <div class="dataNameContainer">
-                                        <span class="data"> 
-                                            Destination Y
-                                        </span>
-                                    </div>
-                                    <div class="dataContainer">
-                                        <span id="dest_y" class="data">
-                                            ------
-                                        </span>
-                                    </div>
-                                    <div class="dataNameContainer">
-                                        <span class="data">
-                                            Destination Z
-                                        </span>
-                                    </div>
-                                    <div class="dataContainer">
-                                        <span id="dest_z" class="data">
-                                            ------
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+       
                         </div>
                     </div>
 
@@ -1693,10 +1622,10 @@
                             </div>
 
 
-                            <!------------------------------------------ GPS Section ------------------------------------------>
+                            <!------------------------------------------ Location Section ------------------------------------------>
                             <div class="roomDataSubTitleContainer">
                                 <span class="subTitle">
-                                    GPS
+                                    Location
                                 </span>
                             </div>
                             <div class="roomDataMainBodyContainer">
@@ -2148,10 +2077,10 @@
                             </div>
 
 
-                            <!------------------------------------------ GPS Section ------------------------------------------>
+                            <!------------------------------------------ Location Section ------------------------------------------>
                             <div class="roomDataSubTitleContainer">
                                 <span class="subTitle">
-                                    GPS
+                                    Location
                                 </span>
                             </div>
                             <div class="roomDataMainBodyContainer">
@@ -2203,8 +2132,9 @@
                                 </div>
                             </div>
 
-
-                            <!------------------------------------------ DCU State Section ------------------------------------------>
+                             <!------------------------------------------ DCU State Section ------------------------------------------>
+                             <!--
+                             EVA #2 DCU is not being used for the 2026 mission since we will only have one physical EVA the the second one will be simulated.
                             <div class="roomDataSubTitleContainer">
                                 <span class="subTitle">
                                     DCU State
@@ -2295,6 +2225,7 @@
                                     </div>
                                 </div>
                             </div>
+                            -->
                         </div>
                     </div>
                 </div>

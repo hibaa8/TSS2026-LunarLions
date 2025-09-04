@@ -80,14 +80,8 @@ function swapTeams(newTeam) {
   setCookie("roomNum", selectedTeam, 1);
 }
 
-// Loads the rover video feed and rover coordinates
-function loadRover() {
-  video.src =
-    "http://192.168.51.194:8080/stream?topic=/camera/image_raw&type=ros_compressed";
-}
-
 // Loads the coordinates of EVA 1 and EVA 2
-function loadGPS() {
+function loadLocation() {
   $.getJSON("data/IMU.json", function (data) {
     xCoordinateEV1.innerText = data.imu.eva1.posx.toFixed(2);
     yCoordinateEV1.innerText = data.imu.eva1.posy.toFixed(2);
@@ -837,15 +831,6 @@ function loadPR_Telemetry(team) {
     let point_of_no_return = data.pr_telemetry.point_of_no_return;
     let distance_from_base = data.pr_telemetry.distance_from_base;
 
-    //Destination
-    let switch_dest = data.pr_telemetry.switch_dest;
-    let dest_x = data.pr_telemetry.dest_x;
-    let dest_y = data.pr_telemetry.dest_y;
-    let dest_z = data.pr_telemetry.dest_z;
-
-    let lat = data.pr_telemetry.latitude;
-    let lon = data.pr_telemetry.longitude;
-
     // PR Positioning
     document.getElementById("throttle").innerText = throttle.toFixed(2) + " %";
     document.getElementById("steering").innerText = steering.toFixed(2);
@@ -905,15 +890,6 @@ function loadPR_Telemetry(team) {
       point_of_no_return.toFixed(2);
     document.getElementById("distance_from_base").innerText =
       distance_from_base.toFixed(2) + " m";
-
-    //Destination
-    //document.getElementById("pr_switch_dest").innerText = switch_dest;
-    document.getElementById("dest_x").innerText = dest_x.toFixed(2);
-    document.getElementById("dest_y").innerText = dest_y.toFixed(2);
-    document.getElementById("dest_z").innerText = dest_z.toFixed(2);
-
-    document.getElementById("latitude").innerText = lat.toFixed(2) + "°";
-    document.getElementById("longitude").innerText = lon.toFixed(2) + "°";
   });
 }
 
@@ -998,7 +974,7 @@ function onload() {
   loadPR(selectedTeam);
   loadTelemetry(selectedTeam);
   loadPR_Telemetry(selectedTeam);
-  loadGPS();
+  loadLocation();
   updateTelemetry();
 
   // Continuously refreshes values from the UIA, DCU, EVA, and Telemetry
@@ -1015,9 +991,7 @@ function onload() {
 
     loadPR_Telemetry(selectedTeam);
 
-    loadRover();
-
-    loadGPS();
+    loadLocation();
   }, 1000);
 }
 
