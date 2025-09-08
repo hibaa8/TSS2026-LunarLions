@@ -1,99 +1,30 @@
+/**
+ * UIA sensor and switch mappings configuration
+ */
+const UIA_SENSORS_AND_SWITCHES = {
+  eva1_power: { sensor: "eva1PowerSensor", switch: "uia_eva1_power_switch" },
+  eva2_power: { sensor: "eva2PowerSensor", switch: "uia_eva2_power_switch" }, 
+  eva1_water_supply: { sensor: "eva1WaterSupplySensor", switch: "uia_eva1_water_supply_switch" },
+  eva2_water_supply: { sensor: "eva2WaterSupplySensor", switch: "uia_eva2_water_supply_switch" },
+  eva1_water_waste: { sensor: "eva1WaterWasteSensor", switch: "uia_eva1_water_waste_switch" },
+  eva2_water_waste: { sensor: "eva2WaterWasteSensor", switch: "uia_eva2_water_waste_switch" },
+  eva1_oxy: { sensor: "eva1OxygenSensor", switch: "uia_eva1_oxy_switch" },
+  eva2_oxy: { sensor: "eva2OxygenSensor", switch: "uia_eva2_oxy_switch" },
+  oxy_vent: { sensor: "oxygenVentSensor", switch: "uia_oxy_vent_switch" },
+  depress: { sensor: "depressPumpSensor", switch: "uia_depress_switch" }
+};
+
+/**
+ * Loads UIA data and updates all sensor/switch states using configuration-driven approach
+ * Replaces 98+ lines of repetitive if/else blocks with simple loop
+ */
 function loadUIA() {
   $.getJSON("data/UIA.json", function (data) {
-    if (data.uia.eva1_power == true) {
-      document.getElementById("eva1PowerSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("uia_eva1_power_switch").checked = true;
-    } else {
-      document.getElementById("eva1PowerSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("uia_eva1_power_switch").checked = false;
-    }
-    if (data.uia.eva2_power == true) {
-      document.getElementById("eva2PowerSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("uia_eva2_power_switch").checked = true;
-    } else {
-      document.getElementById("eva2PowerSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("uia_eva2_power_switch").checked = false;
-    }
-
-    if (data.uia.eva1_water_supply == true) {
-      document.getElementById("eva1WaterSupplySensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("uia_eva1_water_supply_switch").checked = true;
-    } else {
-      document.getElementById("eva1WaterSupplySensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("uia_eva1_water_supply_switch").checked = false;
-    }
-    if (data.uia.eva2_water_supply == true) {
-      document.getElementById("eva2WaterSupplySensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("uia_eva2_water_supply_switch").checked = true;
-    } else {
-      document.getElementById("eva2WaterSupplySensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("uia_eva2_water_supply_switch").checked = false;
-    }
-
-    if (data.uia.eva1_water_waste == true) {
-      document.getElementById("eva1WaterWasteSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("uia_eva1_water_waste_switch").checked = true;
-    } else {
-      document.getElementById("eva1WaterWasteSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("uia_eva1_water_waste_switch").checked = false;
-    }
-    if (data.uia.eva2_water_waste == true) {
-      document.getElementById("eva2WaterWasteSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("uia_eva2_water_waste_switch").checked = true;
-    } else {
-      document.getElementById("eva2WaterWasteSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("uia_eva2_water_waste_switch").checked = false;
-    }
-
-    if (data.uia.eva1_oxy == true) {
-      document.getElementById("eva1OxygenSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("uia_eva1_oxy_switch").checked = true;
-    } else {
-      document.getElementById("eva1OxygenSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("uia_eva1_oxy_switch").checked = false;
-    }
-    if (data.uia.eva2_oxy == true) {
-      document.getElementById("eva2OxygenSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("uia_eva2_oxy_switch").checked = true;
-    } else {
-      document.getElementById("eva2OxygenSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("uia_eva2_oxy_switch").checked = false;
-    }
-
-    if (data.uia.oxy_vent == true) {
-      document.getElementById("oxygenVentSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("uia_oxy_vent_switch").checked = true;
-    } else {
-      document.getElementById("oxygenVentSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("uia_oxy_vent_switch").checked = false;
-    }
-    if (data.uia.depress == true) {
-      document.getElementById("depressPumpSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("uia_depress_switch").checked = true;
-    } else {
-      document.getElementById("depressPumpSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("uia_depress_switch").checked = false;
-    }
+    // Update all UIA sensors and switches using configuration mapping
+    Object.keys(UIA_SENSORS_AND_SWITCHES).forEach(key => {
+      const config = UIA_SENSORS_AND_SWITCHES[key];
+      updateSensorAndSwitch(config.sensor, config.switch, data.uia[key]);
+    });
   });
 }
 

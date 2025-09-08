@@ -1,8 +1,8 @@
-// Global variable for currently selected team and previously selected team
+// Global variable for currently selected team
 let selectedTeam = 0;
 let oldTeam = 0;
-
-// global variables for UI elements
+  
+// Global variables for UI elements
 let startButton = document.getElementById("tssStart");
 let stopButton = document.getElementById("tssStop");
 let prRunningIndex = -1;
@@ -32,10 +32,6 @@ let specBullet = document.getElementById("specBulletPoint");
 let specName = document.getElementById("specName");
 let specFont = document.getElementById("specNameFont");
 
-// ROV elements removed - they don't exist in HTML
-
-// videoFeed element removed - it doesn't exist in HTML
-
 let xCoordinateEV1 = document.getElementById("xCoordinateEV1");
 let yCoordinateEV1 = document.getElementById("yCoordinateEV1");
 let headingEV1 = document.getElementById("headingEV1");
@@ -45,26 +41,72 @@ let headingEV2 = document.getElementById("headingEV2");
 let xCoordinateRover = document.getElementById("xCoordinateRover");
 let yCoordinateRover = document.getElementById("yCoordinateRover");
 
+// Configurations for the sensor and switch mappings so that can we easily loop through them
+
+// UIA sensor mappings
+const UIA_SENSORS = {
+  eva1_power: "eva1PowerSensor",
+  eva2_power: "eva2PowerSensor", 
+  eva1_water_supply: "eva1WaterSupplySensor",
+  eva2_water_supply: "eva2WaterSupplySensor",
+  eva1_water_waste: "eva1WaterWasteSensor",
+  eva2_water_waste: "eva2WaterWasteSensor",
+  eva1_oxy: "eva1OxygenSensor",
+  eva2_oxy: "eva2OxygenSensor",
+  oxy_vent: "oxygenVentSensor",
+  depress: "depressPumpSensor"
+};
+
+// DCU sensor mappings
+const DCU_SENSORS = {
+  "eva1.batt": "dcuEva1BatterySensor",
+  "eva1.oxy": "dcuEva1OxygenSensor", 
+  "eva1.comm": "dcuEva1CommSensor",
+  "eva1.fan": "dcuEva1FanSensor",
+  "eva1.pump": "dcuEva1PumpSensor",
+  "eva1.co2": "dcuEva1Co2Sensor",
+  "eva2.batt": "dcuEva2BatterySensor",
+  "eva2.oxy": "dcuEva2OxygenSensor",
+  "eva2.comm": "dcuEva2CommSensor", 
+  "eva2.fan": "dcuEva2FanSensor",
+  "eva2.pump": "dcuEva2PumpSensor",
+  "eva2.co2": "dcuEva2Co2Sensor"
+};
+
+// Pressurized Rover sensor and switch mappings
+const PR_SENSORS_AND_SWITCHES = {
+  ac_heating: { sensor: "acHeatingSensor", switch: "acHeatingSwitch" },
+  ac_cooling: { sensor: "acCoolingSensor", switch: "acCoolingSwitch" },
+  lights_on: { sensor: "lightsOnSensor", switch: "lightsOnSwitch" },
+  internal_lights_on: { sensor: "internalLightsSensor", switch: "internalLightsSwitch" },
+  brakes: { sensor: "brakesSensor", switch: "brakesSwitch" },
+  in_sunlight: { sensor: "inSunlightSensor", switch: "inSunlightSwitch" },
+  co2_scrubber: { sensor: "co2ScrubberSensor", switch: "co2ScrubberSwitch" },
+  dust_wiper: { sensor: "dustWiperSensor", switch: "dustWiperSwitch" },
+  fan_pri: { sensor: "fanPriSensor", switch: "fanPriSwitch" },
+  switch_dest: { sensor: "switchDestSensor", switch: "switchDestSwitch" }
+};
+
 // Updates team specific data when another team is selected
 function swapTeams(newTeam) {
   // Update global team
   selectedTeam = newTeam - 1;
   
-  console.log("Swapping to team index:", selectedTeam);
-
   // Update dropdown selection
   const dropdown = document.getElementById("roomSelect");
   if (dropdown) {
     dropdown.value = newTeam;
   }
 
-  // Reload the team specific Json files
-  loadEVA(selectedTeam);
-  loadTelemetry(selectedTeam);
-  loadPR(selectedTeam);
-  loadPR_Telemetry(selectedTeam);
+  // Reload the team specific json files
+  loadEVAStatus(selectedTeam);
+  loadEVATelemetry(selectedTeam);
+
+  loadPRStatus(selectedTeam);
+  loadPRTelemetryData(selectedTeam);
 
   // Update button functionality
+  // @TODO change these onclick values to just use the selectedTeam variable directly
   document.getElementById("tssStart").value = selectedTeam;
   document.getElementById("tssStop").value = selectedTeam;
 
@@ -132,221 +174,42 @@ function getCookie(cname) {
   return 0;
 }
 
-// Loads the UIA data and sets the light
+
+// Loads UIA data and updates all sensor states
 function loadUIA() {
   $.getJSON("data/UIA.json", function (data) {
-    if (data.uia.eva1_power == true) {
-      document.getElementById("eva1PowerSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("eva1PowerSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-    if (data.uia.eva2_power == true) {
-      document.getElementById("eva2PowerSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("eva2PowerSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.uia.eva1_water_supply == true) {
-      document.getElementById("eva1WaterSupplySensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("eva1WaterSupplySensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-    if (data.uia.eva2_water_supply == true) {
-      document.getElementById("eva2WaterSupplySensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("eva2WaterSupplySensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.uia.eva1_water_waste == true) {
-      document.getElementById("eva1WaterWasteSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("eva1WaterWasteSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-    if (data.uia.eva2_water_waste == true) {
-      document.getElementById("eva2WaterWasteSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("eva2WaterWasteSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.uia.eva1_oxy == true) {
-      document.getElementById("eva1OxygenSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("eva1OxygenSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-    if (data.uia.eva2_oxy == true) {
-      document.getElementById("eva2OxygenSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("eva2OxygenSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.uia.oxy_vent == true) {
-      document.getElementById("oxygenVentSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("oxygenVentSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-    if (data.uia.depress == true) {
-      document.getElementById("depressPumpSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("depressPumpSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
+    // Update all UIA sensors using configuration mapping
+    Object.keys(UIA_SENSORS).forEach(key => {
+      updateSensor(UIA_SENSORS[key], data.uia[key]);
+    });
   });
 }
 
-// Loads the DCU data and sets the light
+// Loads DCU data and updates all sensor states
 function loadDCU() {
   $.getJSON("data/DCU.json", function (data) {
-    // console.log(data);
-    if (data.dcu.eva1.batt == true) {
-      document.getElementById("dcuEva1BatterySensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva1BatterySensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.dcu.eva1.oxy == true) {
-      document.getElementById("dcuEva1OxygenSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva1OxygenSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.dcu.eva1.comm == true) {
-      document.getElementById("dcuEva1CommSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva1CommSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.dcu.eva1.fan == true) {
-      document.getElementById("dcuEva1FanSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva1FanSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.dcu.eva1.pump == true) {
-      document.getElementById("dcuEva1PumpSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva1PumpSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.dcu.eva1.co2 == true) {
-      document.getElementById("dcuEva1Co2Sensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva1Co2Sensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    // console.log(data);
-    if (data.dcu.eva2.batt == true) {
-      document.getElementById("dcuEva2BatterySensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva2BatterySensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.dcu.eva2.oxy == true) {
-      document.getElementById("dcuEva2OxygenSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva2OxygenSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.dcu.eva2.comm == true) {
-      document.getElementById("dcuEva2CommSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva2CommSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.dcu.eva2.fan == true) {
-      document.getElementById("dcuEva2FanSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva2FanSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.dcu.eva2.pump == true) {
-      document.getElementById("dcuEva2PumpSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva2PumpSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
-
-    if (data.dcu.eva2.co2 == true) {
-      document.getElementById("dcuEva2Co2Sensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-    } else {
-      document.getElementById("dcuEva2Co2Sensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-    }
+    // Update all DCU sensors using configuration mapping
+    Object.keys(DCU_SENSORS).forEach(key => {
+      // Handle nested object paths like "eva1.batt"
+      const keys = key.split('.');
+      let value = data.dcu;
+      keys.forEach(k => value = value[k]);
+      updateSensor(DCU_SENSORS[key], value);
+    });
   });
 }
 
-// Loads the EVA timers depending on state(Started, Stopped, Paused, etc.) and sets light depending on state
-function loadEVA(team) {
+/**
+ * Loads EVA status, timers, and station assignments for the specified team
+ * Updates EVA timer displays and station status indicators
+ */
+function loadEVAStatus(team) {
   $.getJSON("data/teams/" + team + "/EVA_STATUS.json", function (data) {
-    // Formats the total time for the EVA
-    var h = Math.floor(data.eva.total_time / 3600);
-    var m = Math.floor((data.eva.total_time % 3600) / 60);
-    var s = Math.floor((data.eva.total_time % 3600) % 60);
-    document.getElementById("evaTimer").innerText =
-      "EVA Time: " +
-      ("0" + h).slice(-2) +
-      ":" +
-      ("0" + m).slice(-2) +
-      ":" +
-      ("0" + s).slice(-2);
-
-    // Formats the time for the UIA procedure
-    m = Math.floor((data.eva.uia.time % 3600) / 60);
-    s = Math.floor((data.eva.uia.time % 3600) % 60);
-    document.getElementById("uiaTimer").innerText =
-      ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
-
-    // Formats the time for the Spec procedure
-    m = Math.floor((data.eva.spec.time % 3600) / 60);
-    s = Math.floor((data.eva.spec.time % 3600) % 60);
-    document.getElementById("specTimer").innerText =
-      ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
-
-    // Formats the time for the DCU procedure
-    m = Math.floor((data.eva.dcu.time % 3600) / 60);
-    s = Math.floor((data.eva.dcu.time % 3600) % 60);
-    document.getElementById("dcuTimer").innerText =
-      ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
+    // Format and display EVA timers using utility function
+    document.getElementById("evaTimer").innerText = "EVA Time: " + formatTime(data.eva.total_time);
+    document.getElementById("uiaTimer").innerText = formatTime(data.eva.uia.time).substring(3); // Remove hours for MM:SS
+    document.getElementById("specTimer").innerText = formatTime(data.eva.spec.time).substring(3); // Remove hours for MM:SS  
+    document.getElementById("dcuTimer").innerText = formatTime(data.eva.dcu.time).substring(3); // Remove hours for MM:SS
 
     // Button UI States Visuals
     var evaStarted = data.eva.started;
@@ -362,18 +225,7 @@ function loadEVA(team) {
       resumeTSS();
     }
 
-    // Team light state
-    // var room = "room" + (team + 1) + "Light";
-    // var roomLight = document.getElementById(room);
-    // if(evaStarted && !evaComplete){
-    //     roomLight.style.backgroundColor = 'rgba(0, 240, 10, 1)';
-    // }
-    // else if(evaComplete){
-    //     roomLight.style.backgroundColor = 'rgba(0, 0, 255, 1)';
-    // }
-    // else {
-    //     roomLight.style.backgroundColor = 'rgba(100, 100, 100, 1)';
-    // }
+
     loadLights(team);
 
     // Stations Status
@@ -413,20 +265,14 @@ function loadEVA(team) {
   });
 }
 
-// Loads the PR timers depending on state(Started, Stopped, Paused, etc.)
-function loadPR(team) {
+/**
+ * Loads Pressurized Rover status and timer for the specified team
+ * Updates PR timer display and button states
+ */
+function loadPRStatus(team) {
   $.getJSON("data/teams/" + team + "/ROVER_TELEMETRY.json", function (data) {
-    // Formats the total time for the EVA
-    var h = Math.floor(data.pr_telemetry.mission_elapsed_time / 3600);
-    var m = Math.floor((data.pr_telemetry.mission_elapsed_time % 3600) / 60);
-    var s = Math.floor((data.pr_telemetry.mission_elapsed_time % 3600) % 60);
-    document.getElementById("prTimer").innerText =
-      "PR Time: " +
-      ("0" + h).slice(-2) +
-      ":" +
-      ("0" + m).slice(-2) +
-      ":" +
-      ("0" + s).slice(-2);
+    // Format and display PR timer using utility function
+    document.getElementById("prTimer").innerText = "PR Time: " + formatTime(data.pr_telemetry.mission_elapsed_time);
 
     // Button UI States Visuals
     var prStarted = data.pr_telemetry.sim_running;
@@ -465,137 +311,25 @@ function loadPR(team) {
   });
 }
 
-// Loads the Telemetry values of each EVA
-function loadTelemetry(team) {
+/**
+ * Loads EVA telemetry data and updates all telemetry fields for both EVAs
+ * Displays oxygen levels, pressures, consumption rates, and health metrics
+ */
+function loadEVATelemetry(team) {
   $.getJSON("data/teams/" + team + "/EVA_TELEMETRY.json", function (data) {
-    // EVA 1
-    var h = Math.floor(Number(data.telemetry.eva_time) / 3600);
-    var m = Math.floor((Number(data.telemetry.eva_time) % 3600) / 60);
-    var s = Math.floor((Number(data.telemetry.eva_time) % 3600) % 60);
-    document.getElementById("evaTimeTelemetryState1").innerText =
-      ("0" + h).slice(-2) +
-      ":" +
-      ("0" + m).slice(-2) +
-      ":" +
-      ("0" + s).slice(-2);
-    document.getElementById("evaTimeTelemetryState2").innerText =
-      ("0" + h).slice(-2) +
-      ":" +
-      ("0" + m).slice(-2) +
-      ":" +
-      ("0" + s).slice(-2);
-    h = Math.floor(Number(data.telemetry.eva1.oxy_time_left) / 3600);
-    m = Math.floor((Number(data.telemetry.eva1.oxy_time_left) % 3600) / 60);
-    s = Math.floor((Number(data.telemetry.eva1.oxy_time_left) % 3600) % 60);
-    document.getElementById("o2Time1").innerText =
-      ("0" + h).slice(-2) +
-      ":" +
-      ("0" + m).slice(-2) +
-      ":" +
-      ("0" + s).slice(-2);
-
-    document.getElementById("primaryO2Storage1").innerText =
-      Number(data.telemetry.eva1.oxy_pri_storage).toFixed(0) + " %";
-    document.getElementById("secondaryO2Storage1").innerText =
-      Number(data.telemetry.eva1.oxy_sec_storage).toFixed(0) + " %";
-    document.getElementById("primaryO2Pressure1").innerText =
-      Number(data.telemetry.eva1.oxy_pri_pressure).toFixed(2) + " psi";
-    document.getElementById("secondaryO2Pressure1").innerText =
-      Number(data.telemetry.eva1.oxy_sec_pressure).toFixed(2) + " psi";
-
-    document.getElementById("suitO2Pressure1").innerText =
-      Number(data.telemetry.eva1.suit_pressure_oxy).toFixed(2) + " psi";
-    document.getElementById("suitCO2Pressure1").innerText =
-      Number(data.telemetry.eva1.suit_pressure_co2).toFixed(2) + " psi";
-    document.getElementById("suitOtherPressure1").innerText =
-      Number(data.telemetry.eva1.suit_pressure_other).toFixed(2) + " psi";
-    document.getElementById("suitTotalPressure1").innerText =
-      Number(data.telemetry.eva1.suit_pressure_total).toFixed(2) + " psi";
-
-    document.getElementById("scrubberAPressure1").innerText =
-      Number(data.telemetry.eva1.scrubber_a_co2_storage).toFixed(2) + " psi";
-    document.getElementById("scrubberBPressure1").innerText =
-      Number(data.telemetry.eva1.scrubber_b_co2_storage).toFixed(2) + " psi";
-    document.getElementById("h2OGasPressure1").innerText =
-      Number(data.telemetry.eva1.coolant_gas_pressure).toFixed(2) + " psi";
-    document.getElementById("h2OLiquidPressure1").innerText =
-      Number(data.telemetry.eva1.coolant_liquid_pressure).toFixed(2) + " psi";
-
-    document.getElementById("o2Consumption1").innerText =
-      Number(data.telemetry.eva1.oxy_consumption).toFixed(1) + " ml/min";
-    document.getElementById("co2Production1").innerText =
-      Number(data.telemetry.eva1.co2_production).toFixed(1) + " ml/min";
-    document.getElementById("primaryFan1").innerText =
-      Number(data.telemetry.eva1.fan_pri_rpm).toFixed(0) + " rpm";
-    document.getElementById("secondaryFan1").innerText =
-      Number(data.telemetry.eva1.fan_sec_rpm).toFixed(0) + " rpm";
-
-    document.getElementById("helmetCO2Pressure1").innerText =
-      Number(data.telemetry.eva1.helmet_pressure_co2).toFixed(2) + " psi";
-    document.getElementById("heartRate1").innerText =
-      Number(data.telemetry.eva1.heart_rate).toFixed(2) + " bpm";
-    document.getElementById("temperature1").innerText =
-      Number(data.telemetry.eva1.temperature).toFixed(2) + " deg F";
-    document.getElementById("coolant1").innerText =
-      Number(data.telemetry.eva1.coolant_ml).toFixed(2) + " ml";
-
-    // EVA 2
-    h = Math.floor(Number(data.telemetry.eva2.oxy_time_left) / 3600);
-    m = Math.floor((Number(data.telemetry.eva2.oxy_time_left) % 3600) / 60);
-    s = Math.floor((Number(data.telemetry.eva2.oxy_time_left) % 3600) % 60);
-    document.getElementById("o2Time2").innerText =
-      ("0" + h).slice(-2) +
-      ":" +
-      ("0" + m).slice(-2) +
-      ":" +
-      ("0" + s).slice(-2);
-
-    document.getElementById("primaryO2Storage2").innerText =
-      Number(data.telemetry.eva2.oxy_pri_storage).toFixed(0) + " %";
-    document.getElementById("secondaryO2Storage2").innerText =
-      Number(data.telemetry.eva2.oxy_sec_storage).toFixed(0) + " %";
-    document.getElementById("primaryO2Pressure2").innerText =
-      Number(data.telemetry.eva2.oxy_pri_pressure).toFixed(2) + " psi";
-    document.getElementById("secondaryO2Pressure2").innerText =
-      Number(data.telemetry.eva2.oxy_sec_pressure).toFixed(2) + " psi";
-
-    document.getElementById("suitO2Pressure2").innerText =
-      Number(data.telemetry.eva2.suit_pressure_oxy).toFixed(2) + " psi";
-    document.getElementById("suitCO2Pressure2").innerText =
-      Number(data.telemetry.eva2.suit_pressure_co2).toFixed(2) + " psi";
-    document.getElementById("suitOtherPressure2").innerText =
-      Number(data.telemetry.eva2.suit_pressure_other).toFixed(2) + " psi";
-    document.getElementById("suitTotalPressure2").innerText =
-      Number(data.telemetry.eva2.suit_pressure_total).toFixed(2) + " psi";
-
-    document.getElementById("scrubberAPressure2").innerText =
-      Number(data.telemetry.eva2.scrubber_a_co2_storage).toFixed(2) + " psi";
-    document.getElementById("scrubberBPressure2").innerText =
-      Number(data.telemetry.eva2.scrubber_b_co2_storage).toFixed(2) + " psi";
-    document.getElementById("h2OGasPressure2").innerText =
-      Number(data.telemetry.eva2.coolant_gas_pressure).toFixed(2) + " psi";
-    document.getElementById("h2OLiquidPressure2").innerText =
-      Number(data.telemetry.eva2.coolant_liquid_pressure).toFixed(2) + " psi";
-
-    document.getElementById("o2Consumption2").innerText =
-      Number(data.telemetry.eva2.oxy_consumption).toFixed(1) + " ml/min";
-    document.getElementById("co2Production2").innerText =
-      Number(data.telemetry.eva2.co2_production).toFixed(1) + " ml/min";
-    document.getElementById("primaryFan2").innerText =
-      Number(data.telemetry.eva2.fan_pri_rpm).toFixed(0) + " rpm";
-    document.getElementById("secondaryFan2").innerText =
-      Number(data.telemetry.eva2.fan_sec_rpm).toFixed(0) + " rpm";
-
-    document.getElementById("helmetCO2Pressure2").innerText =
-      Number(data.telemetry.eva2.helmet_pressure_co2).toFixed(2) + " psi";
-    document.getElementById("heartRate2").innerText =
-      Number(data.telemetry.eva2.heart_rate).toFixed(2) + " bpm";
-    document.getElementById("temperature2").innerText =
-      Number(data.telemetry.eva2.temperature).toFixed(2) + " deg F";
-    document.getElementById("coolant2").innerText =
-      Number(data.telemetry.eva2.coolant_ml).toFixed(2) + " ml";
+    // Update shared EVA time for both EVAs
+    const evaTime = formatTime(Number(data.telemetry.eva_time));
+    document.getElementById("evaTimeTelemetryState1").innerText = evaTime;
+    document.getElementById("evaTimeTelemetryState2").innerText = evaTime;
+    
+    // Update EVA 1 telemetry
+    updateEVATelemetry(data.telemetry.eva1, "1");
+    
+    // Update EVA 2 telemetry  
+    updateEVATelemetry(data.telemetry.eva2, "2");
   });
 }
+
 
 // Loads title for team specific data depending on which team is selected
 function loadTitle(oldTeam) {
@@ -633,7 +367,7 @@ function loadTeams() {
   });
 }
 
-// Loads lights for Rooms depending on state - now updates dropdown styling
+// Loads status lights for room
 function loadLights(team) {
   $.getJSON("data/teams/" + team + "/EVA_STATUS.json", function (data) {
     $.getJSON(
@@ -670,220 +404,58 @@ function loadLights(team) {
   });
 }
 
-// Load telemetry of Pressurized Rover
-function loadPR_Telemetry(team) {
+/**
+ * Loads Pressurized Rover telemetry data and updates sensors, switches, and telemetry displays
+ * Updates rover positioning, environmental data, and system status indicators
+ */
+function loadPRTelemetryData(team) {
   $.getJSON("data/teams/" + team + "/ROVER_TELEMETRY.json", function (data) {
-    if (data.pr_telemetry.ac_heating == true) {
-      document.getElementById("acHeatingSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("acHeatingSwitch").checked = true;
-    } else {
-      document.getElementById("acHeatingSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("acHeatingSwitch").checked = false;
-    }
+    // Update all PR sensors and switches using configuration mapping
+    Object.keys(PR_SENSORS_AND_SWITCHES).forEach(key => {
+      const config = PR_SENSORS_AND_SWITCHES[key];
+      updateSensorAndSwitch(config.sensor, config.switch, data.pr_telemetry[key]);
+    });
 
-    if (data.pr_telemetry.ac_cooling == true) {
-      document.getElementById("acCoolingSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("acCoolingSwitch").checked = true;
-    } else {
-      document.getElementById("acCoolingSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("acCoolingSwitch").checked = false;
-    }
+    // Convert power consumption percentages to kWh
+    const total_battery_capacity = 4320000; // Electric car capacity in Joules
+    const power_consumption_rate = ((total_battery_capacity * data.pr_telemetry.power_consumption_rate) / 100 / 1000) * 3600;
+    const motor_power_consumption = ((total_battery_capacity * data.pr_telemetry.motor_power_consumption) / 100 / 1000) * 3600;
 
-    if (data.pr_telemetry.lights_on == true) {
-      document.getElementById("lightsOnSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("lightsOnSwitch").checked = true;
-    } else {
-      document.getElementById("lightsOnSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("lightsOnSwitch").checked = false;
-    }
-
-    if (data.pr_telemetry.internal_lights_on == true) {
-      document.getElementById("internalLightsSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("internalLightsSwitch").checked = true;
-    } else {
-      document.getElementById("internalLightsSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("internalLightsSwitch").checked = false;
-    }
-
-    if (data.pr_telemetry.brakes == true) {
-      document.getElementById("brakesSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("brakesSwitch").checked = true;
-    } else {
-      document.getElementById("brakesSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("brakesSwitch").checked = false;
-    }
-
-    if (data.pr_telemetry.in_sunlight == true) {
-      document.getElementById("inSunlightSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("inSunlightSwitch").checked = true;
-    } else {
-      document.getElementById("inSunlightSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("inSunlightSwitch").checked = false;
-    }
-
-    if (data.pr_telemetry.co2_scrubber == true) {
-      document.getElementById("co2ScrubberSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("co2ScrubberSwitch").checked = true;
-    } else {
-      document.getElementById("co2ScrubberSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("co2ScrubberSwitch").checked = false;
-    }
-
-    if (data.pr_telemetry.dust_wiper == true) {
-      document.getElementById("dustWiperSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("dustWiperSwitch").checked = true;
-    } else {
-      document.getElementById("dustWiperSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("dustWiperSwitch").checked = false;
-    }
-
-    if (data.pr_telemetry.fan_pri == true) {
-      document.getElementById("fanPriSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("fanPriSwitch").checked = true;
-    } else {
-      document.getElementById("fanPriSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("fanPriSwitch").checked = false;
-    }
-
-    if (data.pr_telemetry.switch_dest == true) {
-      document.getElementById("switchDestSensor").style.backgroundColor =
-        "rgba(0, 240, 10, 1)";
-      document.getElementById("switchDestSwitch").checked = true;
-    } else {
-      document.getElementById("switchDestSensor").style.backgroundColor =
-        "rgba(100, 100, 100, 1)";
-      document.getElementById("switchDestSwitch").checked = false;
-    }
-
-    let throttle = data.pr_telemetry.throttle;
-    let steering = data.pr_telemetry.steering;
-    let current_pos_x = data.pr_telemetry.current_pos_x;
-    let current_pos_y = data.pr_telemetry.current_pos_y;
-    let current_pos_alt = data.pr_telemetry.current_pos_alt;
-    let heading = data.pr_telemetry.heading;
-    let roll = data.pr_telemetry.roll;
-    let pitch = data.pr_telemetry.pitch;
-    let distance_traveled = data.pr_telemetry.distance_traveled;
-    let speed = data.pr_telemetry.speed;
-    let surface_incline = data.pr_telemetry.surface_incline;
-
-    let battery_level = data.pr_telemetry.battery_level;
-    let solar_panel_dust_accum = data.pr_telemetry.solar_panel_dust_accum;
-    let solar_panel_efficiency = data.pr_telemetry.solar_panel_efficiency;
-
-    let oxygen_levels = data.pr_telemetry.oxygen_levels;
-    let oxygen_tank = data.pr_telemetry.oxygen_tank;
-    let oxygen_pressure = data.pr_telemetry.oxygen_pressure;
-    let ac_fan_pri = data.pr_telemetry.ac_fan_pri;
-    let ac_fan_sec = data.pr_telemetry.ac_fan_sec;
-
-    let cabin_pressure = data.pr_telemetry.cabin_pressure;
-    let cabin_temperature = data.pr_telemetry.cabin_temperature;
-
-    // Convert the porcentage consumption rate to watts
-    // Total_battery_capacity is assuming same capacity as an electric car in Joules
-    let total_battery_capacity = 4320000;
-
-    // Power_consumption_rate is now in kiloWatt/hour
-    let power_consumption_rate =
-      ((total_battery_capacity * data.pr_telemetry.power_consumption_rate) /
-        100 /
-        1000) *
-      3600;
-
-    let motor_power_consumption =
-      ((total_battery_capacity * data.pr_telemetry.motor_power_consumption) /
-        100 /
-        1000) *
-      3600;
-
-    let external_temp = data.pr_telemetry.external_temp;
-    let coolant_level = data.pr_telemetry.pr_coolant_level;
-    let coolant_pressure = data.pr_telemetry.pr_coolant_pressure;
-    let coolant_tank = data.pr_telemetry.pr_coolant_tank;
-    let terrain_condition = data.pr_telemetry.terrain_condition;
-    let mission_elapsed_time = data.pr_telemetry.mission_elapsed_time;
-    let mission_planned_time = data.pr_telemetry.mission_planned_time;
-    let point_of_no_return = data.pr_telemetry.point_of_no_return;
-    let distance_from_base = data.pr_telemetry.distance_from_base;
-
-    // PR Positioning
-    document.getElementById("throttle").innerText = throttle.toFixed(2) + " %";
-    document.getElementById("steering").innerText = steering.toFixed(2);
-    document.getElementById("current_pos_x").innerText =
-      current_pos_x.toFixed(2);
-    document.getElementById("current_pos_y").innerText =
-      current_pos_y.toFixed(2);
-    document.getElementById("current_pos_alt").innerText =
-      current_pos_alt.toFixed(2);
-    document.getElementById("heading").innerText = heading.toFixed(2) + "°";
-    document.getElementById("roll").innerText = roll.toFixed(2) + "°";
-    document.getElementById("pitch").innerText = pitch.toFixed(2) + "°";
-    document.getElementById("distance_traveled").innerText =
-      distance_traveled.toFixed(2) + " m";
-    document.getElementById("speed").innerText = speed.toFixed(2) + " m/s";
-    document.getElementById("surface_incline").innerText =
-      surface_incline.toFixed(2) + "°";
-    document.getElementById("oxygen_pressure").innerText =
-      oxygen_pressure.toFixed(2) + " psi";
-    document.getElementById("oxygen_levels").innerText =
-      oxygen_levels.toFixed(2) + " %";
-    document.getElementById("oxygen_tank").innerText =
-      oxygen_tank.toFixed(2) + " %";
-    document.getElementById("solar_panel_dust_accum").innerText =
-      solar_panel_dust_accum.toFixed(2) + " %";
-    document.getElementById("battery_level").innerText =
-      battery_level.toFixed(2) + " %";
-    document.getElementById("ac_fan_pri").innerText =
-      ac_fan_pri.toFixed(2) + " rpm";
-    document.getElementById("ac_fan_sec").innerText =
-      ac_fan_sec.toFixed(2) + " rpm";
-    document.getElementById("cabin_pressure").innerText =
-      cabin_pressure.toFixed(2) + " psi";
-    document.getElementById("cabin_temperature").innerText =
-      cabin_temperature.toFixed(2) + " °C";
-    document.getElementById("power_consumption_rate").innerText =
-      power_consumption_rate.toFixed(2) + " kWh";
-    document.getElementById("solar_panel_efficiency").innerText =
-      solar_panel_efficiency.toFixed(2);
-    document.getElementById("external_temp").innerText =
-      external_temp.toFixed(2) + " °C";
-    document.getElementById("pr_coolant_level").innerText =
-      coolant_level.toFixed(2) + " L";
-    document.getElementById("pr_coolant_pressure").innerText =
-      coolant_pressure.toFixed(2) + " psi";
-    document.getElementById("pr_coolant_tank").innerText =
-      coolant_tank.toFixed(2) + " %";
-    document.getElementById("motor_power_consumption").innerText =
-      motor_power_consumption.toFixed(2) + " kWh";
-    document.getElementById("terrain_condition").innerText =
-      terrain_condition.toFixed(2);
-    document.getElementById("mission_elapsed_time").innerText =
-      mission_elapsed_time.toFixed(2);
-    document.getElementById("mission_planned_time").innerText =
-      mission_planned_time.toFixed(2);
-    document.getElementById("point_of_no_return").innerText =
-      point_of_no_return.toFixed(2);
-    document.getElementById("distance_from_base").innerText =
-      distance_from_base.toFixed(2) + " m";
+    // Update PR positioning and movement data
+    updateTelemetryField("throttle", data.pr_telemetry.throttle, "%");
+    updateTelemetryField("steering", data.pr_telemetry.steering);
+    updateTelemetryField("current_pos_x", data.pr_telemetry.current_pos_x);
+    updateTelemetryField("current_pos_y", data.pr_telemetry.current_pos_y);
+    updateTelemetryField("current_pos_alt", data.pr_telemetry.current_pos_alt);
+    updateTelemetryField("heading", data.pr_telemetry.heading, "°");
+    updateTelemetryField("roll", data.pr_telemetry.roll, "°");
+    updateTelemetryField("pitch", data.pr_telemetry.pitch, "°");
+    updateTelemetryField("distance_traveled", data.pr_telemetry.distance_traveled, "m");
+    updateTelemetryField("speed", data.pr_telemetry.speed, "m/s");
+    updateTelemetryField("surface_incline", data.pr_telemetry.surface_incline, "°");
+    
+    // Update environmental and system data
+    updateTelemetryField("oxygen_pressure", data.pr_telemetry.oxygen_pressure, "psi");
+    updateTelemetryField("oxygen_levels", data.pr_telemetry.oxygen_levels, "%");
+    updateTelemetryField("oxygen_tank", data.pr_telemetry.oxygen_tank, "%");
+    updateTelemetryField("solar_panel_dust_accum", data.pr_telemetry.solar_panel_dust_accum, "%");
+    updateTelemetryField("battery_level", data.pr_telemetry.battery_level, "%");
+    updateTelemetryField("ac_fan_pri", data.pr_telemetry.ac_fan_pri, "rpm");
+    updateTelemetryField("ac_fan_sec", data.pr_telemetry.ac_fan_sec, "rpm");
+    updateTelemetryField("cabin_pressure", data.pr_telemetry.cabin_pressure, "psi");
+    updateTelemetryField("cabin_temperature", data.pr_telemetry.cabin_temperature, "°C");
+    updateTelemetryField("power_consumption_rate", power_consumption_rate, "kWh");
+    updateTelemetryField("solar_panel_efficiency", data.pr_telemetry.solar_panel_efficiency);
+    updateTelemetryField("external_temp", data.pr_telemetry.external_temp, "°C");
+    updateTelemetryField("pr_coolant_level", data.pr_telemetry.pr_coolant_level, "L");
+    updateTelemetryField("pr_coolant_pressure", data.pr_telemetry.pr_coolant_pressure, "psi");
+    updateTelemetryField("pr_coolant_tank", data.pr_telemetry.pr_coolant_tank, "%");
+    updateTelemetryField("motor_power_consumption", motor_power_consumption, "kWh");
+    updateTelemetryField("terrain_condition", data.pr_telemetry.terrain_condition);
+    updateTelemetryField("mission_elapsed_time", data.pr_telemetry.mission_elapsed_time);
+    updateTelemetryField("mission_planned_time", data.pr_telemetry.mission_planned_time);
+    updateTelemetryField("point_of_no_return", data.pr_telemetry.point_of_no_return);
+    updateTelemetryField("distance_from_base", data.pr_telemetry.distance_from_base, "m");
   });
 }
 
@@ -972,27 +544,21 @@ function onload() {
   //Load immediately
   loadUIA();
   loadDCU();
-  loadEVA(selectedTeam);
-  loadPR(selectedTeam);
-  loadTelemetry(selectedTeam);
-  loadPR_Telemetry(selectedTeam);
+  loadEVAStatus(selectedTeam);
+  loadPRStatus(selectedTeam);
+  loadEVATelemetry(selectedTeam);
+  loadPRTelemetryData(selectedTeam);
   loadLocation();
   updateTelemetry();
 
   // Continuously refreshes values from the UIA, DCU, EVA, and Telemetry
   setInterval(function () {
     loadUIA();
-
     loadDCU();
-
-    loadEVA(selectedTeam);
-
-    loadPR(selectedTeam);
-
-    loadTelemetry(selectedTeam);
-
-    loadPR_Telemetry(selectedTeam);
-
+    loadEVAStatus(selectedTeam);
+    loadPRStatus(selectedTeam);
+    loadEVATelemetry(selectedTeam);
+    loadPRTelemetryData(selectedTeam);
     loadLocation();
   }, 1000);
 }
