@@ -21,7 +21,7 @@ const DCU_SENSORS_AND_SWITCHES = {
  * Replaces 126+ lines of repetitive if/else blocks with simple loop
  */
 function loadDCU() {
-  $.getJSON("data/DCU.json", function (data) {
+  $.getJSON("../data/DCU.json", function (data) {
     // Update all DCU sensors and switches using configuration mapping
     Object.keys(DCU_SENSORS_AND_SWITCHES).forEach((key) => {
       // Handle nested object paths like "eva1.batt"

@@ -1,7 +1,7 @@
 // Global variable for currently selected team
 let selectedTeam = 0;
 let oldTeam = 0;
-  
+
 // Global variables for UI elements
 let startButton = document.getElementById("tssStart");
 let stopButton = document.getElementById("tssStop");
@@ -46,7 +46,7 @@ let yCoordinateRover = document.getElementById("yCoordinateRover");
 // UIA sensor mappings
 const UIA_SENSORS = {
   eva1_power: "eva1PowerSensor",
-  eva2_power: "eva2PowerSensor", 
+  eva2_power: "eva2PowerSensor",
   eva1_water_supply: "eva1WaterSupplySensor",
   eva2_water_supply: "eva2WaterSupplySensor",
   eva1_water_waste: "eva1WaterWasteSensor",
@@ -54,23 +54,23 @@ const UIA_SENSORS = {
   eva1_oxy: "eva1OxygenSensor",
   eva2_oxy: "eva2OxygenSensor",
   oxy_vent: "oxygenVentSensor",
-  depress: "depressPumpSensor"
+  depress: "depressPumpSensor",
 };
 
 // DCU sensor mappings
 const DCU_SENSORS = {
   "eva1.batt": "dcuEva1BatterySensor",
-  "eva1.oxy": "dcuEva1OxygenSensor", 
+  "eva1.oxy": "dcuEva1OxygenSensor",
   "eva1.comm": "dcuEva1CommSensor",
   "eva1.fan": "dcuEva1FanSensor",
   "eva1.pump": "dcuEva1PumpSensor",
   "eva1.co2": "dcuEva1Co2Sensor",
   "eva2.batt": "dcuEva2BatterySensor",
   "eva2.oxy": "dcuEva2OxygenSensor",
-  "eva2.comm": "dcuEva2CommSensor", 
+  "eva2.comm": "dcuEva2CommSensor",
   "eva2.fan": "dcuEva2FanSensor",
   "eva2.pump": "dcuEva2PumpSensor",
-  "eva2.co2": "dcuEva2Co2Sensor"
+  "eva2.co2": "dcuEva2Co2Sensor",
 };
 
 // Pressurized Rover sensor and switch mappings
@@ -78,20 +78,23 @@ const PR_SENSORS_AND_SWITCHES = {
   ac_heating: { sensor: "acHeatingSensor", switch: "acHeatingSwitch" },
   ac_cooling: { sensor: "acCoolingSensor", switch: "acCoolingSwitch" },
   lights_on: { sensor: "lightsOnSensor", switch: "lightsOnSwitch" },
-  internal_lights_on: { sensor: "internalLightsSensor", switch: "internalLightsSwitch" },
+  internal_lights_on: {
+    sensor: "internalLightsSensor",
+    switch: "internalLightsSwitch",
+  },
   brakes: { sensor: "brakesSensor", switch: "brakesSwitch" },
   in_sunlight: { sensor: "inSunlightSensor", switch: "inSunlightSwitch" },
   co2_scrubber: { sensor: "co2ScrubberSensor", switch: "co2ScrubberSwitch" },
   dust_wiper: { sensor: "dustWiperSensor", switch: "dustWiperSwitch" },
   fan_pri: { sensor: "fanPriSensor", switch: "fanPriSwitch" },
-  switch_dest: { sensor: "switchDestSensor", switch: "switchDestSwitch" }
+  switch_dest: { sensor: "switchDestSensor", switch: "switchDestSwitch" },
 };
 
 // Updates team specific data when another team is selected
 function swapTeams(newTeam) {
   // Update global team
   selectedTeam = newTeam - 1;
-  
+
   // Update dropdown selection
   const dropdown = document.getElementById("roomSelect");
   if (dropdown) {
@@ -118,11 +121,19 @@ function swapTeams(newTeam) {
   document.getElementById("assignSPEC").value = selectedTeam;
 
   // Assign page title based on room selected - get from JSON data instead of dropdown
-  $.getJSON("data/TEAMS.json", function (data) {
+  $.getJSON("../data/TEAMS.json", function (data) {
     const teamNames = [
-      data.teams.team_1, data.teams.team_2, data.teams.team_3, data.teams.team_4,
-      data.teams.team_5, data.teams.team_6, data.teams.team_7, data.teams.team_8,
-      data.teams.team_9, data.teams.team_10, data.teams.team_11
+      data.teams.team_1,
+      data.teams.team_2,
+      data.teams.team_3,
+      data.teams.team_4,
+      data.teams.team_5,
+      data.teams.team_6,
+      data.teams.team_7,
+      data.teams.team_8,
+      data.teams.team_9,
+      data.teams.team_10,
+      data.teams.team_11,
     ];
     const teamName = teamNames[selectedTeam] || "------";
     document.getElementById("roomDataTitle").textContent =
@@ -135,7 +146,7 @@ function swapTeams(newTeam) {
 
 // Loads the coordinates of EVA 1 and EVA 2
 function loadLocation() {
-  $.getJSON("data/IMU.json", function (data) {
+  $.getJSON("../data/IMU.json", function (data) {
     xCoordinateEV1.innerText = data.imu.eva1.posx.toFixed(2);
     yCoordinateEV1.innerText = data.imu.eva1.posy.toFixed(2);
     headingEV1.innerText = data.imu.eva1.heading.toFixed(2);
@@ -174,12 +185,11 @@ function getCookie(cname) {
   return 0;
 }
 
-
 // Loads UIA data and updates all sensor states
 function loadUIA() {
-  $.getJSON("data/UIA.json", function (data) {
+  $.getJSON("../data/UIA.json", function (data) {
     // Update all UIA sensors using configuration mapping
-    Object.keys(UIA_SENSORS).forEach(key => {
+    Object.keys(UIA_SENSORS).forEach((key) => {
       updateSensor(UIA_SENSORS[key], data.uia[key]);
     });
   });
@@ -187,13 +197,13 @@ function loadUIA() {
 
 // Loads DCU data and updates all sensor states
 function loadDCU() {
-  $.getJSON("data/DCU.json", function (data) {
+  $.getJSON("../data/DCU.json", function (data) {
     // Update all DCU sensors using configuration mapping
-    Object.keys(DCU_SENSORS).forEach(key => {
+    Object.keys(DCU_SENSORS).forEach((key) => {
       // Handle nested object paths like "eva1.batt"
-      const keys = key.split('.');
+      const keys = key.split(".");
       let value = data.dcu;
-      keys.forEach(k => value = value[k]);
+      keys.forEach((k) => (value = value[k]));
       updateSensor(DCU_SENSORS[key], value);
     });
   });
@@ -204,12 +214,19 @@ function loadDCU() {
  * Updates EVA timer displays and station status indicators
  */
 function loadEVAStatus(team) {
-  $.getJSON("data/teams/" + team + "/EVA_STATUS.json", function (data) {
+  $.getJSON("../data/teams/" + team + "/EVA_STATUS.json", function (data) {
     // Format and display EVA timers using utility function
-    document.getElementById("evaTimer").innerText = "EVA Time: " + formatTime(data.eva.total_time);
-    document.getElementById("uiaTimer").innerText = formatTime(data.eva.uia.time).substring(3); // Remove hours for MM:SS
-    document.getElementById("specTimer").innerText = formatTime(data.eva.spec.time).substring(3); // Remove hours for MM:SS  
-    document.getElementById("dcuTimer").innerText = formatTime(data.eva.dcu.time).substring(3); // Remove hours for MM:SS
+    document.getElementById("evaTimer").innerText =
+      "EVA Time: " + formatTime(data.eva.total_time);
+    document.getElementById("uiaTimer").innerText = formatTime(
+      data.eva.uia.time
+    ).substring(3); // Remove hours for MM:SS
+    document.getElementById("specTimer").innerText = formatTime(
+      data.eva.spec.time
+    ).substring(3); // Remove hours for MM:SS
+    document.getElementById("dcuTimer").innerText = formatTime(
+      data.eva.dcu.time
+    ).substring(3); // Remove hours for MM:SS
 
     // Button UI States Visuals
     var evaStarted = data.eva.started;
@@ -224,7 +241,6 @@ function loadEVAStatus(team) {
     } else {
       resumeTSS();
     }
-
 
     loadLights(team);
 
@@ -270,9 +286,10 @@ function loadEVAStatus(team) {
  * Updates PR timer display and button states
  */
 function loadPRStatus(team) {
-  $.getJSON("data/teams/" + team + "/ROVER_TELEMETRY.json", function (data) {
+  $.getJSON("../data/teams/" + team + "/ROVER_TELEMETRY.json", function (data) {
     // Format and display PR timer using utility function
-    document.getElementById("prTimer").innerText = "PR Time: " + formatTime(data.pr_telemetry.mission_elapsed_time);
+    document.getElementById("prTimer").innerText =
+      "PR Time: " + formatTime(data.pr_telemetry.mission_elapsed_time);
 
     // Button UI States Visuals
     var prStarted = data.pr_telemetry.sim_running;
@@ -316,24 +333,23 @@ function loadPRStatus(team) {
  * Displays oxygen levels, pressures, consumption rates, and health metrics
  */
 function loadEVATelemetry(team) {
-  $.getJSON("data/teams/" + team + "/EVA_TELEMETRY.json", function (data) {
+  $.getJSON("../data/teams/" + team + "/EVA_TELEMETRY.json", function (data) {
     // Update shared EVA time for both EVAs
     const evaTime = formatTime(Number(data.telemetry.eva_time));
     document.getElementById("evaTimeTelemetryState1").innerText = evaTime;
     document.getElementById("evaTimeTelemetryState2").innerText = evaTime;
-    
+
     // Update EVA 1 telemetry
     updateEVATelemetry(data.telemetry.eva1, "1");
-    
-    // Update EVA 2 telemetry  
+
+    // Update EVA 2 telemetry
     updateEVATelemetry(data.telemetry.eva2, "2");
   });
 }
 
-
 // Loads title for team specific data depending on which team is selected
 function loadTitle(oldTeam) {
-  $.getJSON("data/TEAMS.json", function (data) {
+  $.getJSON("../data/TEAMS.json", function (data) {
     var teamnames = Object.values(data.teams);
     document.getElementById("roomDataTitle").innerText =
       teamnames[oldTeam] + " - Room " + (oldTeam + 1);
@@ -342,12 +358,20 @@ function loadTitle(oldTeam) {
 
 // Loads team names for dropdown
 function loadTeams() {
-  $.getJSON("data/TEAMS.json", function (data) {
+  $.getJSON("../data/TEAMS.json", function (data) {
     const dropdown = document.getElementById("roomSelect");
     const teamNames = [
-      data.teams.team_1, data.teams.team_2, data.teams.team_3, data.teams.team_4,
-      data.teams.team_5, data.teams.team_6, data.teams.team_7, data.teams.team_8,
-      data.teams.team_9, data.teams.team_10, data.teams.team_11
+      data.teams.team_1,
+      data.teams.team_2,
+      data.teams.team_3,
+      data.teams.team_4,
+      data.teams.team_5,
+      data.teams.team_6,
+      data.teams.team_7,
+      data.teams.team_8,
+      data.teams.team_9,
+      data.teams.team_10,
+      data.teams.team_11,
     ];
 
     // Update dropdown options with team names
@@ -369,9 +393,9 @@ function loadTeams() {
 
 // Loads status lights for room
 function loadLights(team) {
-  $.getJSON("data/teams/" + team + "/EVA_STATUS.json", function (data) {
+  $.getJSON("../data/teams/" + team + "/EVA_STATUS.json", function (data) {
     $.getJSON(
-      "data/teams/" + team + "/ROVER_TELEMETRY.json",
+      "../data/teams/" + team + "/ROVER_TELEMETRY.json",
       function (pr_data) {
         // Button UI States Visuals
         var evaStarted = data.eva.started || pr_data.pr_telemetry.sim_running;
@@ -391,7 +415,10 @@ function loadLights(team) {
         const dropdown = document.getElementById("roomSelect");
         const option = dropdown.options[team];
         if (option) {
-          if ((evaStarted && !evaComplete) || pr_data.pr_telemetry.sim_running) {
+          if (
+            (evaStarted && !evaComplete) ||
+            pr_data.pr_telemetry.sim_running
+          ) {
             option.style.color = "rgba(0, 240, 10, 1)"; // Green for active
           } else if (evaComplete) {
             option.style.color = "rgba(0, 0, 255, 1)"; // Blue for completed
@@ -409,17 +436,29 @@ function loadLights(team) {
  * Updates rover positioning, environmental data, and system status indicators
  */
 function loadPRTelemetryData(team) {
-  $.getJSON("data/teams/" + team + "/ROVER_TELEMETRY.json", function (data) {
+  $.getJSON("../data/teams/" + team + "/ROVER_TELEMETRY.json", function (data) {
     // Update all PR sensors and switches using configuration mapping
-    Object.keys(PR_SENSORS_AND_SWITCHES).forEach(key => {
+    Object.keys(PR_SENSORS_AND_SWITCHES).forEach((key) => {
       const config = PR_SENSORS_AND_SWITCHES[key];
-      updateSensorAndSwitch(config.sensor, config.switch, data.pr_telemetry[key]);
+      updateSensorAndSwitch(
+        config.sensor,
+        config.switch,
+        data.pr_telemetry[key]
+      );
     });
 
     // Convert power consumption percentages to kWh
     const total_battery_capacity = 4320000; // Electric car capacity in Joules
-    const power_consumption_rate = ((total_battery_capacity * data.pr_telemetry.power_consumption_rate) / 100 / 1000) * 3600;
-    const motor_power_consumption = ((total_battery_capacity * data.pr_telemetry.motor_power_consumption) / 100 / 1000) * 3600;
+    const power_consumption_rate =
+      ((total_battery_capacity * data.pr_telemetry.power_consumption_rate) /
+        100 /
+        1000) *
+      3600;
+    const motor_power_consumption =
+      ((total_battery_capacity * data.pr_telemetry.motor_power_consumption) /
+        100 /
+        1000) *
+      3600;
 
     // Update PR positioning and movement data
     updateTelemetryField("throttle", data.pr_telemetry.throttle, "%");
@@ -430,32 +469,99 @@ function loadPRTelemetryData(team) {
     updateTelemetryField("heading", data.pr_telemetry.heading, "°");
     updateTelemetryField("roll", data.pr_telemetry.roll, "°");
     updateTelemetryField("pitch", data.pr_telemetry.pitch, "°");
-    updateTelemetryField("distance_traveled", data.pr_telemetry.distance_traveled, "m");
+    updateTelemetryField(
+      "distance_traveled",
+      data.pr_telemetry.distance_traveled,
+      "m"
+    );
     updateTelemetryField("speed", data.pr_telemetry.speed, "m/s");
-    updateTelemetryField("surface_incline", data.pr_telemetry.surface_incline, "°");
-    
+    updateTelemetryField(
+      "surface_incline",
+      data.pr_telemetry.surface_incline,
+      "°"
+    );
+
     // Update environmental and system data
-    updateTelemetryField("oxygen_pressure", data.pr_telemetry.oxygen_pressure, "psi");
+    updateTelemetryField(
+      "oxygen_pressure",
+      data.pr_telemetry.oxygen_pressure,
+      "psi"
+    );
     updateTelemetryField("oxygen_levels", data.pr_telemetry.oxygen_levels, "%");
     updateTelemetryField("oxygen_tank", data.pr_telemetry.oxygen_tank, "%");
-    updateTelemetryField("solar_panel_dust_accum", data.pr_telemetry.solar_panel_dust_accum, "%");
+    updateTelemetryField(
+      "solar_panel_dust_accum",
+      data.pr_telemetry.solar_panel_dust_accum,
+      "%"
+    );
     updateTelemetryField("battery_level", data.pr_telemetry.battery_level, "%");
     updateTelemetryField("ac_fan_pri", data.pr_telemetry.ac_fan_pri, "rpm");
     updateTelemetryField("ac_fan_sec", data.pr_telemetry.ac_fan_sec, "rpm");
-    updateTelemetryField("cabin_pressure", data.pr_telemetry.cabin_pressure, "psi");
-    updateTelemetryField("cabin_temperature", data.pr_telemetry.cabin_temperature, "°C");
-    updateTelemetryField("power_consumption_rate", power_consumption_rate, "kWh");
-    updateTelemetryField("solar_panel_efficiency", data.pr_telemetry.solar_panel_efficiency);
-    updateTelemetryField("external_temp", data.pr_telemetry.external_temp, "°C");
-    updateTelemetryField("pr_coolant_level", data.pr_telemetry.pr_coolant_level, "L");
-    updateTelemetryField("pr_coolant_pressure", data.pr_telemetry.pr_coolant_pressure, "psi");
-    updateTelemetryField("pr_coolant_tank", data.pr_telemetry.pr_coolant_tank, "%");
-    updateTelemetryField("motor_power_consumption", motor_power_consumption, "kWh");
-    updateTelemetryField("terrain_condition", data.pr_telemetry.terrain_condition);
-    updateTelemetryField("mission_elapsed_time", data.pr_telemetry.mission_elapsed_time);
-    updateTelemetryField("mission_planned_time", data.pr_telemetry.mission_planned_time);
-    updateTelemetryField("point_of_no_return", data.pr_telemetry.point_of_no_return);
-    updateTelemetryField("distance_from_base", data.pr_telemetry.distance_from_base, "m");
+    updateTelemetryField(
+      "cabin_pressure",
+      data.pr_telemetry.cabin_pressure,
+      "psi"
+    );
+    updateTelemetryField(
+      "cabin_temperature",
+      data.pr_telemetry.cabin_temperature,
+      "°C"
+    );
+    updateTelemetryField(
+      "power_consumption_rate",
+      power_consumption_rate,
+      "kWh"
+    );
+    updateTelemetryField(
+      "solar_panel_efficiency",
+      data.pr_telemetry.solar_panel_efficiency
+    );
+    updateTelemetryField(
+      "external_temp",
+      data.pr_telemetry.external_temp,
+      "°C"
+    );
+    updateTelemetryField(
+      "pr_coolant_level",
+      data.pr_telemetry.pr_coolant_level,
+      "L"
+    );
+    updateTelemetryField(
+      "pr_coolant_pressure",
+      data.pr_telemetry.pr_coolant_pressure,
+      "psi"
+    );
+    updateTelemetryField(
+      "pr_coolant_tank",
+      data.pr_telemetry.pr_coolant_tank,
+      "%"
+    );
+    updateTelemetryField(
+      "motor_power_consumption",
+      motor_power_consumption,
+      "kWh"
+    );
+    updateTelemetryField(
+      "terrain_condition",
+      data.pr_telemetry.terrain_condition
+    );
+    updateTelemetryField(
+      "mission_elapsed_time",
+      data.pr_telemetry.mission_elapsed_time
+    );
+    updateTelemetryField(
+      "mission_planned_time",
+      data.pr_telemetry.mission_planned_time
+    );
+    updateTelemetryField(
+      "point_of_no_return",
+      data.pr_telemetry.point_of_no_return
+    );
+    updateTelemetryField(
+      "distance_from_base",
+      data.pr_telemetry.distance_from_base,
+      "m"
+    );
   });
 }
 
@@ -528,7 +634,7 @@ function onload() {
   oldTeam = getCookie("roomNum");
   console.log("selected team is " + oldTeam);
   loadTitle(oldTeam);
-  
+
   // Set initial dropdown selection
   const dropdown = document.getElementById("roomSelect");
   if (dropdown) {
@@ -572,7 +678,6 @@ function roomSelect(inputVal) {
   // minus 1 handles the zero indexing of the team number folders
   swapTeams(roomNumber);
 }
-
 
 // Updates station frontend
 function updateStationStatus(

@@ -1,0 +1,54 @@
+
+{
+	"telemetry": {
+		"eva_time": 86,
+		"eva1": {
+			"batt_time_left": 1250.000000,
+			"oxy_pri_storage": 0.857339,
+			"oxy_sec_storage": 0.857339,
+			"oxy_pri_pressure": 2819.966797,
+			"oxy_sec_pressure": 2767.956787,
+			"oxy_time_left": 185,
+			"heart_rate": 88.992485,
+			"oxy_consumption": 724.812012,
+			"co2_production": 735.819580,
+			"suit_pressure_oxy": 4.481860,
+			"suit_pressure_co2": 0.074582,
+			"suit_pressure_other": 0.000000,
+			"suit_pressure_total": 4.556442,
+			"fan_pri_rpm": 21215.988281,
+			"fan_sec_rpm": 375001120.000000,
+			"helmet_pressure_co2": 0.089498,
+			"scrubber_a_co2_storage": 17.159868,
+			"scrubber_b_co2_storage": 100.000000,
+			"temperature": 79.987473,
+			"coolant_ml": 78.015030,
+			"coolant_gas_pressure": 321.735596,
+			"coolant_liquid_pressure": 495.171387
+		},
+		"eva2": {
+			"batt_time_left": 1250.000000,
+			"oxy_pri_storage": 0.857339,
+			"oxy_sec_storage": 0.857339,
+			"oxy_pri_pressure": 2819.966797,
+			"oxy_sec_pressure": 2767.956787,
+			"oxy_time_left": 185,
+			"heart_rate": 88.992485,
+			"oxy_consumption": 724.812012,
+			"co2_production": 735.819580,
+			"suit_pressure_oxy": 4.481860,
+			"suit_pressure_co2": 0.074582,
+			"suit_pressure_other": 0.000000,
+			"suit_pressure_total": 4.556442,
+			"fan_pri_rpm": 21215.988281,
+			"fan_sec_rpm": 375001120.000000,
+			"helmet_pressure_co2": 0.089498,
+			"scrubber_a_co2_storage": 17.159868,
+			"scrubber_b_co2_storage": 100.000000,
+			"temperature": 79.987473,
+			"coolant_ml": 78.015030,
+			"coolant_gas_pressure": 321.735596,
+			"coolant_liquid_pressure": 495.171387
+		}
+	}
+}

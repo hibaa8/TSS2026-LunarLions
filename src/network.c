@@ -512,7 +512,15 @@ void serve_resource(struct client_info_t *client, const char *path) {
     }
 
     char full_path[128];
-    sprintf(full_path, "frontend%s", path);
+    
+    // Check if the request is for data files
+    if (strncmp(path, "/data/", 6) == 0) {
+        // Serve from root data directory, strip the leading slash
+        sprintf(full_path, "%s", path + 1);
+    } else {
+        // Serve from frontend directory
+        sprintf(full_path, "frontend%s", path);
+    }
 
     // Convert Unix-style paths to Windows paths when needed
 #if defined(_WIN32)

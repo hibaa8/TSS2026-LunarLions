@@ -7,7 +7,7 @@
 			"comm": false,
 			"fan": false,
 			"pump": false,
-			"co2": true
+			"co2": false
 		},
 		"eva2": {
 			"batt": false,
