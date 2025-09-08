@@ -16,7 +16,6 @@
 
     <!------------------------------------------ Navigation Bar Section ------------------------------------------>
     <nav>
-        <img class="logo" src="./images/suits-logo.png">
         <span class="navBarTitle">
             NASA S.U.I.T.S.
         </span>
@@ -36,187 +35,27 @@
                 </li>
             </ul>
         </div>
-        <img class="logo" src="./images/suits-logo.png">
+        <div class="roomSelector">
+            <label for="roomSelect">Room:</label>
+            <select id="roomSelect" onchange="roomSelect(this.value)">
+                <option value="1">Room 1 - ------</option>
+                <option value="2">Room 2 - ------</option>
+                <option value="3">Room 3 - ------</option>
+                <option value="4">Room 4 - ------</option>
+                <option value="5">Room 5 - ------</option>
+                <option value="6">Room 6 - ------</option>
+                <option value="7">Room 7 - ------</option>
+                <option value="8">Room 8 - ------</option>
+                <option value="9">Room 9 - ------</option>
+                <option value="10">Room 10 - ------</option>
+                <option value="11">Room 11 - ------</option>
+            </select>
+        </div>
     </nav>
 
 
     <!------------------------------------------ Main Page Body Section ------------------------------------------>
     <div class="pageBody">
-
-
-        <!------------------------------------------ List of Rooms Section ------------------------------------------>
-        <div class="roomListContainer">
-            <span class="roomListTitle">
-                Rooms
-            </span>
-            <div onclick="roomSelect(1)" id="room1" class="roomListItemBody">
-                <div class="roomListLightContainer">
-                    <div id="room1Light" class="roomListLight"></div>
-                </div>
-                <div class="roomListTeamNameContainer">
-                    <span id="room1Name" class="roomListTeamNameRoomNum">
-                        ------
-                    </span>
-                </div>
-                <div class="roomListRoomNumContainer">
-                    <span class="roomListTeamNameRoomNum">
-                        Room 1
-                    </span>
-                </div>
-            </div>
-            <div onclick="roomSelect(2)" id="room2" class="roomListItemBody">
-                <div class="roomListLightContainer">
-                    <div id="room2Light" class="roomListLight"></div>
-                </div>
-                <div class="roomListTeamNameContainer">
-                    <span id="room2Name" class="roomListTeamNameRoomNum">
-                        ------
-                    </span>
-                </div>
-                <div class="roomListRoomNumContainer">
-                    <span class="roomListTeamNameRoomNum">
-                        Room 2
-                    </span>
-                </div>
-            </div>
-            <div onclick="roomSelect(3)" id="room3" class="roomListItemBody">
-                <div class="roomListLightContainer">
-                    <div id="room3Light" class="roomListLight"></div>
-                </div>
-                <div class="roomListTeamNameContainer">
-                    <span id="room3Name" class="roomListTeamNameRoomNum">
-                        ------
-                    </span>
-                </div>
-                <div class="roomListRoomNumContainer">
-                    <span class="roomListTeamNameRoomNum">
-                        Room 3
-                    </span>
-                </div>
-            </div>
-            <div onclick="roomSelect(4)" id="room4" class="roomListItemBody">
-                <div class="roomListLightContainer">
-                    <div id="room4Light" class="roomListLight"></div>
-                </div>
-                <div class="roomListTeamNameContainer">
-                    <span id="room4Name" class="roomListTeamNameRoomNum">
-                        ------
-                    </span>
-                </div>
-                <div class="roomListRoomNumContainer">
-                    <span class="roomListTeamNameRoomNum">
-                        Room 4
-                    </span>
-                </div>
-            </div>
-            <div onclick="roomSelect(5)" id="room5" class="roomListItemBody">
-                <div class="roomListLightContainer">
-                    <div id="room5Light" class="roomListLight"></div>
-                </div>
-                <div class="roomListTeamNameContainer">
-                    <span id="room5Name" class="roomListTeamNameRoomNum">
-                        ------
-                    </span>
-                </div>
-                <div class="roomListRoomNumContainer">
-                    <span class="roomListTeamNameRoomNum">
-                        Room 5
-                    </span>
-                </div>
-            </div>
-            <div onclick="roomSelect(6)" id="room6" class="roomListItemBody">
-                <div class="roomListLightContainer">
-                    <div id="room6Light" class="roomListLight"></div>
-                </div>
-                <div class="roomListTeamNameContainer">
-                    <span id="room6Name" class="roomListTeamNameRoomNum">
-                        ------
-                    </span>
-                </div>
-                <div class="roomListRoomNumContainer">
-                    <span class="roomListTeamNameRoomNum">
-                        Room 6
-                    </span>
-                </div>
-            </div>
-            <div onclick="roomSelect(7)" id="room7" class="roomListItemBody">
-                <div class="roomListLightContainer">
-                    <div id="room7Light" class="roomListLight"></div>
-                </div>
-                <div class="roomListTeamNameContainer">
-                    <span id="room7Name" class="roomListTeamNameRoomNum">
-                        ------
-                    </span>
-                </div>
-                <div class="roomListRoomNumContainer">
-                    <span class="roomListTeamNameRoomNum">
-                        Room 7
-                    </span>
-                </div>
-            </div>
-            <div onclick="roomSelect(8)" id="room8" class="roomListItemBody">
-                <div class="roomListLightContainer">
-                    <div id="room8Light" class="roomListLight"></div>
-                </div>
-                <div class="roomListTeamNameContainer">
-                    <span id="room8Name" class="roomListTeamNameRoomNum">
-                        ------
-                    </span>
-                </div>
-                <div class="roomListRoomNumContainer">
-                    <span class="roomListTeamNameRoomNum">
-                       Room 8
-                    </span>
-                </div>
-            </div>
-            <div onclick="roomSelect(9)" id="room9" class="roomListItemBody">
-                <div class="roomListLightContainer">
-                    <div id="room9Light" class="roomListLight"></div>
-                </div>
-                <div class="roomListTeamNameContainer">
-                    <span id="room9Name" class="roomListTeamNameRoomNum">
-                        ------
-                    </span>
-                </div>
-                <div class="roomListRoomNumContainer">
-                    <span class="roomListTeamNameRoomNum">
-                        Room 9
-                    </span>
-                </div>
-            </div>
-            <div onclick="roomSelect(10)" id="room10" class="roomListItemBody">
-                <div class="roomListLightContainer">
-                    <div id="room10Light" class="roomListLight"></div>
-                </div>
-                <div class="roomListTeamNameContainer">
-                    <span id="room10Name" class="roomListTeamNameRoomNum">
-                        ------
-                    </span>
-                </div>
-                <div class="roomListRoomNumContainer">
-                    <span class="roomListTeamNameRoomNum">
-                        Room 10
-                    </span>
-                </div>
-            </div>
-            <div onclick="roomSelect(11)" id="room11" class="roomListItemBody">
-                <div class="roomListLightContainer">
-                    <div id="room11Light" class="roomListLight"></div>
-                </div>
-                <div class="roomListTeamNameContainer">
-                    <span id="room11Name" class="roomListTeamNameRoomNum">
-                        ------
-                    </span>
-                </div>
-                <div class="roomListRoomNumContainer">
-                    <span class="roomListTeamNameRoomNum">
-                        Room 11
-                    </span>
-                </div>
-            </div>
-        </div>
-
-
         <!------------------------------------------ Room Specific Data Section ------------------------------------------>
         <div class="roomDataContainer">
             <div class="roomDataColumnContainer">

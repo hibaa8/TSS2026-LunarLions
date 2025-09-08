@@ -67,7 +67,7 @@
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
-    justify-content: flex-start;
+    justify-content: space-between;
   }
   
   .logo {
@@ -94,9 +94,7 @@
   }
   
   .navBarListContainer {
-    flex-grow: 1;
     display: flex;
-    flex-basis: auto;
     align-items: center;
   }
   
@@ -105,7 +103,7 @@
     flex-direction: row;
     display: flex;
     list-style: none;
-    margin-left: auto;
+    margin: 0;
   }
   
   .navBarListItem {
@@ -118,6 +116,43 @@
   .navBarListItem:hover {
     color: var(--yellow);
     transition-duration: 1s;
+  }
+
+  .roomSelector {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .roomSelector label {
+    color: var(--white);
+    font-size: 1rem;
+    margin-right: .5rem;
+    white-space: nowrap;
+  }
+
+  .roomSelector select {
+    background-color: var(--dark-grey);
+    color: var(--white);
+    border: 1px solid var(--grey);
+    border-radius: .25rem;
+    padding: .25rem .5rem;
+    font-size: .9rem;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .roomSelector select:focus {
+    outline: none;
+    border-color: var(--yellow);
+    box-shadow: 0 0 .2rem var(--yellow);
+  }
+
+  .roomSelector select option {
+    background-color: var(--dark-grey);
+    color: var(--white);
   }
   
   

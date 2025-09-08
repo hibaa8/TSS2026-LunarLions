@@ -32,14 +32,9 @@ let specBullet = document.getElementById("specBulletPoint");
 let specName = document.getElementById("specName");
 let specFont = document.getElementById("specNameFont");
 
-let rovButton = document.getElementById("assignROV");
-let rov = document.getElementById("rovTimerContainer");
-let rovStatus = document.getElementById("rovStatus");
-let rovBullet = document.getElementById("rovBulletPoint");
-let rovName = document.getElementById("rovName");
-let rovFont = document.getElementById("rovNameFont");
+// ROV elements removed - they don't exist in HTML
 
-let video = document.getElementById("videoFeed");
+// videoFeed element removed - it doesn't exist in HTML
 
 let xCoordinateEV1 = document.getElementById("xCoordinateEV1");
 let yCoordinateEV1 = document.getElementById("yCoordinateEV1");
@@ -54,10 +49,20 @@ let yCoordinateRover = document.getElementById("yCoordinateRover");
 function swapTeams(newTeam) {
   // Update global team
   selectedTeam = newTeam - 1;
+  
+  console.log("Swapping to team index:", selectedTeam);
+
+  // Update dropdown selection
+  const dropdown = document.getElementById("roomSelect");
+  if (dropdown) {
+    dropdown.value = newTeam;
+  }
 
   // Reload the team specific Json files
   loadEVA(selectedTeam);
   loadTelemetry(selectedTeam);
+  loadPR(selectedTeam);
+  loadPR_Telemetry(selectedTeam);
 
   // Update button functionality
   document.getElementById("tssStart").value = selectedTeam;
@@ -69,12 +74,18 @@ function swapTeams(newTeam) {
   document.getElementById("assignUIA").value = selectedTeam;
   document.getElementById("assignDCU").value = selectedTeam;
   document.getElementById("assignSPEC").value = selectedTeam;
-  document.getElementById("assignROV").value = selectedTeam;
 
-  // Assign page title based on room selected
-  var room = "room" + (selectedTeam + 1) + "Name";
-  document.getElementById("roomDataTitle").textContent =
-    document.getElementById(room).innerText + " - Room " + (selectedTeam + 1);
+  // Assign page title based on room selected - get from JSON data instead of dropdown
+  $.getJSON("data/TEAMS.json", function (data) {
+    const teamNames = [
+      data.teams.team_1, data.teams.team_2, data.teams.team_3, data.teams.team_4,
+      data.teams.team_5, data.teams.team_6, data.teams.team_7, data.teams.team_8,
+      data.teams.team_9, data.teams.team_10, data.teams.team_11
+    ];
+    const teamName = teamNames[selectedTeam] || "------";
+    document.getElementById("roomDataTitle").textContent =
+      teamName + " - Room " + (selectedTeam + 1);
+  });
 
   // Sets the cookie anytime a new team is selected
   setCookie("roomNum", selectedTeam, 1);
@@ -337,12 +348,6 @@ function loadEVA(team) {
     document.getElementById("dcuTimer").innerText =
       ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
 
-    // Formats the time for the Rover procedure
-    m = Math.floor((data.eva.rover.time % 3600) / 60);
-    s = Math.floor((data.eva.rover.time % 3600) % 60);
-    document.getElementById("rovTimer").innerText =
-      ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
-
     // Button UI States Visuals
     var evaStarted = data.eva.started;
     var evaPaused = data.eva.paused;
@@ -393,17 +398,6 @@ function loadEVA(team) {
       dcuBullet,
       dcuFont,
       dcuName
-    );
-    updateStationStatus(
-      evaStarted,
-      data.eva.rover.started,
-      data.eva.rover.completed,
-      rov,
-      rovStatus,
-      rovButton,
-      rovBullet,
-      rovFont,
-      rovName
     );
     updateStationStatus(
       evaStarted,
@@ -612,20 +606,20 @@ function loadTitle(oldTeam) {
   });
 }
 
-// Loads team names for Rooms
+// Loads team names for dropdown
 function loadTeams() {
   $.getJSON("data/TEAMS.json", function (data) {
-    document.getElementById("room1Name").innerText = data.teams.team_1;
-    document.getElementById("room2Name").innerText = data.teams.team_2;
-    document.getElementById("room3Name").innerText = data.teams.team_3;
-    document.getElementById("room4Name").innerText = data.teams.team_4;
-    document.getElementById("room5Name").innerText = data.teams.team_5;
-    document.getElementById("room6Name").innerText = data.teams.team_6;
-    document.getElementById("room7Name").innerText = data.teams.team_7;
-    document.getElementById("room8Name").innerText = data.teams.team_8;
-    document.getElementById("room9Name").innerText = data.teams.team_9;
-    document.getElementById("room10Name").innerText = data.teams.team_10;
-    document.getElementById("room11Name").innerText = data.teams.team_11;
+    const dropdown = document.getElementById("roomSelect");
+    const teamNames = [
+      data.teams.team_1, data.teams.team_2, data.teams.team_3, data.teams.team_4,
+      data.teams.team_5, data.teams.team_6, data.teams.team_7, data.teams.team_8,
+      data.teams.team_9, data.teams.team_10, data.teams.team_11
+    ];
+
+    // Update dropdown options with team names
+    for (let i = 0; i < teamNames.length; i++) {
+      dropdown.options[i].text = `Room ${i + 1} - ${teamNames[i]}`;
+    }
 
     prRunningIndex = -1;
     prRunningTeam = "";
@@ -634,14 +628,12 @@ function loadTeams() {
     }
 
     if (prRunningIndex >= 0) {
-      prRunningTeam = document.getElementById(
-        "room" + (prRunningIndex + 1) + "Name"
-      ).innerText;
+      prRunningTeam = teamNames[prRunningIndex];
     }
   });
 }
 
-// Loads lights for Rooms depending on state
+// Loads lights for Rooms depending on state - now updates dropdown styling
 function loadLights(team) {
   $.getJSON("data/teams/" + team + "/EVA_STATUS.json", function (data) {
     $.getJSON(
@@ -661,15 +653,17 @@ function loadLights(team) {
           prRunningIndex = team;
         }
 
-        // Team light state
-        var room = "room" + (team + 1) + "Light";
-        var roomLight = document.getElementById(room);
-        if ((evaStarted && !evaComplete) || pr_data.pr_telemetry.sim_running) {
-          roomLight.style.backgroundColor = "rgba(0, 240, 10, 1)";
-        } else if (evaComplete) {
-          roomLight.style.backgroundColor = "rgba(0, 0, 255, 1)";
-        } else {
-          roomLight.style.backgroundColor = "rgba(100, 100, 100, 1)";
+        // Update dropdown option styling based on team status
+        const dropdown = document.getElementById("roomSelect");
+        const option = dropdown.options[team];
+        if (option) {
+          if ((evaStarted && !evaComplete) || pr_data.pr_telemetry.sim_running) {
+            option.style.color = "rgba(0, 240, 10, 1)"; // Green for active
+          } else if (evaComplete) {
+            option.style.color = "rgba(0, 0, 255, 1)"; // Blue for completed
+          } else {
+            option.style.color = "rgba(255, 255, 255, 1)"; // White for inactive
+          }
         }
       }
     );
@@ -905,7 +899,7 @@ function updateTelemetry() {
   document.getElementById("assignUIA").value = selectedTeam;
   document.getElementById("assignDCU").value = selectedTeam;
   document.getElementById("assignSPEC").value = selectedTeam;
-  document.getElementById("assignROV").value = selectedTeam;
+  // assignROV removed - element doesn't exist in HTML
 }
 
 // Runs on load of the page
@@ -938,14 +932,16 @@ function onload() {
   specName = document.getElementById("specName");
   specFont = document.getElementById("specNameFont");
 
-  rovButton = document.getElementById("assignROV");
-  rov = document.getElementById("rovTimerContainer");
-  rovStatus = document.getElementById("rovStatus");
-  rovBullet = document.getElementById("rovBulletPoint");
-  rovName = document.getElementById("rovName");
-  rovFont = document.getElementById("rovNameFont");
+  // ROV elements removed - they don't exist in HTML
+  // rovButton = document.getElementById("assignROV");
+  // rov = document.getElementById("rovTimerContainer");
+  // rovStatus = document.getElementById("rovStatus");
+  // rovBullet = document.getElementById("rovBulletPoint");
+  // rovName = document.getElementById("rovName");
+  // rovFont = document.getElementById("rovNameFont");
 
-  video = document.getElementById("videoFeed");
+  // videoFeed element removed - it doesn't exist in HTML
+  // video = document.getElementById("videoFeed");
 
   xCoordinateEV1 = document.getElementById("xCoordinateEV1");
   yCoordinateEV1 = document.getElementById("yCoordinateEV1");
@@ -960,7 +956,13 @@ function onload() {
   oldTeam = getCookie("roomNum");
   console.log("selected team is " + oldTeam);
   loadTitle(oldTeam);
-  roomBorder(oldTeam + 1);
+  
+  // Set initial dropdown selection
+  const dropdown = document.getElementById("roomSelect");
+  if (dropdown) {
+    dropdown.value = oldTeam + 1;
+    console.log("Set dropdown to:", oldTeam + 1);
+  }
 
   selectedTeam = oldTeam;
 
@@ -995,27 +997,16 @@ function onload() {
   }, 1000);
 }
 
-// Called when a new room is selected on the sidebar
+// Called when a new room is selected in dropdown
 function roomSelect(inputVal) {
-  var elem = document.getElementsByClassName("roomListItemBody");
-
-  for (var i = 0; i < elem.length; i++) {
-    elem[i].style.borderStyle = "none";
-  }
-
-  roomBorder(inputVal);
+  // Convert string to number if needed
+  const roomNumber = parseInt(inputVal);
+  console.log("Room selected:", roomNumber);
 
   // minus 1 handles the zero indexing of the team number folders
-  swapTeams(inputVal);
+  swapTeams(roomNumber);
 }
 
-// Puts border around Room name and number when selected
-function roomBorder(num) {
-  var roomId = "room" + num;
-  document.getElementById(roomId).style.borderColor = "rgba(255, 255, 255, 1)";
-  document.getElementById(roomId).style.borderWidth = ".05rem";
-  document.getElementById(roomId).style.borderStyle = "solid";
-}
 
 // Updates station frontend
 function updateStationStatus(
@@ -1114,24 +1105,21 @@ function pauseTSS() {
   var array = new Array(
     uiaStatus,
     specStatus,
-    rovStatus,
     dcuStatus,
     uia,
     spec,
-    rov,
     dcu,
     uiaButton,
     specButton,
-    rovButton,
     dcuButton
   );
-  for (var i = 0; i < 4; i++) {
+  for (var i = 0; i < 3; i++) {
     if (array[i].textContent == "Completed") {
-      array[i + 4].style.display = "initial";
-      array[i + 8].style.display = "none";
+      array[i + 3].style.display = "initial";
+      array[i + 6].style.display = "none";
     } else {
-      array[i + 4].style.display = "none";
-      array[i + 8].style.display = "none";
+      array[i + 3].style.display = "none";
+      array[i + 6].style.display = "none";
     }
   }
 }
@@ -1151,27 +1139,24 @@ function resumeTSS() {
   var array = new Array(
     uiaStatus,
     specStatus,
-    rovStatus,
     dcuStatus,
     uia,
     spec,
-    rov,
     dcu,
     uiaButton,
     specButton,
-    rovButton,
     dcuButton
   );
-  for (var i = 0; i < 4; i++) {
+  for (var i = 0; i < 3; i++) {
     if (array[i].textContent == "Completed") {
-      array[i + 4].style.display = "initial";
-      array[i + 8].style.display = "none";
+      array[i + 3].style.display = "initial";
+      array[i + 6].style.display = "none";
     } else if (array[i].textContent == "Current") {
-      array[i + 4].style.display = "initial";
-      array[i + 8].style.display = "initial";
+      array[i + 3].style.display = "initial";
+      array[i + 6].style.display = "initial";
     } else if (array[i].textContent == "Incomplete") {
-      array[i + 4].style.display = "none";
-      array[i + 8].style.display = "initial";
+      array[i + 3].style.display = "none";
+      array[i + 6].style.display = "initial";
     }
   }
 }
