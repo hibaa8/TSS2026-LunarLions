@@ -17,22 +17,22 @@
 
     <!------------------------------------------ Navigation Bar Section ------------------------------------------>
     <nav>
-        <span class="navBarTitle">
+        <span class="nav-title">
             NASA S.U.I.T.S.
         </span>
-        <span class="navBarSubTitle">
+        <span class="nav-subtitle">
             | CAPCOM |
         </span>
-        <div class="navBarListContainer">
-            <ul class="navBarList">
+        <div class="nav-menu">
+            <ul class="nav-list">
                 <li>
-                    <a href="index.html" class="navBarListItem">CAPCOM</a>
+                    <a href="index.html" class="nav-item">CAPCOM</a>
                 </li>
                 <li>
-                    <a href="uia.html" class="navBarListItem">UIA</a>
+                    <a href="uia.html" class="nav-item">UIA</a>
                 </li>
                 <li>
-                    <a href="dcu.html" class="navBarListItem">DCU</a>
+                    <a href="dcu.html" class="nav-item">DCU</a>
                 </li>
             </ul>
         </div>
@@ -41,58 +41,58 @@
 
 
     <!------------------------------------------ Main Page Body Section ------------------------------------------>
-    <div class="pageBody">
+    <div class="page-content">
 
 
         <!------------------------------------------ Room Specific Data Section ------------------------------------------>
-        <div class="roomDataContainer">
-            <div class="roomDataColumnContainer">
-                <div class="roomDataRowContainer">
-                    <div class="roomDataColumn">
+        <div class="main-container">
+            <div class="col-container">
+                <div class="row-container">
+                    <div class="column">
         
 
                         <!------------------------------------------ DCU State Section ------------------------------------------>
-                        <div class="roomDataSubContainer">
-                            <div class="roomDataTitleContainer">
-                                <span class="roomDataTitle">
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">
                                     DCU State
                                 </span>
                             </div>
-                            <div class="roomDataSubTitleContainer">
-                                <span class="roomDataSubTitle">
+                            <div class="card-subtitle">
+                                <span class="subtitle">
                                     Not Connected
                                 </span>
                             </div>
 
 
                             <!-------------------------------------- EVA 1 Section -------------------------------------->
-                            <div class="roomDataSubTitleContainer">
-                                <span class="subTitle">
+                            <div class="card-subtitle">
+                                <span class="subtitle">
                                     EVA 1
                                 </span>
                             </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="roomDataMainBodySubContainer">
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfoTitle">
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="info-container">
+                                        <span class="info-title">
                                             Status Sensor
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfoTitle">
+                                    <div class="info-container">
+                                        <span class="info-title">
                                             Status Sensor
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="roomDataMainBodySubContainer">
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva1BatterySensor" class="stateSensor">
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva1BatterySensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             LOCAL
                                         </span>
                                         <form action="" method="post">
@@ -102,21 +102,21 @@
                                                 <input type='hidden' name='dcu_eva1_batt' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             UMB
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             BATTERY
                                         </span>
                                     </div>
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva1FanSensor" class="stateSensor">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva1FanSensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             SEC
                                         </span>
                                         <form action="" method="post">
@@ -126,25 +126,25 @@
                                                 <input type='hidden' name='dcu_eva1_fan' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             PRI
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             FAN
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="roomDataMainBodySubContainer">
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva1OxygenSensor" class="stateSensor">
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva1OxygenSensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             SEC
                                         </span>
                                         <form action="" method="post">
@@ -154,21 +154,21 @@
                                                 <input type='hidden' name='dcu_eva1_oxy' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             PRI
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             OXYGEN
                                         </span>
                                     </div>
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva1PumpSensor" class="stateSensor">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva1PumpSensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             CLOSE
                                         </span>
                                         <form action="" method="post">
@@ -178,25 +178,25 @@
                                                 <input type='hidden' name='dcu_eva1_pump' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             OPEN
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             PUMP
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="roomDataMainBodySubContainer">
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva1CommSensor" class="stateSensor">
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva1CommSensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             B
                                         </span>
                                         <form action="" method="post">
@@ -206,21 +206,21 @@
                                                 <input type='hidden' name='dcu_eva1_comm' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             A
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             COMMS
                                         </span>
                                     </div>
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva1Co2Sensor" class="stateSensor">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva1Co2Sensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             B
                                         </span>
                                         <form action="" method="post">
@@ -230,12 +230,12 @@
                                                 <input type='hidden' name='dcu_eva1_co2' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             A
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             CO2
                                         </span>
                                     </div>
@@ -244,33 +244,33 @@
 
 
                             <!-------------------------------------- EVA 2 Section -------------------------------------->
-                            <div class="roomDataSubTitleContainer">
-                                <span class="subTitle">
+                            <div class="card-subtitle">
+                                <span class="subtitle">
                                     EVA 2
                                 </span>
                             </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="roomDataMainBodySubContainer">
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfoTitle">
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="info-container">
+                                        <span class="info-title">
                                             Status Sensor
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfoTitle">
+                                    <div class="info-container">
+                                        <span class="info-title">
                                             Status Sensor
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="roomDataMainBodySubContainer">
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva2BatterySensor" class="stateSensor">
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva2BatterySensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             LOCAL
                                         </span>
                                         <form action="" method="post">
@@ -280,21 +280,21 @@
                                                 <input type='hidden' name='dcu_eva2_batt' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             UMB
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             BATTERY
                                         </span>
                                     </div>
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva2FanSensor" class="stateSensor">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva2FanSensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             SEC
                                         </span>
                                         <form action="" method="post">
@@ -304,25 +304,25 @@
                                                 <input type='hidden' name='dcu_eva2_fan' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             PRI
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             FAN
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="roomDataMainBodySubContainer">
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva2OxygenSensor" class="stateSensor">
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva2OxygenSensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             SEC
                                         </span>
                                         <form action="" method="post">
@@ -332,21 +332,21 @@
                                                 <input type='hidden' name='dcu_eva2_oxy' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             PRI
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             OXYGEN
                                         </span>
                                     </div>
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva2PumpSensor" class="stateSensor">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva2PumpSensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             CLOSE
                                         </span>
                                         <form action="" method="post">
@@ -356,25 +356,25 @@
                                                 <input type='hidden' name='dcu_eva2_pump' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             OPEN
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             PUMP
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="roomDataMainBodyContainer">
-                                <div class="roomDataMainBodySubContainer">
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva2CommSensor" class="stateSensor">
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva2CommSensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             B
                                         </span>
                                         <form action="" method="post">
@@ -384,21 +384,21 @@
                                                 <input type='hidden' name='dcu_eva2_comm' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             A
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             COMMS
                                         </span>
                                     </div>
-                                    <div class="stateSensorContainer dcuStatus">
-                                        <div id="eva2Co2Sensor" class="stateSensor">
+                                    <div class="sensor-container dcu-status">
+                                        <div id="eva2Co2Sensor" class="sensor">
                                         </div>
                                     </div>
-                                    <div class="stateSensorContainer">
-                                        <span class="stateInfo dcuStateInfoLeft">
+                                    <div class="sensor-container">
+                                        <span class="info-text dcu-info-left">
                                             B
                                         </span>
                                         <form action="" method="post">
@@ -408,12 +408,12 @@
                                                 <input type='hidden' name='dcu_eva2_co2' value="false">
                                             </label>
                                         </form>
-                                        <span class="stateInfo">
+                                        <span class="info-text">
                                             A
                                         </span>
                                     </div>
-                                    <div class="stateInfoContainer">
-                                        <span class="stateInfo">
+                                    <div class="info-container">
+                                        <span class="info-text">
                                             CO2
                                         </span>
                                     </div>

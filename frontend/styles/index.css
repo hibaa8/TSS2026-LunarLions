@@ -1,4 +1,4 @@
-.roomListContainer {
+.sidebar {
   padding: 1rem;
   margin: 0;
   background-color: var(--darker-grey);
@@ -14,7 +14,7 @@
   flex-direction: column;
 }
 
-.roomListTitle {
+.sidebar-title {
   color: var(--white);
   font-size: 1.5rem;
   text-decoration: none;
@@ -22,7 +22,7 @@
   align-self: flex-start;
 }
 
-.roomListItemBody {
+.sidebar-item {
   font-size: 0.75rem;
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
@@ -37,12 +37,12 @@
   justify-content: flex-start;
 }
 
-.roomListItemBody:hover {
+.sidebar-item:hover {
   background-color: var(--grey);
   transition: 1s;
 }
 
-.roomListLightContainer {
+.sidebar-light {
   width: 15%;
   position: relative;
   display: flex;
@@ -51,14 +51,14 @@
   justify-content: center;
 }
 
-.roomListLight {
+.status-light {
   background-color: var(--light-grey);
   border-radius: 50%;
   height: 1.5rem;
   width: 1.5rem;
 }
 
-.errorButton, .prButton {
+.btn-round, .prButton {
   background-color: var(--light-grey);
   border-radius: 50%;
   height: 1.5rem;
@@ -67,12 +67,12 @@
   cursor: pointer;
 }
 
-.errorButton:hover, .prButton:hover {
+.btn-round:hover, .prButton:hover {
   background-color: var(--grey);
   transition: 0.3s;
 }
 
-.errorButton:active {
+.btn-round:active {
   background-color: var(--white);
 }
 
@@ -88,7 +88,7 @@
   background-color: var(--light-green);
 }
 
-.roomListTeamNameContainer {
+.sidebar-name {
   width: 45%;
   position: relative;
   display: flex;
@@ -97,7 +97,7 @@
   justify-content: center;
 }
 
-.roomListTeamNameRoomNum {
+.sidebar-text {
   color: var(--white);
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
@@ -106,7 +106,7 @@
   white-space: nowrap;
 }
 
-.roomListRoomNumContainer {
+.sidebar-num {
   width: 25%;
   position: relative;
   display: flex;
@@ -117,7 +117,7 @@
 
 
 /**************** Telemetry CSS ****************/
-.telemetryStartButton {
+.btn-start {
   margin-left: 0.75rem;
   margin-right: 0.75rem;
   height: 2rem;
@@ -130,7 +130,7 @@
   border: none;
 }
 
-.telemetryStopButton {
+.btn-stop {
   margin-left: 0.75rem;
   margin-right: 0.75rem;
   height: 2rem;
@@ -143,17 +143,17 @@
   border: none;
 }
 
-.telemetryStartButton:hover {
+.btn-start:hover {
   opacity: 1;
   transition: 1s;
 }
 
-.telemetryStopButton:hover {
+.btn-stop:hover {
   opacity: 1;
   transition: 1s;
 }
 
-.errorSwitchNameContainer {
+.switch-label {
   width: 60%;
   position: relative;
   display: flex;
@@ -162,13 +162,13 @@
   justify-content: flex-end;
 }
 
-.errorSwitchName {
+.switch-text {
   color: var(--light-grey);
   white-space: nowrap;
   font-size: 0.9rem;
 }
 
-.errorSwitchSwitchContainer {
+.switch-container {
   width: 35%;
   position: relative;
   display: flex;
@@ -177,7 +177,7 @@
   justify-content: flex-end;
 }
 
-.errorButtonContainer {
+.btn-container {
   width: 35%;
   position: relative;
   display: flex;

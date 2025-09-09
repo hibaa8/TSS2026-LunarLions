@@ -1,6 +1,6 @@
-/* Spec page can now use shared .dataNameContainer, .dataContainer, .dataTitle, .data classes */
+/* Spec page can now use shared .data-label, .data-value, .label, .value classes */
 
-.rockPictureContainer {
+.rock-container {
   margin: auto;
   position: relative;
   display: flex;
@@ -9,13 +9,13 @@
   justify-content: center;
 }
 
-.rockPicture {
+.rock-image {
   width: 5rem;
   height: 5rem;
   margin-right: 1rem;
   margin-left: 1rem;
 }
 
-.dropdownText {
+.dropdown-text {
   font-size: .9rem;
 }

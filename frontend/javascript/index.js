@@ -697,7 +697,7 @@ function updateStationStatus(
     StationStatus.textContent = "Incomplete";
     Station.style.display = "none";
 
-    var elem = document.getElementsByClassName("stationButtonContainer");
+    var elem = document.getElementsByClassName("station-btn");
     for (var i = 0; i < elem.length; i++) {
       elem[i].style.display = "none";
     }
@@ -716,7 +716,7 @@ function updateStationStatus(
     StationStatus.textContent = "Incomplete";
     Station.style.display = "none";
 
-    var elem = document.getElementsByClassName("stationButtonContainer");
+    var elem = document.getElementsByClassName("station-btn");
     for (var i = 0; i < elem.length; i++) {
       elem[i].style.display = "initial";
     }
@@ -735,7 +735,7 @@ function updateStationStatus(
     StationStatus.textContent = "Current";
     Station.style.display = "initial";
 
-    var elem = document.getElementsByClassName("stationButtonContainer");
+    var elem = document.getElementsByClassName("station-btn");
     for (var i = 0; i < elem.length; i++) {
       elem[i].style.display = "initial";
     }
@@ -837,7 +837,7 @@ function stopTSS() {
   startButton.textContent = "START";
   stopButton.style.backgroundColor = "rgba(35, 35, 35, 1)";
 
-  var elem = document.getElementsByClassName("stationButtonContainer");
+  var elem = document.getElementsByClassName("station-btn");
   for (var i = 0; i < elem.length; i++) {
     elem[i].style.display = "none";
   }

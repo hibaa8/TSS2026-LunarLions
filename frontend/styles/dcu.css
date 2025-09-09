@@ -1,26 +1,26 @@
 /* DCU page-specific overrides */
-.roomDataColumn {
+.column {
   width: 80%;
 }
 
 /* DCU-specific state info styling */
-.dcuStateInfo {
+.dcu-info {
   width: 25%;
 }
 
-.dcuStateInfoLeft {
+.dcu-info-left {
   text-align: right;
 }
 
-.dcuStateSensorContainer {
+.dcu-sensor {
   width: 25%;
 }
 
 /* Override for duplicate sensor container - use wider version for DCU */
-.dcuStateSensorContainer:last-of-type {
+.dcu-sensor:last-of-type {
   width: 40%;
 }
 
-.dcuStatus {
+.dcu-status {
   width: 10%;
 }
