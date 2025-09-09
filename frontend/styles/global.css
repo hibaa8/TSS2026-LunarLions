@@ -1,467 +1,463 @@
 @font-face {
-  font-family: 'Geist Mono';
+  font-family: "Geist Mono";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url('../fonts/geist-mono.woff2') format('woff2'),
+  src: url("../fonts/geist-mono.woff2") format("woff2");
 }
 
 :root {
-    --darker-grey:  rgba(35, 35, 35, 1);
-    --dark-grey:    rgba(50, 50, 50, 1);
-    --grey:         rgba(75, 75, 75, 1);
-    --light-grey:   rgba(100, 100, 100, 1);
-    --lighter-grey: rgba(150, 150, 150, 1);
-    --white:        rgba(255, 255, 255, 1);
-    --red:          rgba(255, 0, 0, 1);
-    --light-red:    rgb(255, 80, 80);
-    --yellow:       rgba(255, 199, 0, 1);
-    --green:        rgba(0, 150, 10, 1);
-    --light-green:  rgba(0, 240, 10, 1);
-    --blue:         rgba(0, 0, 255, 1);
-    font-family: 'Geist Mono', 'Courier New', Consolas, monospace;
-  }
-  
-  @media (min-width: 768px) and (max-width:1199px) {
-    html {
-      font-size: 8px;
-    }
-  }
-  
-  @media (min-width: 1200px) and (max-width:1439px) {
-    html {
-      font-size: 12px;
-    }
-  }
-  
-  @media (min-width: 1440px) and (max-width:1879px) {
-    html {
-      font-size: 16px;
-    }
-  }
-  
-  @media (min-width: 1880px) and (max-width:2159px) {
-    html {
-      font-size: 20px;
-    }
-  }
-  
-  @media (min-width: 2160px){
-    html {
-      font-size: 24px;
-    }
-  }
-  
-  body {
-    background-color: var(--dark-grey);
-    margin: 0;
-    min-width: 90rem;
-  }
-  
-  /**************************************************************** Nav Bar CSS ****************************************************************/
-  nav {
-    background-color: var(--darker-grey);
-    padding-top: .5rem;
-    padding-bottom: .5rem;
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-  }
-  
-  .logo {
-    width: 3rem;
-    height: 3rem;
-    margin-right: 1rem;
-    margin-left: 1rem;
-  }
-  
-  .navBarTitle {
-    color: var(--white);
-    margin-right: 1rem;
-    font-size: 1.5rem;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  
-  .navBarSubTitle {
-    color: var(--yellow);
-    margin-right: 1rem;
-    font-size: 1rem;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  
-  .navBarListContainer {
-    display: flex;
-    align-items: center;
-  }
-  
-  .navBarList {
-    font-size: 1.35rem;
-    flex-direction: row;
-    display: flex;
-    list-style: none;
-    margin: 0;
-  }
-  
-  .navBarListItem {
-    padding-left: .5rem;
-    padding-right: .5rem;
-    color: var(--white);
-    text-decoration: none;
-  }
-  
-  .navBarListItem:hover {
-    color: var(--yellow);
-    transition-duration: 1s;
-  }
+  --darker-grey: #000000;
+  --dark-grey: #0f1932;
+  --grey: #192846;
+  --light-grey: #283c64;
+  --lighter-grey: #465a82;
+  --white: #ffffff;
+  --red: #ff0000;
+  --light-red: #ff5050;
+  --yellow: #ffc700;
+  --green: #00960a;
+  --light-green: #00f00a;
+  --blue: #0064ff;
+  font-family: "Geist Mono", "Courier New", Consolas, monospace;
+}
 
-  .roomSelector {
-    display: flex;
-    align-items: center;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+@media (min-width: 768px) and (max-width: 1199px) {
+  html {
+    font-size: 8px;
   }
+}
 
-  .roomSelector label {
-    color: var(--white);
-    font-size: 1rem;
-    margin-right: .5rem;
-    white-space: nowrap;
+@media (min-width: 1200px) and (max-width: 1439px) {
+  html {
+    font-size: 12px;
   }
+}
 
-  .roomSelector select {
-    background-color: var(--dark-grey);
-    color: var(--white);
-    border: 1px solid var(--grey);
-    border-radius: .25rem;
-    padding: .25rem .5rem;
-    font-size: .9rem;
-    font-family: inherit;
-    cursor: pointer;
+@media (min-width: 1440px) and (max-width: 1879px) {
+  html {
+    font-size: 16px;
   }
+}
 
-  .roomSelector select:focus {
-    outline: none;
-    border-color: var(--yellow);
-    box-shadow: 0 0 .2rem var(--yellow);
+@media (min-width: 1880px) and (max-width: 2159px) {
+  html {
+    font-size: 20px;
   }
+}
 
-  .roomSelector select option {
-    background-color: var(--dark-grey);
-    color: var(--white);
+@media (min-width: 2160px) {
+  html {
+    font-size: 24px;
   }
-  
-  
-  /**************************************************************** Page body CSS ****************************************************************/
-  .pageBody {
-    padding-top: .5rem;
-    padding-bottom: .5rem;
-    position: relative;
-    display: flex;
-    align-items: flex-start;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    flex-direction: row;
-  }
+}
 
-  /**************************************************************** Shared Components CSS ****************************************************************/
-  
-  /* Main Page Data Components - Shared across spec, dcu, and uia pages */
-  .roomDataContainer {
-    width: 100%;
-    margin: 1rem;
-    background-color: var(--darker-grey);
-    border-radius: 1rem;
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
-    flex-direction: row;
-  }
+body {
+  background-color: var(--dark-grey);
+  margin: 0;
+  min-width: 90rem;
+}
 
-  .roomDataColumnContainer {
-    width: 100%;
-    height: 25%;
-    margin: .2rem;
-    border-radius: 1rem;
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
-    flex-direction: column;
-  }
+/**************************************************************** Nav Bar CSS ****************************************************************/
+nav {
+  background-color: var(--darker-grey);
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
 
-  .roomDataRowContainer {
-    width: 100%;
-    height: 25%;
-    margin: .2rem;
-    border-radius: 1rem;
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
-    flex-direction: row;
-  }
+.logo {
+  width: 3rem;
+  height: 3rem;
+  margin-right: 1rem;
+  margin-left: 1rem;
+}
 
-  .roomDataColumn {
-    width: 50%;
-    margin: .2rem;
-    border-radius: 1rem;
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
-    flex-direction: column;
-  }
+.navBarTitle {
+  color: var(--white);
+  margin-right: 1rem;
+  font-size: 1.5rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
 
-  .roomDataSubContainer {
-    background-color: var(--dark-grey);
-    padding-top: .25rem;
-    padding-bottom: .25rem;
-    margin: .5rem;
-    border-radius: 1rem;
-    width: 95%;
-    justify-content: center;
-    align-items: center;
-  }
+.navBarSubTitle {
+  color: var(--yellow);
+  margin-right: 1rem;
+  font-size: 1rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
 
-  .roomDataTitleContainer {
-    font-size: 1.25rem;
-    margin: .5rem;
-    padding-bottom: .25rem;
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
-  }
+.navBarListContainer {
+  display: flex;
+  align-items: center;
+}
 
-  .roomDataTitle {
-    color: var(--white);
-    text-decoration: none;
-    white-space: nowrap;
-  }
+.navBarList {
+  font-size: 1.35rem;
+  flex-direction: row;
+  display: flex;
+  list-style: none;
+  margin: 0;
+}
 
-  .roomDataSubTitleContainer {
-    font-size: .9rem;
-    padding-top: .25rem;
-    padding-bottom: .25rem;
-    margin: .5rem;
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
-  }
+.navBarListItem {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  color: var(--white);
+  text-decoration: none;
+}
 
-  .roomDataSubTitle {
-    color: var(--lighter-grey);
-    text-decoration: none;
-    white-space: nowrap;
-  }
+.navBarListItem:hover {
+  color: var(--yellow);
+  transition-duration: 1s;
+}
 
-  .roomDataMainBodyContainer {
-    width: 100%;
-    margin: .5rem;
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
-    flex-direction: row;
-  }
+.roomSelector {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
-  .roomDataMainBodySubContainer {
-    width: 85%; 
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
-  }
+.roomSelector label {
+  color: var(--white);
+  font-size: 1rem;
+  margin-right: 0.5rem;
+  white-space: nowrap;
+}
 
-  /* Switch Components - Shared across multiple pages */
-  .switch {
-    width: 2.95rem;
-    height: 1.25rem;
-    margin-left: .5rem;
-    margin-right: .5rem;
-    position: relative; 
-    display: inline-block;
-  }
+.roomSelector select {
+  background-color: var(--dark-grey);
+  color: var(--white);
+  border: 4px solid var(--grey);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+}
 
-  .switch input {
-    opacity: 0;
-    width: 0rem;
-    height: 0rem;
-  }
+.roomSelector select:focus {
+  outline: none;
+  border-color: var(--yellow);
+  box-shadow: 0 0 0.2rem var(--yellow);
+}
 
-  .slider {
-    background-color: var(--light-grey);
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    transition: .3s;
-    position: absolute;
-    cursor: pointer;
-  }
+.roomSelector select option {
+  background-color: var(--dark-grey);
+  color: var(--white);
+}
 
-  .slider:before {
-    height: 1rem;
-    width: 1.25rem;
-    left: .15rem;
-    bottom: .12rem;
-    background-color: var(--white);
-    transition: .3s;
-    position: absolute;
-    content: "";
-  }
+/**************************************************************** Page body CSS ****************************************************************/
+.pageBody {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  flex-direction: row;
+}
 
-  .slider.round {
-    border-radius: 1rem;
-  }
+/**************************************************************** Shared Components CSS ****************************************************************/
 
-  .slider.round:before {
-    border-radius: 50%;
-  }
+/* Main Page Data Components - Shared across spec, dcu, and uia pages */
+.roomDataContainer {
+  width: 100%;
+  margin: 1rem;
+  background-color: var(--darker-grey);
+  border: 4px solid var(--grey);
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+  flex-direction: row;
+}
 
-  /* Default switch behavior - green when on */
-  input:checked + .slider {
-    background-color: var(--light-green);
-  }
+.roomDataColumnContainer {
+  width: 100%;
+  height: 25%;
+  margin: 0.2rem;
+  border: 4px solid var(--grey);
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+  flex-direction: column;
+}
 
-  input:focus + .slider {
-    box-shadow: 0 0 .1rem var(--light-green);
-  }
+.roomDataRowContainer {
+  width: 100%;
+  height: 25%;
+  margin: 0.2rem;
+  border: 4px solid var(--grey);
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+  flex-direction: row;
+}
 
-  /* Switch variants for different contexts */
-  .switch.error-switch input:checked + .slider {
-    background-color: var(--red);
-  }
+.roomDataColumn {
+  width: 50%;
+  margin: 0.2rem;
+  border: 4px solid var(--grey);
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+  flex-direction: column;
+}
 
-  .switch.error-switch input:focus + .slider {
-    box-shadow: 0 0 .1rem var(--red);
-  }
+.roomDataSubContainer {
+  background-color: var(--dark-grey);
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  margin: 0.5rem;
+  border: 4px solid var(--grey);
+  width: 95%;
+  justify-content: center;
+  align-items: center;
+}
 
-  input:checked + .slider:before {
-    transform: translateX(1.45rem);
-  }
+.roomDataTitleContainer {
+  font-size: 1.25rem;
+  margin: 0.5rem;
+  padding-bottom: 0.25rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
 
-  /* State Info Components - Shared across spec, dcu, and uia pages */
-  .stateInfoContainer {
-    width: 50%;
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-  }
+.roomDataTitle {
+  color: var(--white);
+  text-decoration: none;
+  white-space: nowrap;
+}
 
-  .stateInfoTitle {
-    color: var(--white);
-    font-size: 1rem;
-    white-space: nowrap;
-    font-weight: bold;
-  }
+.roomDataSubTitleContainer {
+  font-size: 0.9rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  margin: 0.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
 
-  .stateInfo {
-    color: var(--white);
-    font-size: .85rem;
-    white-space: nowrap;
-  }
+.roomDataSubTitle {
+  color: var(--lighter-grey);
+  text-decoration: none;
+  white-space: nowrap;
+}
 
-  .stateSensorContainer {
-    width: 10%;
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
-  }
+.roomDataMainBodyContainer {
+  width: 100%;
+  margin: 0.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+  flex-direction: row;
+}
 
-  .stateSensor {
-    background-color: var(--light-grey);
-    border-radius: 5rem;
-    height: 1rem;
-    width: 1rem;
-  }
+.roomDataMainBodySubContainer {
+  width: 85%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
 
-  /* Telemetry State Components - Shared styles */
-  .telemetryStateNameContainer {
-    width: 65%;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-  }
+/* Switch Components - Shared across multiple pages */
+.switch {
+  width: 2.95rem;
+  height: 1.25rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  position: relative;
+  display: inline-block;
+}
 
-  .telemetryStateDataContainer {
-    width: 35%;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-  }
+.switch input {
+  opacity: 0;
+  width: 0rem;
+  height: 0rem;
+}
 
-  .telemetryStateDataTitle {
-    color: var(--white);
-    font-size: 1rem;
-    white-space: nowrap;
-    font-weight: bold;
-  }
+.slider {
+  background-color: var(--light-grey);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: 0.3s;
+  position: absolute;
+  cursor: pointer;
+}
 
-  .telemetryStateData {
-    color: var(--white);
-    font-size: .85rem;
-    white-space: nowrap;
-  }
+.slider:before {
+  height: 1rem;
+  width: 1.25rem;
+  left: 0.15rem;
+  bottom: 0.12rem;
+  background-color: var(--white);
+  transition: 0.3s;
+  position: absolute;
+  content: "";
+}
 
-  /* Data Name/Data Container Pattern - Shared across multiple pages */
-  .dataNameContainer {
-    width: 65%;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-  }
+.slider.round {
+}
 
-  .dataContainer {
-    width: 35%;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-  }
+.slider.round:before {
+}
 
-  .dataTitle {
-    color: var(--white);
-    font-size: 1rem;
-    white-space: nowrap;
-    font-weight: bold;
-  }
+/* Default switch behavior - green when on */
+input:checked + .slider {
+  background-color: var(--light-green);
+}
 
-  .data {
-    color: var(--white);
-    font-size: .85rem;
-    white-space: nowrap;
-  }
+input:focus + .slider {
+  box-shadow: 0 0 0.1rem var(--light-green);
+}
 
-  /* Subtitle pattern used across pages */
-  .subTitle {
-    color: var(--white);
-    text-decoration: none;
-    white-space: nowrap;
-  }
+/* Switch variants for different contexts */
+.switch.error-switch input:checked + .slider {
+  background-color: var(--red);
+}
+
+.switch.error-switch input:focus + .slider {
+  box-shadow: 0 0 0.1rem var(--red);
+}
+
+input:checked + .slider:before {
+  transform: translateX(1.45rem);
+}
+
+/* State Info Components - Shared across spec, dcu, and uia pages */
+.stateInfoContainer {
+  width: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.stateInfoTitle {
+  color: var(--white);
+  font-size: 1rem;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.stateInfo {
+  color: var(--white);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.stateSensorContainer {
+  width: 10%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.stateSensor {
+  background-color: var(--light-grey);
+  border: 4px solid var(--grey);
+  height: 1rem;
+  width: 1rem;
+}
+
+/* Telemetry State Components - Shared styles */
+.telemetryStateNameContainer {
+  width: 65%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.telemetryStateDataContainer {
+  width: 35%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.telemetryStateDataTitle {
+  color: var(--white);
+  font-size: 1rem;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.telemetryStateData {
+  color: var(--white);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* Data Name/Data Container Pattern - Shared across multiple pages */
+.dataNameContainer {
+  width: 65%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.dataContainer {
+  width: 35%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.dataTitle {
+  color: var(--white);
+  font-size: 1rem;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.data {
+  color: var(--white);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* Subtitle pattern used across pages */
+.subTitle {
+  color: var(--white);
+  text-decoration: none;
+  white-space: nowrap;
+}
