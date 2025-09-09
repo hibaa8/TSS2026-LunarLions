@@ -16,8 +16,8 @@
   --red: #ff0000;
   --light-red: #ff5050;
   --yellow: #ffc700;
-  --green: #00960a;
-  --light-green: #00f00a;
+  --green: #28ae5f;
+  --light-green: #28ae5f;
   --blue: #0064ff;
   --sharp-blue: #4dc9ff;
   --light-blue: #08212b;
@@ -63,8 +63,7 @@ body {
 /**************************************************************** Nav Bar CSS ****************************************************************/
 nav {
   background-color: var(--darker-grey);
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding: 0.5rem;
   position: relative;
   display: flex;
   align-items: center;
@@ -190,7 +189,7 @@ nav {
 .col-container {
   width: 100%;
   height: 25%;
-  margin: 0.2rem;
+  margin: 0rem;
   background-color: var(--darker-grey);
   position: relative;
   display: flex;
@@ -203,7 +202,7 @@ nav {
 .row-container {
   width: 100%;
   height: 25%;
-  margin: 0.2rem;
+  margin: 0rem;
   background-color: var(--darker-grey);
   position: relative;
   display: flex;
@@ -215,7 +214,7 @@ nav {
 
 .column {
   width: 50%;
-  margin: 0.2rem;
+  margin: 0rem;
   background-color: var(--darker-grey);
   position: relative;
   display: flex;
@@ -228,8 +227,9 @@ nav {
 .card {
   background-color: var(--darker-grey);
   padding: 0;
-  margin: 0.5rem;
+  margin: 0rem;
   border: 4px solid var(--sharp-blue);
+  border-bottom: none;
   width: 95%;
   justify-content: flex-start;
   align-items: flex-start;

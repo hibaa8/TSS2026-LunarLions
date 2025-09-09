@@ -731,7 +731,7 @@ function updateStationStatus(
   else if (started && !complete) {
     StationButton.textContent = "UNASSIGN";
     StationButton.name = "eva_end_" + StationName.innerText + "_team";
-    StationStatus.style.color = "rgba(255, 199, 0, 1)";
+    StationStatus.style.color = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
     StationStatus.textContent = "Current";
     Station.style.display = "initial";
 
@@ -741,7 +741,7 @@ function updateStationStatus(
     }
 
     StationBullet.style.display = "initial";
-    StationBullet.style.backgroundColor = "rgba(255, 199, 0, 1)";
+    StationBullet.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
     StationFont.style.color = "rgba(255, 255, 255, 1)";
     StationName.style.backgroundColor = "rgba(0, 0, 255, 1)";
   }
@@ -757,7 +757,7 @@ function updateStationStatus(
     StationButton.style.display = "none";
 
     StationBullet.style.display = "none";
-    StationBullet.style.backgroundColor = "rgba(255, 199, 0, 1)";
+    StationBullet.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
     StationFont.style.color = "rgba(255, 255, 255, 1)";
     StationName.style.backgroundColor = "rgba(0, 0, 255, 1)";
   }
@@ -766,9 +766,9 @@ function updateStationStatus(
 // Updates Telemetry frontend when TSS is paused
 function pauseTSS() {
   startButton.name = "eva_unpause_team";
-  startButton.style.backgroundColor = "rgba(255, 199, 0, 1)";
+  startButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
   startButton.textContent = "RESUME";
-  stopButton.style.backgroundColor = "rgba(255, 30, 30, 1)";
+  stopButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-red');
   document.getElementById("evaTimer").style.display = "contents";
 
   var array = new Array(
@@ -795,14 +795,14 @@ function pauseTSS() {
 
 // Updates Telemetry frontend when TSS is resumed
 function resumeTSS() {
-  startButton.style.backgroundColor = "rgba(35, 35, 35, 1)";
+  startButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-grey');
   startButton.textContent = "PAUSE";
-  stopButton.style.backgroundColor = "rgba(255, 30, 30, 1)";
+  stopButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-red');
 
   startButton.name = "eva_pause_team";
-  startButton.style.backgroundColor = "rgba(35, 35, 35, 1)";
+  startButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-grey');
   startButton.textContent = "PAUSE";
-  stopButton.style.backgroundColor = "rgba(255, 30, 30, 1)";
+  stopButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-red');
   document.getElementById("evaTimer").style.display = "contents";
 
   var array = new Array(
@@ -833,9 +833,9 @@ function resumeTSS() {
 // Updates Telemetry frontend when TSS is stopped
 function stopTSS() {
   startButton.name = "eva_start_team";
-  startButton.style.backgroundColor = "rgba(0, 150, 10, 1)";
+  startButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--green');
   startButton.textContent = "START";
-  stopButton.style.backgroundColor = "rgba(35, 35, 35, 1)";
+  stopButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-grey');
 
   var elem = document.getElementsByClassName("station-btn");
   for (var i = 0; i < elem.length; i++) {
@@ -848,23 +848,23 @@ function stopTSS() {
 // Updates Telemetry frontend when TSS is paused
 function pausePRTSS() {
   startPRButton.name = "pr_unpause_team";
-  startPRButton.style.backgroundColor = "rgba(255, 199, 0, 1)";
+  startPRButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
   startPRButton.textContent = "RESUME";
-  stopPRButton.style.backgroundColor = "rgba(255, 30, 30, 1)";
+  stopPRButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-red');
   stopPRButton.disabled = false;
   document.getElementById("prTimer").style.display = "contents";
 }
 
 // Updates Telemetry frontend when TSS is resumed
 function resumePRTSS() {
-  startPRButton.style.backgroundColor = "rgba(35, 35, 35, 1)";
+  startPRButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-grey');
   startPRButton.textContent = "PAUSE";
-  stopPRButton.style.backgroundColor = "rgba(255, 30, 30, 1)";
+  stopPRButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-red');
 
   startPRButton.name = "pr_pause_team";
-  startPRButton.style.backgroundColor = "rgba(35, 35, 35, 1)";
+  startPRButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-grey');
   startPRButton.textContent = "PAUSE";
-  stopPRButton.style.backgroundColor = "rgba(255, 30, 30, 1)";
+  stopPRButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-red');
   stopPRButton.disabled = false;
   document.getElementById("prTimer").style.display = "contents";
 }
@@ -872,9 +872,9 @@ function resumePRTSS() {
 // Updates Telemetry frontend when TSS is stopped
 function stopPRTSS() {
   startPRButton.name = "pr_start_team";
-  startPRButton.style.backgroundColor = "rgba(0, 150, 10, 1)";
+  startPRButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--green');
   startPRButton.textContent = "START";
-  stopPRButton.style.backgroundColor = "rgba(35, 35, 35, 1)";
+  stopPRButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-grey');
   stopPRButton.disabled = true;
   document.getElementById("prTimer").style.display = "none";
 }
