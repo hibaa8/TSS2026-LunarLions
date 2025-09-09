@@ -1,15 +1,16 @@
 .roomListContainer {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  margin-top: 1rem;
+  padding: 1rem;
+  margin: 0;
   background-color: var(--darker-grey);
-  border-radius: 0rem 1rem 1rem 0rem;
+  border: 4px solid var(--sharp-blue);
   width: 20%;
+  height: 100%;
+  box-sizing: border-box;
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   flex-direction: column;
 }
 
@@ -18,6 +19,7 @@
   font-size: 1.5rem;
   text-decoration: none;
   white-space: nowrap;
+  align-self: flex-start;
 }
 
 .roomListItemBody {
@@ -25,8 +27,8 @@
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
   margin-top: 0.5rem;
-  background-color: var(--dark-grey);
-  border-radius: 1rem;
+  background-color: var(--darker-grey);
+  border: 2px solid var(--sharp-blue);
   width: 95%;
   position: relative;
   display: flex;
@@ -51,30 +53,39 @@
 
 .roomListLight {
   background-color: var(--light-grey);
-  border-radius: 5rem;
+  border-radius: 50%;
   height: 1.5rem;
   width: 1.5rem;
 }
 
-.errorButton {
+.errorButton, .prButton {
   background-color: var(--light-grey);
-  border-radius: 5rem;
+  border-radius: 50%;
   height: 1.5rem;
   width: 1.5rem;
+  border: none;
+  cursor: pointer;
 }
 
-.errorButton:hover {
+.errorButton:hover, .prButton:hover {
   background-color: var(--grey);
-  border-radius: 5rem;
-  height: 1.5rem;
-  width: 1.5rem;
+  transition: 0.3s;
 }
 
 .errorButton:active {
   background-color: var(--white);
-  border-radius: 5rem;
-  height: 1.5rem;
-  width: 1.5rem;
+}
+
+.prButton {
+  background-color: var(--white);
+}
+
+.prButton:hover {
+  background-color: var(--grey);
+}
+
+.prButton:active {
+  background-color: var(--light-green);
 }
 
 .roomListTeamNameContainer {
@@ -104,14 +115,6 @@
   justify-content: center;
 }
 
-/* Room Data CSS now uses shared styles from global.css with index-specific overrides */
-.roomDataContainer {
-  width: 80%; /* Override for index page layout */
-}
-
-.roomDataRowContainer {
-  align-items: flex-start; /* Override for index page alignment */
-}
 
 /**************** Telemetry CSS ****************/
 .telemetryStartButton {
@@ -184,10 +187,7 @@
   border-radius: 2rem;
 }
 
-/* Switch CSS now in global.css - use .switch.error-switch for red switches */
-
 /**************** Telemetry State CSS ****************/
-/* Telemetry state styles now use shared classes from global.css */
 
 /**************** Stations CSS ****************/
 .stationNameContainer {
@@ -213,14 +213,9 @@
 .stationBulletPoint {
   width: 0.6rem;
   height: 0.6rem;
-  border-radius: 5rem;
+  border-radius: 50%;
   background-color: var(--lighter-grey);
   margin: 0.25rem;
-  position: relative;
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  justify-content: center;
 }
 
 .stationStatusContainer {
@@ -286,11 +281,6 @@
   transition: 1s;
 }
 
-/**************** UIA State CSS ****************/
-/* UIA state styles now use shared .stateInfoContainer, .stateInfoTitle, .stateInfo, .stateSensorContainer, .stateSensor classes from global.css */
-
-/**************** DCU State CSS ****************/
-/* DCU state styles now use shared .stateInfoContainer, .stateInfoTitle, .stateInfo, .stateSensorContainer, .stateSensor, .subTitle classes from global.css */
 
 /**************** Rover CSS ****************/
 .roverFeed {
@@ -302,29 +292,5 @@
   border-color: var(--white);
 }
 
-/**************** Location CSS ****************/
-/* Location styles now use shared .subTitle, .dataNameContainer, .dataContainer, .data classes from global.css */
-
 /**************** PR Telemetry CSS ****************/
-/* PR telemetry styles now use shared .dataNameContainer, .dataContainer, .dataTitle, .data classes from global.css */
 
-.prButton {
-  background-color: white;
-  border-radius: 5rem;
-  height: 1.5rem;
-  width: 1.5rem;
-}
-
-.prButton:hover {
-  background-color: gray;
-  border-radius: 5rem;
-  height: 1.5rem;
-  width: 1.5rem;
-}
-
-.prButton:active {
-  background-color: greenyellow;
-  border-radius: 5rem;
-  height: 1.5rem;
-  width: 1.5rem;
-}

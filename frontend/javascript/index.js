@@ -136,8 +136,7 @@ function swapTeams(newTeam) {
       data.teams.team_11,
     ];
     const teamName = teamNames[selectedTeam] || "------";
-    document.getElementById("roomDataTitle").textContent =
-      teamName + " - Room " + (selectedTeam + 1);
+    // Team title functionality removed
   });
 
   // Sets the cookie anytime a new team is selected
@@ -351,8 +350,7 @@ function loadEVATelemetry(team) {
 function loadTitle(oldTeam) {
   $.getJSON("../data/TEAMS.json", function (data) {
     var teamnames = Object.values(data.teams);
-    document.getElementById("roomDataTitle").innerText =
-      teamnames[oldTeam] + " - Room " + (oldTeam + 1);
+    // Team title functionality removed
   });
 }
 

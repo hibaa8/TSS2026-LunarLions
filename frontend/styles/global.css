@@ -19,6 +19,8 @@
   --green: #00960a;
   --light-green: #00f00a;
   --blue: #0064ff;
+  --sharp-blue: #4dc9ff;
+  --light-blue: #08212b;
   font-family: "Geist Mono", "Courier New", Consolas, monospace;
 }
 
@@ -53,7 +55,7 @@
 }
 
 body {
-  background-color: var(--dark-grey);
+  background-color: var(--darker-grey);
   margin: 0;
   min-width: 90rem;
 }
@@ -156,8 +158,53 @@ nav {
 
 /**************************************************************** Page body CSS ****************************************************************/
 .pageBody {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  flex-direction: row;
+  height: calc(100vh - 4rem);
+  width: 100vw;
+}
+
+/**************************************************************** Shared Components CSS ****************************************************************/
+
+/* Main Page Data Components - Shared across spec, dcu, and uia pages */
+.roomDataContainer {
+  width: 100%;
+  margin: 0;
+  background-color: var(--darker-grey);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  flex-direction: row;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.roomDataColumnContainer {
+  width: 100%;
+  height: 25%;
+  margin: 0.2rem;
+  background-color: var(--darker-grey);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  flex-direction: column;
+}
+
+.roomDataRowContainer {
+  width: 100%;
+  height: 25%;
+  margin: 0.2rem;
+  background-color: var(--darker-grey);
   position: relative;
   display: flex;
   align-items: flex-start;
@@ -166,86 +213,48 @@ nav {
   flex-direction: row;
 }
 
-/**************************************************************** Shared Components CSS ****************************************************************/
-
-/* Main Page Data Components - Shared across spec, dcu, and uia pages */
-.roomDataContainer {
-  width: 100%;
-  margin: 1rem;
-  background-color: var(--darker-grey);
-  border: 4px solid var(--grey);
-  position: relative;
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  justify-content: center;
-  flex-direction: row;
-}
-
-.roomDataColumnContainer {
-  width: 100%;
-  height: 25%;
-  margin: 0.2rem;
-  border: 4px solid var(--grey);
-  position: relative;
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  justify-content: center;
-  flex-direction: column;
-}
-
-.roomDataRowContainer {
-  width: 100%;
-  height: 25%;
-  margin: 0.2rem;
-  border: 4px solid var(--grey);
-  position: relative;
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  justify-content: center;
-  flex-direction: row;
-}
-
 .roomDataColumn {
   width: 50%;
   margin: 0.2rem;
-  border: 4px solid var(--grey);
+  background-color: var(--darker-grey);
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   flex-direction: column;
 }
 
 .roomDataSubContainer {
-  background-color: var(--dark-grey);
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
+  background-color: var(--darker-grey);
+  padding: 0;
   margin: 0.5rem;
-  border: 4px solid var(--grey);
+  border: 4px solid var(--sharp-blue);
   width: 95%;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .roomDataTitleContainer {
   font-size: 1.25rem;
-  margin: 0.5rem;
-  padding-bottom: 0.25rem;
+  margin: 0;
+  padding: 0.5rem;
+  background-color: var(--light-blue);
+  border-bottom: 2px solid var(--sharp-blue);
+  width: 100%;
+  box-sizing: border-box;
   position: relative;
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .roomDataTitle {
   color: var(--white);
   text-decoration: none;
   white-space: nowrap;
+  font-weight: bold;
 }
 
 .roomDataSubTitleContainer {
@@ -257,7 +266,7 @@ nav {
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .roomDataSubTitle {
@@ -271,19 +280,19 @@ nav {
   margin: 0.5rem;
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   flex-direction: row;
 }
 
 .roomDataMainBodySubContainer {
-  width: 85%;
+  width: 100%;
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 /* Switch Components - Shared across multiple pages */
