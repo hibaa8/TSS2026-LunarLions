@@ -134,10 +134,6 @@
                             <div class="card-body">
                                 <div class="card-content">
                                     <div class="sensor-container">
-                                        <div id="acHeatingSensor" class="sensor">
-                                        </div>
-                                    </div>
-                                    <div class="sensor-container">
                                         <form action="" method="post">
                                             <label class="switch">
                                                 <input type="checkbox" id="acHeatingSwitch" name="pr_ac_heating" value="true" onChange="this.form.submit()">
@@ -150,10 +146,6 @@
                                         <span class="value">
                                             AC Heating
                                         </span>
-                                    </div>
-                                    <div class="sensor-container">
-                                        <div id="acCoolingSensor" class="sensor">
-                                        </div>
                                     </div>
                                     <div class="sensor-container">
                                         <form action="" method="post">
@@ -174,10 +166,6 @@
                             <div class="card-body">
                                 <div class="card-content">
                                     <div class="sensor-container">
-                                        <div id="co2ScrubberSensor" class="sensor">
-                                        </div>
-                                    </div>
-                                    <div class="sensor-container">
                                         <form action="" method="post">
                                             <label class="switch">
                                                 <input type="checkbox" id="co2ScrubberSwitch" name="pr_co2_scrubber" value="true" onChange="this.form.submit()">
@@ -190,10 +178,6 @@
                                         <span class="value">
                                             CO2 Scrubber
                                         </span>
-                                    </div>
-                                    <div class="sensor-container">
-                                        <div id="lightsOnSensor" class="sensor">
-                                        </div>
                                     </div>
                                     <div class="sensor-container">
                                         <form action="" method="post">
@@ -215,10 +199,6 @@
                             <div class="card-body">
                                 <div class="card-content">
                                     <div class="sensor-container">
-                                        <div id="fanPriSensor" class="sensor">
-                                        </div>
-                                    </div>
-                                    <div class="sensor-container">
                                         <form action="" method="post">
                                             <label class="switch">
                                                 <input type="checkbox" id="fanPriSwitch" name="pr_fan_pri" value="true" onChange="this.form.submit()">
@@ -231,10 +211,6 @@
                                         <span class="value">
                                             Fan: primary
                                         </span>
-                                    </div>
-                                    <div class="sensor-container">
-                                        <div id="dustWiperSensor" class="sensor">
-                                        </div>
                                     </div>
                                     <div class="sensor-container">
                                         <form action="" method="post">
@@ -255,10 +231,6 @@
                             <div class="card-body">
                                 <div class="card-content">
                                     <div class="sensor-container">
-                                        <div id="inSunlightSensor" class="sensor">
-                                        </div>
-                                    </div>
-                                    <div class="sensor-container">
                                         <form action="" method="post">
                                             <label class="switch">
                                                 <input type="checkbox" id="inSunlightSwitch" name="pr_in_sunlight" value="true" onChange="this.form.submit()">
@@ -269,24 +241,6 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            In sunlight
-                                        </span>
-                                    </div>
-                                    <div class="sensor-container">
-                                        <div id="inSunlightSensor" class="sensor" hidden>
-                                        </div>
-                                    </div>
-                                    <div class="sensor-container">
-                                        <form action="" method="post" hidden>
-                                            <label class="switch">
-                                                <input type="checkbox" id="inSunlightSwitch" name="pr_in_sunlight" value="true" onChange="this.form.submit()">
-                                                <span class="slider round"></span>
-                                                <input type='hidden' name="pr_in_sunlight" value="false">
-                                            </label>
-                                        </form>
-                                    </div>
-                                    <div class="data-label">
-                                        <span class="value" hidden>
                                             In sunlight
                                         </span>
                                     </div>
@@ -853,91 +807,55 @@
                         <div class="card">
                             <div class="card-header">
                                 <span class="card-title">
-                                    EVA STATIONS
+                                    EVA TIMING
                                 </span>
                             </div>
-                            <div class="card-body">
-                                <div class="card-content">
-                                    <div id="uiaName" class="station-name">
-                                        <span id="uiaNameFont" class="station-text">
-                                            UIA
-                                        </span>
-                                    </div>
-                                    <div class="sensor-container">
-                                        <div id="uiaBulletPoint" class="sensor">
-                                        </div>
-                                    </div>
-                                    <div class="station-status">
-                                        <span id="uiaStatus" class="status-text">
-                                            Incomplete
-                                        </span>
-                                    </div>
-                                    <div id="uiaTimerContainer" class="station-timer">
-                                        <span id="uiaTimer" class="timer-text">
-                                            00:00
-                                        </span>
-                                    </div>
-                                    <div class="station-btn">
-                                        <form action="" method="post">
-                                            <button name="eva_start_UIA_team" value="0" id="assignUIA" class="btn-station">ASSIGN</button>
-                                        </form>
-                                    </div>
+                            <div class="station-rectangle">
+                                <div class="station-name-section">
+                                    <span class="station-text">UIA</span>
+                                </div>
+                                <div class="station-timer-section">
+                                    <span id="uiaTimer" class="station-timer-text">00:00:00</span>
+                                </div>
+                                <div class="station-status-section">
+                                    <span id="uiaStatus" class="station-status-text">Incomplete</span>
+                                </div>
+                                <div class="station-button-section">
+                                    <form action="" method="post">
+                                        <button name="eva_start_UIA_team" value="0" id="assignUIA" class="btn-station">ASSIGN</button>
+                                    </form>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <div class="card-content">
-                                    <div id="specName" class="station-name">
-                                        <span id="specNameFont" class="station-text">
-                                            LTV Repair
-                                        </span>
-                                    </div>
-                                    <div class="sensor-container">
-                                        <div id="specBulletPoint" class="sensor">
-                                        </div>
-                                    </div>
-                                    <div class="station-status">
-                                        <span id="specStatus" class="status-text">
-                                            Incomplete
-                                        </span>
-                                    </div>
-                                    <div id="specTimerContainer" class="station-timer">
-                                        <span id="specTimer" class="timer-text">
-                                            00:00
-                                        </span>
-                                    </div>
-                                    <div class="station-btn">
-                                        <form action="" method="post">
-                                            <button name="eva_start_SPEC_team" value="0" id="assignSPEC" class="btn-station">ASSIGN</button>
-                                        </form>
-                                    </div>
+                            <div class="station-rectangle">
+                                <div class="station-name-section">
+                                    <span class="station-text">LTV Repair</span>
+                                </div>
+                                <div class="station-timer-section">
+                                    <span id="specTimer" class="station-timer-text">00:00:00</span>
+                                </div>
+                                <div class="station-status-section">
+                                    <span id="specStatus" class="station-status-text">Incomplete</span>
+                                </div>
+                                <div class="station-button-section">
+                                    <form action="" method="post">
+                                        <button name="eva_start_SPEC_team" value="0" id="assignSPEC" class="btn-station">ASSIGN</button>
+                                    </form>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <div class="card-content">
-                                    <div id="dcuName" class="station-name">
-                                        <span id="dcuNameFont" class="station-text">
-                                            DCU
-                                        </span>
-                                    </div>
-                                    <div class="sensor-container">
-                                        <div id="dcuBulletPoint" class="sensor">
-                                        </div>
-                                    </div>
-                                    <div class="station-status">
-                                        <span id="dcuStatus" class="status-text">
-                                            Incomplete
-                                        </span>
-                                    </div>
-                                    <div id="dcuTimerContainer" class="station-timer">
-                                        <span id="dcuTimer" class="timer-text">
-                                            00:00
-                                        </span>
-                                    </div>
-                                    <div class="station-btn">
-                                        <form action="" method="post">
-                                            <button name="eva_start_DCU_team" value="0" id="assignDCU" class="btn-station">ASSIGN</button>
-                                        </form>
-                                    </div>
+                            <div class="station-rectangle">
+                                <div class="station-name-section">
+                                    <span class="station-text">DCU</span>
+                                </div>
+                                <div class="station-timer-section">
+                                    <span id="dcuTimer" class="station-timer-text">00:00:00</span>
+                                </div>
+                                <div class="station-status-section">
+                                    <span id="dcuStatus" class="station-status-text">Incomplete</span>
+                                </div>
+                                <div class="station-button-section">
+                                    <form action="" method="post">
+                                        <button name="eva_start_DCU_team" value="0" id="assignDCU" class="btn-station">ASSIGN</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -954,20 +872,6 @@
                                 <span class="subtitle">
                                     NOT CONNECTED
                                 </span>
-                            </div>
-                            <div class="card-body">
-                                <div class="card-content">
-                                    <div class="info-container">
-                                        <span class="info-title">
-                                            Status Sensor
-                                        </span>
-                                    </div>
-                                    <div class="info-container">
-                                        <span class="info-title">
-                                            Status Sensor
-                                        </span>
-                                    </div>
-                                </div>
                             </div>
                             <div class="card-body">
                                 <div class="card-content">
@@ -1431,20 +1335,6 @@
                             </div>
                             <div class="card-body">
                                 <div class="card-content">
-                                    <div class="info-container">
-                                        <span class="info-title">
-                                            Status Sensor
-                                        </span>
-                                    </div>
-                                    <div class="info-container">
-                                        <span class="info-title">
-                                            Status Sensor
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="card-content">
                                     <div class="sensor-container">
                                         <div id="dcuEva1BatterySensor" class="sensor">
                                         </div>
@@ -1861,20 +1751,6 @@
                                 <span class="subtitle">
                                    NOT CONNECTED
                                 </span>
-                            </div>
-                            <div class="card-body">
-                                <div class="card-content">
-                                    <div class="info-container">
-                                        <span class="info-title">
-                                            Status Sensor
-                                        </span>
-                                    </div>
-                                    <div class="info-container">
-                                        <span class="info-title">
-                                            Status Sensor
-                                        </span>
-                                    </div>
-                                </div>
                             </div>
                             <div class="card-body">
                                 <div class="card-content">

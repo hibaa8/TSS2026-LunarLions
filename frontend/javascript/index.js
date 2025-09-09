@@ -12,25 +12,13 @@ let startPRButton = document.getElementById("prTssStart");
 let stopPRButton = document.getElementById("prTssStop");
 
 let uiaButton = document.getElementById("assignUIA");
-let uia = document.getElementById("uiaTimerContainer");
 let uiaStatus = document.getElementById("uiaStatus");
-let uiaBullet = document.getElementById("uiaBulletPoint");
-let uiaName = document.getElementById("uiaName");
-let uiaFont = document.getElementById("uiaNameFont");
 
 let dcuButton = document.getElementById("assignDCU");
-let dcu = document.getElementById("dcuTimerContainer");
 let dcuStatus = document.getElementById("dcuStatus");
-let dcuBullet = document.getElementById("dcuBulletPoint");
-let dcuName = document.getElementById("dcuName");
-let dcuFont = document.getElementById("dcuNameFont");
 
 let specButton = document.getElementById("assignSPEC");
-let spec = document.getElementById("specTimerContainer");
 let specStatus = document.getElementById("specStatus");
-let specBullet = document.getElementById("specBulletPoint");
-let specName = document.getElementById("specName");
-let specFont = document.getElementById("specNameFont");
 
 let xCoordinateEV1 = document.getElementById("xCoordinateEV1");
 let yCoordinateEV1 = document.getElementById("yCoordinateEV1");
@@ -219,13 +207,13 @@ function loadEVAStatus(team) {
       "EVA Time: " + formatTime(data.eva.total_time);
     document.getElementById("uiaTimer").innerText = formatTime(
       data.eva.uia.time
-    ).substring(3); // Remove hours for MM:SS
+    ); // Keep HH:MM:SS format for new layout
     document.getElementById("specTimer").innerText = formatTime(
       data.eva.spec.time
-    ).substring(3); // Remove hours for MM:SS
+    ); // Keep HH:MM:SS format for new layout
     document.getElementById("dcuTimer").innerText = formatTime(
       data.eva.dcu.time
-    ).substring(3); // Remove hours for MM:SS
+    ); // Keep HH:MM:SS format for new layout
 
     // Button UI States Visuals
     var evaStarted = data.eva.started;
@@ -248,34 +236,22 @@ function loadEVAStatus(team) {
       evaStarted,
       data.eva.uia.started,
       data.eva.uia.completed,
-      uia,
       uiaStatus,
-      uiaButton,
-      uiaBullet,
-      uiaFont,
-      uiaName
+      uiaButton
     );
     updateStationStatus(
       evaStarted,
       data.eva.dcu.started,
       data.eva.dcu.completed,
-      dcu,
       dcuStatus,
-      dcuButton,
-      dcuBullet,
-      dcuFont,
-      dcuName
+      dcuButton
     );
     updateStationStatus(
       evaStarted,
       data.eva.spec.started,
       data.eva.spec.completed,
-      spec,
       specStatus,
-      specButton,
-      specBullet,
-      specFont,
-      specName
+      specButton
     );
   });
 }
@@ -588,25 +564,13 @@ function onload() {
   stopPRButton = document.getElementById("prTssStop");
 
   uiaButton = document.getElementById("assignUIA");
-  uia = document.getElementById("uiaTimerContainer");
   uiaStatus = document.getElementById("uiaStatus");
-  uiaBullet = document.getElementById("uiaBulletPoint");
-  uiaName = document.getElementById("uiaName");
-  uiaFont = document.getElementById("uiaNameFont");
 
   dcuButton = document.getElementById("assignDCU");
-  dcu = document.getElementById("dcuTimerContainer");
   dcuStatus = document.getElementById("dcuStatus");
-  dcuBullet = document.getElementById("dcuBulletPoint");
-  dcuName = document.getElementById("dcuName");
-  dcuFont = document.getElementById("dcuNameFont");
 
   specButton = document.getElementById("assignSPEC");
-  spec = document.getElementById("specTimerContainer");
   specStatus = document.getElementById("specStatus");
-  specBullet = document.getElementById("specBulletPoint");
-  specName = document.getElementById("specName");
-  specFont = document.getElementById("specNameFont");
 
   // ROV elements removed - they don't exist in HTML
   // rovButton = document.getElementById("assignROV");
@@ -682,84 +646,49 @@ function updateStationStatus(
   evaStarted,
   started,
   complete,
-  Station,
   StationStatus,
-  StationButton,
-  StationBullet,
-  StationFont,
-  StationName
+  StationButton
 ) {
+  // Get station name from button ID
+  let stationName;
+  if (StationButton.id === "assignUIA") {
+    stationName = "UIA";
+  } else if (StationButton.id === "assignDCU") {
+    stationName = "DCU";  
+  } else if (StationButton.id === "assignSPEC") {
+    stationName = "SPEC";
+  }
+
   // Updates when not started
   if (!evaStarted) {
     StationButton.textContent = "ASSIGN";
     StationButton.name = "";
     StationStatus.style.color = "rgba(150, 150, 150, 1)";
     StationStatus.textContent = "Incomplete";
-    Station.style.display = "none";
-
-    var elem = document.getElementsByClassName("station-btn");
-    for (var i = 0; i < elem.length; i++) {
-      elem[i].style.display = "none";
-    }
-
-    StationBullet.style.display = "initial";
-    StationBullet.style.backgroundColor = "rgba(150, 150, 150, 1)";
-    StationFont.style.color = "rgba(150, 150, 150, 1)";
-    StationName.style.backgroundColor = "rgba(100, 100, 100, 1)";
   }
 
-  // Updates when running but not paused
+  // Updates when running but not started at this station
   else if (!started && !complete) {
     StationButton.textContent = "ASSIGN";
-    StationButton.name = "eva_start_" + StationName.innerText + "_team";
+    StationButton.name = "eva_start_" + stationName + "_team";
     StationStatus.style.color = "rgba(150, 150, 150, 1)";
     StationStatus.textContent = "Incomplete";
-    Station.style.display = "none";
-
-    var elem = document.getElementsByClassName("station-btn");
-    for (var i = 0; i < elem.length; i++) {
-      elem[i].style.display = "initial";
-    }
-
-    StationBullet.style.display = "initial";
-    StationBullet.style.backgroundColor = "rgba(150, 150, 150, 1)";
-    StationFont.style.color = "rgba(150, 150, 150, 1)";
-    StationName.style.backgroundColor = "rgba(100, 100, 100, 1)";
   }
 
-  // Updates when running but not resumed
+  // Updates when running at this station
   else if (started && !complete) {
     StationButton.textContent = "UNASSIGN";
-    StationButton.name = "eva_end_" + StationName.innerText + "_team";
+    StationButton.name = "eva_end_" + stationName + "_team";
     StationStatus.style.color = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
     StationStatus.textContent = "Current";
-    Station.style.display = "initial";
-
-    var elem = document.getElementsByClassName("station-btn");
-    for (var i = 0; i < elem.length; i++) {
-      elem[i].style.display = "initial";
-    }
-
-    StationBullet.style.display = "initial";
-    StationBullet.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
-    StationFont.style.color = "rgba(255, 255, 255, 1)";
-    StationName.style.backgroundColor = "rgba(0, 0, 255, 1)";
   }
 
   // Updates when completed
   else if (complete) {
-    StationButton.textContent = "ASSIGN";
-    StationButton.name = "eva_end_" + StationName.innerText + "_team";
+    StationButton.textContent = "COMPLETED";
+    StationButton.style.display = "none";
     StationStatus.style.color = "rgba(0, 240, 10, 1)";
     StationStatus.textContent = "Completed";
-    Station.style.display = "initial";
-
-    StationButton.style.display = "none";
-
-    StationBullet.style.display = "none";
-    StationBullet.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--yellow');
-    StationFont.style.color = "rgba(255, 255, 255, 1)";
-    StationName.style.backgroundColor = "rgba(0, 0, 255, 1)";
   }
 }
 
@@ -771,26 +700,8 @@ function pauseTSS() {
   stopButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-red');
   document.getElementById("evaTimer").style.display = "contents";
 
-  var array = new Array(
-    uiaStatus,
-    specStatus,
-    dcuStatus,
-    uia,
-    spec,
-    dcu,
-    uiaButton,
-    specButton,
-    dcuButton
-  );
-  for (var i = 0; i < 3; i++) {
-    if (array[i].textContent == "Completed") {
-      array[i + 3].style.display = "initial";
-      array[i + 6].style.display = "none";
-    } else {
-      array[i + 3].style.display = "none";
-      array[i + 6].style.display = "none";
-    }
-  }
+  // Station buttons are always visible in the new layout
+  // Status updates are handled by updateStationStatus function
 }
 
 // Updates Telemetry frontend when TSS is resumed
@@ -805,29 +716,8 @@ function resumeTSS() {
   stopButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-red');
   document.getElementById("evaTimer").style.display = "contents";
 
-  var array = new Array(
-    uiaStatus,
-    specStatus,
-    dcuStatus,
-    uia,
-    spec,
-    dcu,
-    uiaButton,
-    specButton,
-    dcuButton
-  );
-  for (var i = 0; i < 3; i++) {
-    if (array[i].textContent == "Completed") {
-      array[i + 3].style.display = "initial";
-      array[i + 6].style.display = "none";
-    } else if (array[i].textContent == "Current") {
-      array[i + 3].style.display = "initial";
-      array[i + 6].style.display = "initial";
-    } else if (array[i].textContent == "Incomplete") {
-      array[i + 3].style.display = "none";
-      array[i + 6].style.display = "initial";
-    }
-  }
+  // Station buttons are always visible in the new layout
+  // Status updates are handled by updateStationStatus function
 }
 
 // Updates Telemetry frontend when TSS is stopped
@@ -837,11 +727,7 @@ function stopTSS() {
   startButton.textContent = "START";
   stopButton.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--button-grey');
 
-  var elem = document.getElementsByClassName("station-btn");
-  for (var i = 0; i < elem.length; i++) {
-    elem[i].style.display = "none";
-  }
-
+  // Station buttons remain visible in new layout but are disabled via updateStationStatus
   document.getElementById("evaTimer").style.display = "none";
 }
 
