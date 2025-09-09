@@ -2,7 +2,7 @@
 {
 	"error": {
 		"fan_error": false,
-		"oxy_error": false,
+		"oxy_error": true,
 		"batt_error": false,
 		"pump_error": false
 	}
