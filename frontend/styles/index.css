@@ -148,17 +148,6 @@
   transition: opacity 0.3s;
 }
 
-/* Ensure button styling consistency for both EVA and PR buttons */
-#prTssStart,
-#tssStart {
-  background-color: var(--green);
-}
-
-#prTssStop,
-#tssStop {
-  background-color: var(--dark-grey);
-}
-
 .switch-label {
   width: 60%;
   position: relative;

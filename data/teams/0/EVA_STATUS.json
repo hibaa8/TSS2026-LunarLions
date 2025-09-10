@@ -3,27 +3,27 @@
 	"eva": {
 		"started": true,
 		"paused": false,
-		"completed": true,
-		"total_time": 97,
+		"completed": false,
+		"total_time": 911,
 		"uia": {
-			"started": true,
-			"completed": true,
-			"time": 88
+			"started": false,
+			"completed": false,
+			"time": 0
 		},
 		"dcu": {
-			"started": true,
-			"completed": true,
-			"time": 13
+			"started": false,
+			"completed": false,
+			"time": 0
 		},
 		"rover": {
 			"started": false,
-			"completed": true,
+			"completed": false,
 			"time": 0
 		},
 		"spec": {
-			"started": true,
-			"completed": true,
-			"time": 79
+			"started": false,
+			"completed": false,
+			"time": 0
 		}
 	}
 }

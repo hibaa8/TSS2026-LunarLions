@@ -31,34 +31,34 @@ let yCoordinateRover = document.getElementById("yCoordinateRover");
 
 // Configurations for the sensor and switch mappings so that can we easily loop through them
 
-// UIA sensor mappings
-const UIA_SENSORS = {
-  eva1_power: "eva1PowerSensor",
-  eva2_power: "eva2PowerSensor",
-  eva1_water_supply: "eva1WaterSupplySensor",
-  eva2_water_supply: "eva2WaterSupplySensor",
-  eva1_water_waste: "eva1WaterWasteSensor",
-  eva2_water_waste: "eva2WaterWasteSensor",
-  eva1_oxy: "eva1OxygenSensor",
-  eva2_oxy: "eva2OxygenSensor",
-  oxy_vent: "oxygenVentSensor",
-  depress: "depressPumpSensor",
+// UIA switch mappings
+const UIA_SWITCHES = {
+  eva1_power: "uia_eva1_power_switch",
+  eva2_power: "uia_eva2_power_switch",
+  eva1_water_supply: "uia_eva1_water_supply_switch",
+  eva2_water_supply: "uia_eva2_water_supply_switch",
+  eva1_water_waste: "uia_eva1_water_waste_switch",
+  eva2_water_waste: "uia_eva2_water_waste_switch",
+  eva1_oxy: "uia_eva1_oxy_switch",
+  eva2_oxy: "uia_eva2_oxy_switch",
+  oxy_vent: "uia_oxy_vent_switch",
+  depress: "uia_depress_switch",
 };
 
-// DCU sensor mappings
-const DCU_SENSORS = {
-  "eva1.batt": "dcuEva1BatterySensor",
-  "eva1.oxy": "dcuEva1OxygenSensor",
-  "eva1.comm": "dcuEva1CommSensor",
-  "eva1.fan": "dcuEva1FanSensor",
-  "eva1.pump": "dcuEva1PumpSensor",
-  "eva1.co2": "dcuEva1Co2Sensor",
-  "eva2.batt": "dcuEva2BatterySensor",
-  "eva2.oxy": "dcuEva2OxygenSensor",
-  "eva2.comm": "dcuEva2CommSensor",
-  "eva2.fan": "dcuEva2FanSensor",
-  "eva2.pump": "dcuEva2PumpSensor",
-  "eva2.co2": "dcuEva2Co2Sensor",
+// DCU switch mappings
+const DCU_SWITCHES = {
+  "eva1.batt": "eva1_dcu_batt_switch",
+  "eva1.oxy": "eva1_dcu_oxy_switch",
+  "eva1.comm": "eva1_dcu_comm_switch",
+  "eva1.fan": "eva1_dcu_fan_switch",
+  "eva1.pump": "eva1_dcu_pump_switch",
+  "eva1.co2": "eva1_dcu_co2_switch",
+  "eva2.batt": "eva2_dcu_batt_switch",
+  "eva2.oxy": "eva2_dcu_oxy_switch",
+  "eva2.comm": "eva2_dcu_comm_switch",
+  "eva2.fan": "eva2_dcu_fan_switch",
+  "eva2.pump": "eva2_dcu_pump_switch",
+  "eva2.co2": "eva2_dcu_co2_switch",
 };
 
 // Pressurized Rover sensor and switch mappings
@@ -172,26 +172,33 @@ function getCookie(cname) {
   return 0;
 }
 
-// Loads UIA data and updates all sensor states
+// Loads UIA data and updates all switch states
 function loadUIA() {
   $.getJSON("../data/UIA.json", function (data) {
-    // Update all UIA sensors using configuration mapping
-    Object.keys(UIA_SENSORS).forEach((key) => {
-      updateSensor(UIA_SENSORS[key], data.uia[key]);
+    // Update all UIA switches using configuration mapping
+    Object.keys(UIA_SWITCHES).forEach((key) => {
+      const switchElement = document.getElementById(UIA_SWITCHES[key]);
+      if (switchElement) {
+        switchElement.checked = data.uia[key];
+      }
     });
   });
 }
 
-// Loads DCU data and updates all sensor states
+// Loads DCU data and updates all switch states
 function loadDCU() {
   $.getJSON("../data/DCU.json", function (data) {
-    // Update all DCU sensors using configuration mapping
-    Object.keys(DCU_SENSORS).forEach((key) => {
+    // Update all DCU switches using configuration mapping
+    Object.keys(DCU_SWITCHES).forEach((key) => {
       // Handle nested object paths like "eva1.batt"
       const keys = key.split(".");
       let value = data.dcu;
       keys.forEach((k) => (value = value[k]));
-      updateSensor(DCU_SENSORS[key], value);
+
+      const switchElement = document.getElementById(DCU_SWITCHES[key]);
+      if (switchElement) {
+        switchElement.checked = value;
+      }
     });
   });
 }
@@ -204,7 +211,7 @@ function loadEVAStatus(team) {
   $.getJSON("../data/teams/" + team + "/EVA_STATUS.json", function (data) {
     // Format and display EVA timers using utility function
     document.getElementById("evaTimer").innerText =
-      "EVA Time: " + formatTime(data.eva.total_time);
+      "EVA TIME: " + formatTime(data.eva.total_time);
     document.getElementById("uiaTimer").innerText = formatTime(
       data.eva.uia.time
     ); // Keep HH:MM:SS format for new layout
@@ -264,7 +271,7 @@ function loadPRStatus(team) {
   $.getJSON("../data/teams/" + team + "/ROVER_TELEMETRY.json", function (data) {
     // Format and display PR timer using utility function
     document.getElementById("prTimer").innerText =
-      "Rover Time: " + formatTime(data.pr_telemetry.mission_elapsed_time);
+      "ROVER TIME: " + formatTime(data.pr_telemetry.mission_elapsed_time);
 
     // Button UI States Visuals
     var prStarted = data.pr_telemetry.sim_running;
@@ -747,7 +754,7 @@ function stopTSS() {
 
   // Station buttons remain visible in new layout but are disabled via updateStationStatus
   document.getElementById("evaTimer").style.display = "contents";
-  document.getElementById("evaTimer").innerText = "EVA Time: 00:00:00";
+  document.getElementById("evaTimer").innerText = "EVA TIME: 00:00:00";
 }
 
 // Updates Telemetry frontend when TSS is paused
@@ -798,5 +805,5 @@ function stopPRTSS() {
   ).getPropertyValue("--button-grey");
   stopPRButton.disabled = true;
   document.getElementById("prTimer").style.display = "contents";
-  document.getElementById("prTimer").innerText = "Rover Time: 00:00:00";
+  document.getElementById("prTimer").innerText = "ROVER TIME: 00:00:00";
 }
