@@ -18,6 +18,9 @@
         <span class="nav-title">
             NASA SUITS
         </span>
+        <span id="nav-clock" class="nav-title">
+            00:00:00
+        </span>
         <div class="room-select">
             <select id="roomSelect" onchange="roomSelect(this.value)">
                 <option value="1">Room 1 - ------</option>
@@ -223,7 +226,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="card" style="border-bottom: 4px solid var(--sharp-blue);">
+                        <div class="card" style="border-bottom: 2px solid var(--sharp-blue);">
                             <div class="card-header">
                                 <span class="card-title">
                                     ROVER
@@ -513,11 +516,11 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            Terrain Condition
+                                            Distance From Base
                                         </span>
                                     </div>
                                     <div class="data-value">
-                                        <span id="terrain_condition" class="value">
+                                        <span id="distance_from_base" class="value">
                                             ------
                                         </span>
                                     </div>
@@ -537,36 +540,12 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            Mission Planned Time
+                                            
                                         </span>
                                     </div>
                                     <div class="data-value">
-                                        <span id="mission_planned_time" class="value">
-                                            ------
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="card-content">
-                                    <div class="data-label">
                                         <span class="value">
-                                            Point Of No Return
-                                        </span>
-                                    </div>
-                                    <div class="data-value">
-                                        <span id="point_of_no_return" class="value">
-                                            ------
-                                        </span>
-                                    </div>
-                                    <div class="data-label">
-                                        <span class="value">
-                                            Distance From Base
-                                        </span>
-                                    </div>
-                                    <div class="data-value">
-                                        <span id="distance_from_base" class="value">
-                                            ------
+                                            
                                         </span>
                                     </div>
                                 </div>
@@ -657,12 +636,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="card-content">
-                                    <div class="switch-label">
-                                        <span class="switch-text">
-                                            O2 ERROR
-                                        </span>
-                                    </div>
-                                    <div class="switch-container">
+                                    <div class="sensor-container">
                                         <form action="" method="post">
                                             <label class="switch">
                                                 <input type="checkbox" id="eva_o2_error" name="error_oxy" value="true" onChange="this.form.submit()">
@@ -671,12 +645,12 @@
                                             </label>
                                         </form>
                                     </div>
-                                    <div class="switch-label">
-                                        <span class="switch-text">
-                                            FAN ERROR
+                                    <div class="data-label">
+                                        <span class="value">
+                                            O2 ERROR
                                         </span>
                                     </div>
-                                    <div class="switch-container">
+                                    <div class="sensor-container">
                                         <form action="" method="post">
                                             <label class="switch">
                                                 <input type="checkbox" id="eva_fan_error" name="error_fan" value="true" onChange="this.form.submit()">
@@ -685,16 +659,16 @@
                                             </label>
                                         </form>
                                     </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            FAN ERROR
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="card-body">
                                 <div class="card-content">
-                                    <div class="switch-label">
-                                        <span class="switch-text">
-                                            PUMP ERROR
-                                        </span>
-                                    </div>
-                                    <div class="switch-container">
+                                    <div class="sensor-container">
                                         <form action="" method="post">
                                             <label class="switch">
                                                 <input type="checkbox" id="eva_pump_error" name="error_pump" value="true" onChange="this.form.submit()">
@@ -703,12 +677,12 @@
                                             </label>
                                         </form>
                                     </div>
-                                    <div class="switch-label">
-                                        <span class="switch-text">
-                                            POWER ERROR
+                                    <div class="data-label">
+                                        <span class="value">
+                                            PUMP ERROR
                                         </span>
                                     </div>
-                                    <div class="switch-container">
+                                    <div class="sensor-container">
                                         <form action="" method="post">
                                             <label class="switch">
                                                 <input type="checkbox" id="eva_power_error" name="error_power" value="true" onChange="this.form.submit()">
@@ -716,6 +690,11 @@
                                                 <input type="hidden" name="error_power" value="false">
                                             </label>
                                         </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            POWER ERROR
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -726,12 +705,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="card-content">
-                                    <div class="switch-label">
-                                        <span class="switch-text">
-                                            EVA RESTING
-                                        </span>
-                                    </div>
-                                    <div class="switch-container">
+                                    <div class="sensor-container">
                                         <form action="" method="post">
                                             <label class="switch">
                                                 <button class="btn-round" type="submitButton"></button>
@@ -739,12 +713,12 @@
                                             </label>
                                         </form>
                                     </div>
-                                    <div class="switch-label">
-                                        <span class="switch-text">
-                                            EVA WORKSPACE
+                                    <div class="data-label">
+                                        <span class="value">
+                                            EVA RESTING
                                         </span>
                                     </div>
-                                    <div class="switch-container">
+                                    <div class="sensor-container">
                                         <form action="" method="post">
                                             <label class="switch">
                                                 <button class="btn-round" type="submitButton"></button>
@@ -752,16 +726,16 @@
                                             </label>
                                         </form>
                                     </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            EVA WORKSPACE
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="card-body">
                                 <div class="card-content">
-                                    <div class="switch-label">
-                                        <span class="switch-text">
-                                            EVA TIRED
-                                        </span>
-                                    </div>
-                                    <div class="switch-container">
+                                    <div class="sensor-container">
                                         <form action="" method="post">
                                             <label class="switch">
                                                 <button class="btn-round" type="submitButton"></button>
@@ -769,12 +743,10 @@
                                             </label>
                                         </form>
                                     </div>
-                                    <div class="switch-label">
-                                        <span class="switch-text">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            EVA TIRED
                                         </span>
-                                    </div>
-                                    <div class="switch-container">
-                                        
                                     </div>
                                 </div>
                             </div>
@@ -1484,7 +1456,7 @@
 
 
                         <!------------------------------------------ EVA 2 Section ------------------------------------------>
-                        <div class="card"  style="border-bottom: 4px solid var(--sharp-blue);">
+                        <div class="card"  style="border-bottom: 2px solid var(--sharp-blue);">
                             <div class="card-header">
                                 <span class="card-title">
                                     EVA 2

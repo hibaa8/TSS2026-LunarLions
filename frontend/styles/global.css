@@ -18,7 +18,7 @@
   --green: #28ae5f;
   --light-green: #28ae5f;
   --blue: #0064ff;
-  --sharp-blue: #42a0c8;
+  --sharp-blue: #47b2e0ff;
   --light-blue: #08212b;
   --dark-blue: #001628;
   font-family: "Geist Mono", "Courier New", Consolas, monospace;
@@ -69,6 +69,11 @@ nav {
   align-items: center;
   flex-wrap: nowrap;
   justify-content: space-between;
+}
+
+#nav-clock {
+  font-size: 1rem;
+  color: var(--light-grey);
 }
 
 .nav-logo {
@@ -161,7 +166,7 @@ nav {
   justify-content: flex-start;
   flex-direction: row;
   height: calc(100vh - 4rem);
-  width: 100vw;
+  width: calc(100vw - 1.75rem);
 }
 
 /* Main Page Data Components - Shared across spec, dcu, and uia pages */

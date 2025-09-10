@@ -625,6 +625,7 @@ function onload() {
   loadPRTelemetryData(selectedTeam);
   loadLocation();
   updateTelemetry();
+  updateClock();
 
   // Continuously refreshes values from the UIA, DCU, EVA, and Telemetry
   setInterval(function () {
@@ -635,7 +636,22 @@ function onload() {
     loadEVATelemetry(selectedTeam);
     loadPRTelemetryData(selectedTeam);
     loadLocation();
+    updateClock();
   }, 1000);
+}
+
+// Updates the navigation clock display with current time in military format
+function updateClock() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const timeString = `${hours}:${minutes}:${seconds}`;
+  
+  const clockElement = document.getElementById('nav-clock');
+  if (clockElement) {
+    clockElement.textContent = timeString;
+  }
 }
 
 // Called when a new room is selected in dropdown
