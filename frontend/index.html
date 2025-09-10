@@ -68,7 +68,8 @@
                                 </span>
                             </div>
                             <div class="card-subtitle">
-                                <span id="prTimer" class="subtitle" style="display:none;">
+                                <span id="prTimer" class="subtitle">
+                                    00:00:00
                                 </span>
                             </div>
                             <div class="card-body">
@@ -79,49 +80,6 @@
                                     </form>
                                 </span>
                                 <span id="prAlreadyRunningText" class="subtitle" style="display:none;">
-                                </span>
-                            </div>
-                        </div>
-                        
-
-
-
-                        <!------------------------------------------ LTV Section ------------------------------------------>
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">
-                                    LTV
-                                </span>
-                            </div>
-                            <div class="card-body">
-                                <div class="card-content">
-                                    <div class="telemetry-label">
-                                        <span class="telemetry-data">
-                                            X-Coordinate
-                                        </span>
-                                    </div>
-                                    <div class="telemetry-value">
-                                        <span id="xCoordinateRover" class="telemetry-data">
-                                            ------
-                                        </span>
-                                    </div>
-                                    <div class="telemetry-label">
-                                        <span class="telemetry-data">
-                                            Y-Coordinate
-                                        </span>
-                                    </div>
-                                    <div class="telemetry-value">
-                                        <span id="yCoordinateRover" class="telemetry-data">
-                                            ------
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card" style="border-bottom: 4px solid var(--sharp-blue);">
-                            <div class="card-header">
-                                <span class="card-title">
-                                    ROVER
                                 </span>
                             </div>
                             <div class="card-subtitle">
@@ -193,7 +151,6 @@
                                     </div>
                                 </div>
                             </div>
-        
                             <div class="card-body">
                                 <div class="card-content">
                                     <div class="sensor-container">
@@ -239,10 +196,53 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            In sunlight
+                                        In sunlight
                                         </span>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                        
+
+
+
+                        <!------------------------------------------ LTV Section ------------------------------------------>
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    LTV
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            X-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="xCoordinateRover" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Y-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="yCoordinateRover" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card" style="border-bottom: 4px solid var(--sharp-blue);">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    ROVER
+                                </span>
                             </div>
                             <div class="card-subtitle">
                                 <div class="subtitle">
@@ -273,42 +273,9 @@
                                     </div>
                                 </div>
                             </div>
+        
                             <div class="card-body">
                                 <div class="card-content">
-                                    <div class="data-label">
-                                        <span class="value">
-                                            Current Pos X
-                                        </span>
-                                    </div>
-                                    <div class="data-value">
-                                        <span id="current_pos_x" class="value">
-                                            ------
-                                        </span>
-                                    </div>
-                                    <div class="data-label">
-                                        <span class="value">
-                                            Current Pos Y
-                                        </span>
-                                    </div>
-                                    <div class="data-value">
-                                        <span id="current_pos_y" class="value">
-                                            ------
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="card-content">
-                                    <div class="data-label">
-                                        <span class="value">
-                                            Current Pos Altitude
-                                        </span>
-                                    </div>
-                                    <div class="data-value">
-                                        <span id="current_pos_alt" class="value">
-                                            ------
-                                        </span>
-                                    </div>
                                     <div class="data-label">
                                         <span class="value">
                                             Solar panel dust accumulation
@@ -316,20 +283,6 @@
                                     </div>
                                     <div class="data-value">
                                         <span id="solar_panel_dust_accum" class="value">
-                                            ------
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="card-content">
-                                    <div class="data-label">
-                                        <span class="value">
-                                            Heading
-                                        </span>
-                                    </div>
-                                    <div class="data-value">
-                                        <span id="heading" class="value">
                                             ------
                                         </span>
                                     </div>
@@ -633,6 +586,13 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!------------------------------------------ Location Section ------------------------------------------>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    LOCATION
+                                </span>
+                            </div>
                             <div class="card-body">
                                 <div class="card-content">
                                     <div class="data-label">
@@ -653,6 +613,30 @@
                                     <div class="data-value">
                                         <span id="longitude" class="value">
                                             ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Heading
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="heading" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span class="value">
+                                            
                                         </span>
                                     </div>
                                 </div>
@@ -680,6 +664,11 @@
                                     <button name="eva_start_team" value="0" id="tssStart" class="btn-start">START</button>
                                     <button name="eva_end_team" value="0" id="tssStop" class="btn-stop">STOP</button>
                                 </form>
+                            </div>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    ERROR SIMULATION
+                                </span>
                             </div>
                             <div class="card-body">
                                 <div class="card-content">
@@ -744,6 +733,11 @@
                                         </form>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    EVA STATUS
+                                </span>
                             </div>
                             <div class="card-body">
                                 <div class="card-content">
@@ -820,7 +814,11 @@
                                 </div>
                                 <div class="station-button-section">
                                     <form action="" method="post">
-                                        <button name="eva_start_UIA_team" value="0" id="assignUIA" class="btn-station">ASSIGN</button>
+                                        <label class="switch">
+                                            <input type="checkbox" id="assignUIA" name="eva_start_UIA_team" value="true" onChange="this.form.submit()">
+                                            <span class="slider round"></span>
+                                            <input type="hidden" name="eva_start_UIA_team" value="false">
+                                        </label>
                                     </form>
                                 </div>
                             </div>
@@ -836,7 +834,11 @@
                                 </div>
                                 <div class="station-button-section">
                                     <form action="" method="post">
-                                        <button name="eva_start_SPEC_team" value="0" id="assignSPEC" class="btn-station">ASSIGN</button>
+                                        <label class="switch">
+                                            <input type="checkbox" id="assignSPEC" name="eva_start_SPEC_team" value="true" onChange="this.form.submit()">
+                                            <span class="slider round"></span>
+                                            <input type="hidden" name="eva_start_SPEC_team" value="false">
+                                        </label>
                                     </form>
                                 </div>
                             </div>
@@ -852,7 +854,11 @@
                                 </div>
                                 <div class="station-button-section">
                                     <form action="" method="post">
-                                        <button name="eva_start_DCU_team" value="0" id="assignDCU" class="btn-station">ASSIGN</button>
+                                        <label class="switch">
+                                            <input type="checkbox" id="assignDCU" name="eva_start_DCU_team" value="true" onChange="this.form.submit()">
+                                            <span class="slider round"></span>
+                                            <input type="hidden" name="eva_start_DCU_team" value="false">
+                                        </label>
                                     </form>
                                 </div>
                             </div>

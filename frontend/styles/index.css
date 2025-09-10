@@ -117,8 +117,6 @@
 
 /**************** Telemetry CSS ****************/
 .btn-start {
-  margin-left: 0.75rem;
-  margin-right: 0.75rem;
   height: 2rem;
   width: 6.5rem;
   color: var(--white);
@@ -130,8 +128,6 @@
 }
 
 .btn-stop {
-  margin-left: 0.75rem;
-  margin-right: 0.75rem;
   height: 2rem;
   width: 6.5rem;
   color: var(--white);

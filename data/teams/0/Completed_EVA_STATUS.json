@@ -4,16 +4,16 @@
 		"started": true,
 		"paused": false,
 		"completed": true,
-		"total_time": 262,
+		"total_time": 97,
 		"uia": {
 			"started": true,
 			"completed": true,
-			"time": 5
+			"time": 88
 		},
 		"dcu": {
-			"started": false,
+			"started": true,
 			"completed": true,
-			"time": 0
+			"time": 13
 		},
 		"rover": {
 			"started": false,
@@ -21,9 +21,9 @@
 			"time": 0
 		},
 		"spec": {
-			"started": false,
+			"started": true,
 			"completed": true,
-			"time": 0
+			"time": 79
 		}
 	}
 }
