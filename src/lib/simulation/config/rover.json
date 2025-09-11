@@ -52,7 +52,7 @@
     "speed": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "throttle * 0.15 + 2.0 - terrain_condition * 0.05",
+      "formula": "(throttle / 100.0) * 0.4 * (1.0 - terrain_condition / 200.0)",
       "depends_on": ["throttle", "terrain_condition"]
     },
     "surface_incline": {
@@ -77,10 +77,10 @@
     },
     "oxygen_levels": {
       "type": "float",
-      "algorithm": "linear_decay",
-      "start_value": 21.0,
-      "end_value": 16.0,
-      "duration_seconds": 843.0
+      "algorithm": "sine_wave",
+      "base_value": 0.13,
+      "amplitude": 0.03,
+      "frequency": 0.001
     },
     "ac_fan_pri": {
       "type": "float",
@@ -119,7 +119,7 @@
     "power_consumption_rate": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "throttle * 0.8 + ac_fan_pri * 0.0002 + 15.0",
+      "formula": "100.0 + throttle * 0.5 + ac_fan_pri * 0.003",
       "depends_on": ["throttle", "ac_fan_pri"]
     },
     "solar_panel_efficiency": {
@@ -131,8 +131,8 @@
     "external_temp": {
       "type": "float",
       "algorithm": "sine_wave",
-      "base_value": 0.0,
-      "amplitude": 250.0,
+      "base_value": -30.0,
+      "amplitude": 50.0,
       "frequency": 0.0008
     },
     "pr_coolant_level": {
@@ -165,7 +165,7 @@
     "motor_power_consumption": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "speed * 8.5 + 25.0",
+      "formula": "speed * 150.0 + 50.0",
       "depends_on": ["speed"]
     },
     "terrain_condition": {

@@ -94,6 +94,7 @@ bool sim_engine_load_predefined_configs(sim_engine_t* engine) {
     bool success = true;
     int loaded_count = 0;
     
+    // Load each configuration file in a loop
     for (int i = 0; i < config_count; i++) {
         if (sim_engine_load_component(engine, config_files[i])) {
             loaded_count++;
@@ -131,16 +132,18 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
         return false;
     }
     
+    // Get the file size
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
     
+    // Read the entire JSON file into a string
     char* json_string = malloc(file_size + 1);
     fread(json_string, 1, file_size, file);
     json_string[file_size] = '\0';
     fclose(file);
     
-    // Parse JSON
+    // Parse the string as JSON
     cJSON* root = cJSON_Parse(json_string);
     free(json_string);
     
@@ -149,7 +152,7 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
         return false;
     }
     
-    // Extract component name
+    // Extract component name I.E. "eva", "rover"
     cJSON* component_name_json = cJSON_GetObjectItem(root, "component_name");
     if (!component_name_json || !cJSON_IsString(component_name_json)) {
         printf("Error: Missing component_name in file: %s\n", json_file_path);

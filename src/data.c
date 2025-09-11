@@ -2554,7 +2554,7 @@ bool update_pr_telemetry_from_simulation(struct pr_data_t *p_rover, uint32_t ser
     sim_value_t ac_fan_pri = sim_engine_get_field_value(backend->sim_engine, "ac_fan_pri");
     sim_value_t ac_fan_sec = sim_engine_get_field_value(backend->sim_engine, "ac_fan_sec");
 
-    // Apply simulated values (NOT overwriting Unreal Engine data)
+    // Apply simulated values
     p_rover->battery_level = battery_level.f;
     p_rover->oxygen_levels = oxygen_levels.f;
     p_rover->cabin_temperature = cabin_temperature.f;
