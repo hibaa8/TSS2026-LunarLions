@@ -1,0 +1,214 @@
+{
+  "component_name": "rover",
+  "fields": {
+    "throttle": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 30.0,
+      "amplitude": 25.0,
+      "frequency": 0.02
+    },
+    "steering": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 0.0,
+      "amplitude": 0.8,
+      "frequency": 0.015
+    },
+    "current_pos_alt": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 100.0,
+      "amplitude": 20.0,
+      "frequency": 0.001
+    },
+    "heading": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "steering * 45.0 + 180.0",
+      "depends_on": ["steering"]
+    },
+    "pitch": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 0.0,
+      "amplitude": 5.0,
+      "frequency": 0.01
+    },
+    "roll": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 0.0,
+      "amplitude": 3.0,
+      "frequency": 0.012
+    },
+    "distance_traveled": {
+      "type": "float",
+      "algorithm": "linear_growth",
+      "start_value": 0.0,
+      "growth_rate": 3.2,
+      "max_value": 50000.0
+    },
+    "speed": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "(throttle / 100.0) * 0.4 * (1.0 - terrain_condition / 200.0)",
+      "depends_on": ["throttle", "terrain_condition"]
+    },
+    "surface_incline": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 2.0,
+      "amplitude": 8.0,
+      "frequency": 0.005
+    },
+    "oxygen_tank": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 100.0,
+      "end_value": 20.0,
+      "duration_seconds": 675.0
+    },
+    "oxygen_pressure": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "oxygen_tank * 30.0",
+      "depends_on": ["oxygen_tank"]
+    },
+    "oxygen_levels": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 0.13,
+      "amplitude": 0.03,
+      "frequency": 0.001
+    },
+    "ac_fan_pri": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 15000.0,
+      "amplitude": 10000.0,
+      "frequency": 0.003
+    },
+    "ac_fan_sec": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 12000.0,
+      "amplitude": 8000.0,
+      "frequency": 0.0025
+    },
+    "cabin_pressure": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 4.0,
+      "amplitude": 0.3,
+      "frequency": 0.008
+    },
+    "cabin_temperature": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "external_temp * 0.1 + 22.0",
+      "depends_on": ["external_temp"]
+    },
+    "battery_level": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 100.0,
+      "end_value": 5.0,
+      "duration_seconds": 1350.0
+    },
+    "power_consumption_rate": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "100.0 + throttle * 0.5 + ac_fan_pri * 0.003",
+      "depends_on": ["throttle", "ac_fan_pri"]
+    },
+    "solar_panel_efficiency": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "100.0 - solar_panel_dust_accum",
+      "depends_on": ["solar_panel_dust_accum"]
+    },
+    "external_temp": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": -30.0,
+      "amplitude": 50.0,
+      "frequency": 0.0008
+    },
+    "pr_coolant_level": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 44.5,
+      "end_value": 5.0,
+      "duration_seconds": 25200.0
+    },
+    "pr_coolant_pressure": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "pr_coolant_level * 11.2 + 50.0",
+      "depends_on": ["pr_coolant_level"]
+    },
+    "pr_coolant_tank": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 100.0,
+      "end_value": 10.0,
+      "duration_seconds": 21600.0
+    },
+    "radiator": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 75.0,
+      "amplitude": 25.0,
+      "frequency": 0.004
+    },
+    "motor_power_consumption": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "speed * 150.0 + 50.0",
+      "depends_on": ["speed"]
+    },
+    "terrain_condition": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 50.0,
+      "amplitude": 30.0,
+      "frequency": 0.001
+    },
+    "solar_panel_dust_accum": {
+      "type": "float",
+      "algorithm": "linear_growth",
+      "start_value": 0.0,
+      "growth_rate": 0.8,
+      "max_value": 85.0
+    },
+    "mission_planned_time": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 1350.0,
+      "end_value": 0.0,
+      "duration_seconds": 1350.0
+    },
+    "dest_x": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 5000.0,
+      "amplitude": 2000.0,
+      "frequency": 0.0001
+    },
+    "dest_y": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 3000.0,
+      "amplitude": 1500.0,
+      "frequency": 0.00012
+    },
+    "dest_z": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 150.0,
+      "amplitude": 50.0,
+      "frequency": 0.0002
+    }
+  }
+}

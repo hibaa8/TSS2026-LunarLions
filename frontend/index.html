@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CAPCOM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="./styles/global.css">
+    <link rel="stylesheet" href="./styles/index.css">
+    <link rel="icon" href="./images/suits-logo.png">
+    <script src="./javascript/utils.js"></script>
+    <script src="./javascript/index.js" ></script>
+    <script type="text/javascript" src="./javascript/lib/jquery-3.3.1.min.js"></script>
+  </head>
+
+  <body onload="onload()">
+    <!------------------------------------------ Navigation Bar Section ------------------------------------------>
+    <nav>
+        <div class="nav-top">
+            <span class="nav-title">
+                NASA SUITS
+            </span>
+            <span id="nav-clock" class="nav-title">
+                00:00:00
+            </span>
+            <div class="room-select">
+                <select id="roomSelect" onchange="roomSelect(this.value)">
+                    <option value="1">Room 1 - ------</option>
+                    <option value="2">Room 2 - ------</option>
+                    <option value="3">Room 3 - ------</option>
+                    <option value="4">Room 4 - ------</option>
+                    <option value="5">Room 5 - ------</option>
+                    <option value="6">Room 6 - ------</option>
+                    <option value="7">Room 7 - ------</option>
+                    <option value="8">Room 8 - ------</option>
+                    <option value="9">Room 9 - ------</option>
+                    <option value="10">Room 10 - ------</option>
+                    <option value="11">Room 11 - ------</option>
+                </select>
+            </div>
+        </div>
+        <div class="nav-description">
+            <p>Welcome to the TSS (telemetry stream server) for the NASA SUITS challenge! This interface is where you can monitor and control various aspects of the mission and trigger scenarios for testing/debugging your software. You'll be connecting to this server to fetch telemetry values when building your rover or EVA interface. This website is what will be used by the moderators of the challenge in May during test week to track your EVA or Rover activities and initiate error scenarios. Some helpful links:</p> <a href="https://github.com/SUITS-Techteam/TSS2026/tree/feat/frontend-update/documents" target="_blank">Development Docs</a> | <a href="https://www.nasa.gov/wp-content/uploads/2025/09/fy26-suits-mission-description.pdf?emrc=345f62?emrc=345f62" target="_blank">Mission Description</a> | <a href="https://github.com/SUITS-Techteam/TSS2026" target="_blank">GitHub Repo</a>
+        </div>
+    </nav>
+
+    <!------------------------------------------ Main Page Body Section ------------------------------------------>
+    <div class="page-content">
+        <!------------------------------------------ Room Specific Data Section ------------------------------------------>
+        <div class="main-container">
+            <div class="col-container">
+                <div class="row-container">
+
+
+                    <!------------------------------------------ Stations Section ------------------------------------------>
+                    <div class="column">
+                        <!------------------------------------------ PR Telemetry Section ------------------------------------------>
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    ROVER PANEL
+                                </span>
+                            </div>
+                            <div class="card-subtitle">
+                                <span id="prTimer" class="subtitle">
+                                    00:00:00
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <span id="prButtons" class="subtitle" style="display:none;">
+                                    <form action="" method="post">
+                                        <button name="pr_start_team" value="0" id="prTssStart" class="btn-start">START</button>
+                                        <button name="pr_end_team" value="0" id="prTssStop" class="btn-stop">STOP</button>
+                                    </form>
+                                </span>
+                                <span id="prAlreadyRunningText" class="subtitle" style="display:none;">
+                                </span>
+                            </div>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    ROVER CONTROLS
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="acHeatingSwitch" name="pr_ac_heating" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name="pr_ac_heating" value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            AC Heating
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="acCoolingSwitch" name="pr_ac_cooling" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name="pr_ac_cooling" value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            AC Cooling
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="co2ScrubberSwitch" name="pr_co2_scrubber" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name="pr_co2_scrubber" value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            CO2 Scrubber
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="lightsOnSwitch" name="pr_lights_on" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name="pr_lights_on" value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Lights On
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="fanPriSwitch" name="pr_fan_pri" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name="pr_fan_pri" value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Fan: Primary
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="dustWiperSwitch" name="pr_dust_wiper" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name="pr_dust_wiper" value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Dust Wiper
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="inSunlightSwitch" name="pr_in_sunlight" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name="pr_in_sunlight" value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                        In sunlight
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+
+
+                        <!------------------------------------------ LTV Section ------------------------------------------>
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    LTV
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            X-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="xCoordinateRover" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Y-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="yCoordinateRover" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card" style="border-bottom: 2px solid var(--sharp-blue);">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    ROVER
+                                </span>
+                            </div>
+                            <div class="card-subtitle">
+                                <div class="subtitle">
+                                    TELEMETRY VALUES
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Throttle
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="throttle" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Steering
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="steering" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+        
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Solar Panel Dust Accumulation
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="solar_panel_dust_accum" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Pitch
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="pitch" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Roll
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="roll" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Distance Traveled
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="distance_traveled" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Speed
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="speed" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Surface Incline
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="surface_incline" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Oxygen Levels
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="oxygen_levels" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Oxygen Tank
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="oxygen_tank" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Battery Level
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="battery_level" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Oxygen Pressure
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="oxygen_pressure" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            AC Fan: Primary
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="ac_fan_pri" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            AC Fan: Secondary
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="ac_fan_sec" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Cabin Pressure
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="cabin_pressure" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Cabin Temperature
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="cabin_temperature" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Power Consumption Rate
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="power_consumption_rate" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Solar Panel Efficiency
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="solar_panel_efficiency" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            External Temperature
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="external_temp" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Coolant Level
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="pr_coolant_level" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Coolant Pressure
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="pr_coolant_pressure" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Coolant Tank
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="pr_coolant_tank" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Motor Power Consumption
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="motor_power_consumption" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Distance From Base
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="distance_from_base" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Mission Elapsed Time
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="mission_elapsed_time" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span class="value">
+                                            
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!------------------------------------------ Location Section ------------------------------------------>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    LOCATION
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            X-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="latitude" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Y-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="longitude" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Heading
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="heading" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span class="value">
+                                            
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="column">
+        
+                        <!------------------------------------------ EVA PANEL Section ------------------------------------------>
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    EVA PANEL
+                                </span>
+                            </div>
+                            <div class="card-subtitle">
+                                <span id="evaTimer" class="subtitle" style="display:none;">
+                                    
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <form action="" method="post">
+                                    <button name="eva_start_team" value="0" id="tssStart" class="btn-start">START</button>
+                                    <button name="eva_end_team" value="0" id="tssStop" class="btn-stop">STOP</button>
+                                </form>
+                            </div>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    EVA ERROR SIMULATION
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="eva_o2_error" name="error_oxy" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type="hidden" name="error_oxy" value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            O2 Error
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="eva_fan_error" name="error_fan" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type="hidden" name="error_fan" value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Fan Error
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="eva_pump_error" name="error_pump" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type="hidden" name="error_pump" value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Pump Error
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="eva_power_error" name="error_power" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type="hidden" name="error_power" value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Power Error
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!------------------------------------------ Stations Section ------------------------------------------>
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    EVA TIMING
+                                </span>
+                            </div>
+                            <div class="station-rectangle">
+                                <div class="station-name-section">
+                                    <span class="station-text">UIA</span>
+                                </div>
+                                <div class="station-timer-section">
+                                    <span id="uiaTimer" class="station-timer-text">00:00:00</span>
+                                </div>
+                                <div class="station-status-section">
+                                    <span id="uiaStatus" class="station-status-text">Incomplete</span>
+                                </div>
+                                <div class="station-button-section">
+                                    <form action="" method="post">
+                                        <label class="switch">
+                                            <input type="checkbox" id="assignUIA" name="eva_start_UIA_team" value="true" onChange="this.form.submit()">
+                                            <span class="slider round"></span>
+                                            <input type="hidden" name="eva_start_UIA_team" value="false">
+                                        </label>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="station-rectangle">
+                                <div class="station-name-section">
+                                    <span class="station-text">LTV Repair</span>
+                                </div>
+                                <div class="station-timer-section">
+                                    <span id="specTimer" class="station-timer-text">00:00:00</span>
+                                </div>
+                                <div class="station-status-section">
+                                    <span id="specStatus" class="station-status-text">Incomplete</span>
+                                </div>
+                                <div class="station-button-section">
+                                    <form action="" method="post">
+                                        <label class="switch">
+                                            <input type="checkbox" id="assignSPEC" name="eva_start_SPEC_team" value="true" onChange="this.form.submit()">
+                                            <span class="slider round"></span>
+                                            <input type="hidden" name="eva_start_SPEC_team" value="false">
+                                        </label>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="station-rectangle" style="border-bottom: 0;">
+                                <div class="station-name-section">
+                                    <span class="station-text">DCU</span>
+                                </div>
+                                <div class="station-timer-section">
+                                    <span id="dcuTimer" class="station-timer-text">00:00:00</span>
+                                </div>
+                                <div class="station-status-section">
+                                    <span id="dcuStatus" class="station-status-text">Incomplete</span>
+                                </div>
+                                <div class="station-button-section">
+                                    <form action="" method="post">
+                                        <label class="switch">
+                                            <input type="checkbox" id="assignDCU" name="eva_start_DCU_team" value="true" onChange="this.form.submit()">
+                                            <span class="slider round"></span>
+                                            <input type="hidden" name="eva_start_DCU_team" value="false">
+                                        </label>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+        
+        
+                        <!------------------------------------------ UIA State Section ------------------------------------------>
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    UIA
+                                </span>
+                            </div>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    NOT CONNECTED
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="uia_eva1_power_switch" name="uia_eva1_power" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name='uia_eva1_power' value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            EMU1 POWER
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="uia_eva2_power_switch" name="uia_eva2_power" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name='uia_eva2_power' value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            EMU2 POWER
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="uia_eva1_water_supply_switch" name="uia_eva1_water_supply" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name='uia_eva1_water_supply' value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            EV1 Supply
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="uia_eva2_water_supply_switch" name="uia_eva2_water_supply" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name='uia_eva2_water_supply' value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            EV2 Supply
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="uia_eva1_water_waste_switch" name="uia_eva1_water_waste" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name='uia_eva1_water_waste' value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            EV1 Waste
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="uia_eva2_water_waste_switch" name="uia_eva2_water_waste" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name='uia_eva2_water_waste' value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            EV2 Waste
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="uia_eva1_oxy_switch" name="uia_eva1_oxy" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name='uia_eva1_oxy' value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            EV1 Oxygen
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="uia_eva2_oxy_switch" name="uia_eva2_oxy" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name='uia_eva2_oxy' value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            EV2 Oxygen
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="uia_oxy_vent_switch" name="uia_oxy_vent" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name='uia_oxy_vent' value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            O2 Vent
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <form action="" method="post">
+                                            <label class="switch">
+                                                <input type="checkbox" id="uia_depress_switch" name="uia_depress" value="true" onChange="this.form.submit()">
+                                                <span class="slider round"></span>
+                                                <input type='hidden' name='uia_depress' value="false">
+                                            </label>
+                                        </form>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            Depress Pump
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!------------------------------------------ EVA 1 Section ------------------------------------------>
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    EVA 1
+                                </span>
+                            </div>
+
+
+                            <!-------------------------------------- TELEMETRY VALUES Section -------------------------------------->
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    TELEMETRY VALUES
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            EVA Time
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="evaTimeTelemetryState1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            O2 Time Left
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="o2Time1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Primary O2 Storage
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="primaryO2Storage1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Secondary O2 Storage
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="secondaryO2Storage1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Primary O2 Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="primaryO2Pressure1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Secondary O2 Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="secondaryO2Pressure1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Suit O2 Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="suitO2Pressure1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Suit CO2 Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="suitCO2Pressure1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Suit Other Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="suitOtherPressure1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Suit Total Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="suitTotalPressure1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Scrubber Primary Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="scrubberAPressure1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Scrubber Secondary Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="scrubberBPressure1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            H20 Gas Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="h2OGasPressure1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            H2O Liquid Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="h2OLiquidPressure1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            O2 Consumption
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="o2Consumption1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            CO2 Production
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="co2Production1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Primary Fan
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="primaryFan1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Secondary Fan
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="secondaryFan1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Helmet CO2 Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="helmetCO2Pressure1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Heart Rate
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="heartRate1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Temperature
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="temperature1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Coolant
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="coolant1" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!------------------------------------------ Location Section ------------------------------------------>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    LOCATION
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            X-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="xCoordinateEV1" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Y-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="yCoordinateEV1" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Heading
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="headingEV1" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span class="value">
+                                            
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!------------------------------------------ DCU State Section ------------------------------------------>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    DCU STATE
+                                </span>
+                            </div>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    NOT CONNECTED
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="dcu-control-row">
+                                        <div class="dcu-switch-container">
+                                            <span class="dcu-label-left">LOCAL</span>
+                                            <form action="" method="post">
+                                                <label class="switch">
+                                                    <input type="checkbox" id="eva1_dcu_batt_switch" name="dcu_eva1_batt" value="true" onChange="this.form.submit()">
+                                                    <span class="slider round"></span>
+                                                    <input type='hidden' name='dcu_eva1_batt' value="false">
+                                                </label>
+                                            </form>
+                                            <span class="dcu-label-right">UMB</span>
+                                        </div>
+                                        <div class="dcu-control-label">
+                                            <span class="info-text">BATTERY</span>
+                                        </div>
+                                    </div>
+                                    <div class="dcu-control-row">
+                                        <div class="dcu-switch-container">
+                                            <span class="dcu-label-left">SEC</span>
+                                            <form action="" method="post">
+                                                <label class="switch">
+                                                    <input type="checkbox" id="eva1_dcu_fan_switch" name="dcu_eva1_fan" value="true" onChange="this.form.submit()">
+                                                    <span class="slider round"></span>
+                                                    <input type='hidden' name='dcu_eva1_fan' value="false">
+                                                </label>
+                                            </form>
+                                            <span class="dcu-label-right">PRI</span>
+                                        </div>
+                                        <div class="dcu-control-label">
+                                            <span class="info-text">FAN</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="dcu-control-row">
+                                        <div class="dcu-switch-container">
+                                            <span class="dcu-label-left">SEC</span>
+                                            <form action="" method="post">
+                                                <label class="switch">
+                                                    <input type="checkbox" id="eva1_dcu_oxy_switch" name="dcu_eva1_oxy" value="true" onChange="this.form.submit()">
+                                                    <span class="slider round"></span>
+                                                    <input type='hidden' name='dcu_eva1_oxy' value="false">
+                                                </label>
+                                            </form>
+                                            <span class="dcu-label-right">PRI</span>
+                                        </div>
+                                        <div class="dcu-control-label">
+                                            <span class="info-text">OXYGEN</span>
+                                        </div>
+                                    </div>
+                                    <div class="dcu-control-row">
+                                        <div class="dcu-switch-container">
+                                            <span class="dcu-label-left">CLOSE</span>
+                                            <form action="" method="post">
+                                                <label class="switch">
+                                                    <input type="checkbox" id="eva1_dcu_pump_switch" name="dcu_eva1_pump" value="true" onChange="this.form.submit()">
+                                                    <span class="slider round"></span>
+                                                    <input type='hidden' name='dcu_eva1_pump' value="false">
+                                                </label>
+                                            </form>
+                                            <span class="dcu-label-right">OPEN</span>
+                                        </div>
+                                        <div class="dcu-control-label">
+                                            <span class="info-text">PUMP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="dcu-control-row">
+                                        <div class="dcu-switch-container">
+                                            <span class="dcu-label-left">SEC</span>
+                                            <form action="" method="post">
+                                                <label class="switch">
+                                                    <input type="checkbox" id="eva1_dcu_comm_switch" name="dcu_eva1_comm" value="true" onChange="this.form.submit()">
+                                                    <span class="slider round"></span>
+                                                    <input type='hidden' name='dcu_eva1_comm' value="false">
+                                                </label>
+                                            </form>
+                                            <span class="dcu-label-right">PRI</span>
+                                        </div>
+                                        <div class="dcu-control-label">
+                                            <span class="info-text">COMMS</span>
+                                        </div>
+                                    </div>
+                                    <div class="dcu-control-row">
+                                        <div class="dcu-switch-container">
+                                            <span class="dcu-label-left">SEC</span>
+                                            <form action="" method="post">
+                                                <label class="switch">
+                                                    <input type="checkbox" id="eva1_dcu_co2_switch" name="dcu_eva1_co2" value="true" onChange="this.form.submit()">
+                                                    <span class="slider round"></span>
+                                                    <input type='hidden' name='dcu_eva1_co2' value="false">
+                                                </label>
+                                            </form>
+                                            <span class="dcu-label-right">PRI</span>
+                                        </div>
+                                        <div class="dcu-control-label">
+                                            <span class="info-text">CO2</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!------------------------------------------ EVA 2 Section ------------------------------------------>
+                        <div class="card"  style="border-bottom: 2px solid var(--sharp-blue);">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    EVA 2
+                                </span>
+                            </div>
+
+
+                            <!-------------------------------------- TELEMETRY VALUES Section -------------------------------------->
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    TELEMETRY VALUES
+                                </span>
+                            </div>
+                          
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            EVA Time
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="evaTimeTelemetryState2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            O2 Time Left
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="o2Time2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Primary O2 Storage
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="primaryO2Storage2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Secondary O2 Storage
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="secondaryO2Storage2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Primary O2 Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="primaryO2Pressure2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Secondary O2 Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="secondaryO2Pressure2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Suit O2 Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="suitO2Pressure2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Suit CO2 Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="suitCO2Pressure2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Suit Other Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="suitOtherPressure2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Suit Total Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="suitTotalPressure2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Scrubber Primary Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="scrubberAPressure2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Scrubber Secondary Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="scrubberBPressure2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            H20 Gas Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="h2OGasPressure2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            H2O Liquid Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="h2OLiquidPressure2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            O2 Consumption
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="o2Consumption2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            CO2 Production
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="co2Production2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Primary Fan
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="primaryFan2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Secondary Fan
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="secondaryFan2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Helmet CO2 Pressure
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="helmetCO2Pressure2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Heart Rate
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="heartRate2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Temperature
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="temperature2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Coolant
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="coolant2" class="telemetry-data">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!------------------------------------------ Location Section ------------------------------------------>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    LOCATION
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            X-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="xCoordinateEV2" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Y-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="yCoordinateEV2" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Heading
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span id="headingEV2" class="value">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            
+                                        </span>
+                                    </div>
+                                    <div class="data-value">
+                                        <span class="value">
+                                            
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                             <!------------------------------------------ DCU State Section ------------------------------------------>
+                             <!--
+                             EVA #2 DCU is not being used for the 2026 mission since we will only have one physical EVA the the second one will be simulated.
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    DCU State
+                                </span>
+                            </div>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                   NOT CONNECTED
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <div id="dcuEva2BatterySensor" class="sensor">
+                                        </div>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            BATTERY
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <div id="dcuEva2FanSensor" class="sensor">
+                                        </div>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            FAN
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <div id="dcuEva2OxygenSensor" class="sensor">
+                                        </div>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            OXYGEN
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <div id="dcuEva2PumpSensor" class="sensor">
+                                        </div>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            PUMP
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <div id="dcuEva2CommSensor" class="sensor">
+                                        </div>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            COMMS
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <div id="dcuEva2Co2Sensor" class="sensor">
+                                        </div>
+                                    </div>
+                                    <div class="info-container">
+                                        <span class="info-text">
+                                            CO2
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+  </body>
+</html>
