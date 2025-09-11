@@ -1,14 +1,14 @@
 
 {
 	"eva": {
-		"started": true,
+		"started": false,
 		"paused": false,
 		"completed": false,
-		"total_time": 79,
+		"total_time": 0,
 		"uia": {
-			"started": true,
-			"completed": true,
-			"time": 34
+			"started": false,
+			"completed": false,
+			"time": 0
 		},
 		"dcu": {
 			"started": false,

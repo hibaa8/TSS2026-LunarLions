@@ -9,7 +9,7 @@
 :root {
   --dark-grey: #2d2d2d;
   --grey: #404040;
-  --light-grey: #666666;
+  --light-grey: #8e8e8eff;
   --black: #000000;
   --white: #ffffff;
   --red: #ff0000;
@@ -18,7 +18,7 @@
   --green: #28ae5f;
   --light-green: #28ae5f;
   --blue: #0064ff;
-  --sharp-blue: #47b2e0ff;
+  --sharp-blue: #3889abff;
   --light-blue: #08212b;
   --dark-blue: #001628;
   font-family: "Geist Mono", "Courier New", Consolas, monospace;
@@ -62,9 +62,16 @@ body {
 /**************************************************************** Nav Bar CSS ****************************************************************/
 nav {
   margin: 0.5rem;
-  padding: 0.5rem;
+  padding: 0;
   border: 3px solid var(--sharp-blue);
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-top {
+  padding: 0.5rem;
+  padding-bottom: 0;
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
@@ -74,6 +81,32 @@ nav {
 #nav-clock {
   font-size: 1rem;
   color: var(--light-grey);
+}
+
+.nav-description {
+  padding: 0 0.5rem 0.5rem 0.5rem;
+  color: var(--light-grey);
+}
+
+.nav-description p {
+  color: var(--light-grey);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  margin: 0;
+  text-align: left;
+  display: inline;
+}
+
+.nav-description a {
+  color: var(--sharp-blue);
+  font-size: 0.75rem;
+  text-decoration: underline;
+  display: inline;
+  margin: 0 0.25rem;
+}
+
+.nav-description a:hover {
+  color: var(--white);
 }
 
 .nav-logo {

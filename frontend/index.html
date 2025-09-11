@@ -15,26 +15,31 @@
   <body onload="onload()">
     <!------------------------------------------ Navigation Bar Section ------------------------------------------>
     <nav>
-        <span class="nav-title">
-            NASA SUITS
-        </span>
-        <span id="nav-clock" class="nav-title">
-            00:00:00
-        </span>
-        <div class="room-select">
-            <select id="roomSelect" onchange="roomSelect(this.value)">
-                <option value="1">Room 1 - ------</option>
-                <option value="2">Room 2 - ------</option>
-                <option value="3">Room 3 - ------</option>
-                <option value="4">Room 4 - ------</option>
-                <option value="5">Room 5 - ------</option>
-                <option value="6">Room 6 - ------</option>
-                <option value="7">Room 7 - ------</option>
-                <option value="8">Room 8 - ------</option>
-                <option value="9">Room 9 - ------</option>
-                <option value="10">Room 10 - ------</option>
-                <option value="11">Room 11 - ------</option>
-            </select>
+        <div class="nav-top">
+            <span class="nav-title">
+                NASA SUITS
+            </span>
+            <span id="nav-clock" class="nav-title">
+                00:00:00
+            </span>
+            <div class="room-select">
+                <select id="roomSelect" onchange="roomSelect(this.value)">
+                    <option value="1">Room 1 - ------</option>
+                    <option value="2">Room 2 - ------</option>
+                    <option value="3">Room 3 - ------</option>
+                    <option value="4">Room 4 - ------</option>
+                    <option value="5">Room 5 - ------</option>
+                    <option value="6">Room 6 - ------</option>
+                    <option value="7">Room 7 - ------</option>
+                    <option value="8">Room 8 - ------</option>
+                    <option value="9">Room 9 - ------</option>
+                    <option value="10">Room 10 - ------</option>
+                    <option value="11">Room 11 - ------</option>
+                </select>
+            </div>
+        </div>
+        <div class="nav-description">
+            <p>Welcome to the TSS (telemetry stream server) for the NASA SUITS challenge! This interface is where you can monitor and control various aspects of the mission and trigger scenarios for testing your software. You'll be connecting to this server to fetch telemetry values when building your rover or EVA interface. This website is what will be used by the moderators of the challenge in May during test week to track your EVA or Rover activities and initiate error scenarios. Some helpful links:</p> <a href="https://github.com/SUITS-Techteam/TSS2026/tree/feat/frontend-update/documents" target="_blank">Development Docs</a> | <a href="https://www.nasa.gov/wp-content/uploads/2025/09/fy26-suits-mission-description.pdf?emrc=345f62?emrc=345f62" target="_blank">Mission Description</a> | <a href="https://github.com/SUITS-Techteam/TSS2026" target="_blank">GitHub Repo</a>
         </div>
     </nav>
 
@@ -134,7 +139,7 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            Lights on
+                                            Lights On
                                         </span>
                                     </div>
                                 </div>
@@ -152,7 +157,7 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            Fan: primary
+                                            Fan: Primary
                                         </span>
                                     </div>
                                     <div class="sensor-container">
@@ -166,7 +171,7 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            Dust wiper
+                                            Dust Wiper
                                         </span>
                                     </div>
                                 </div>
@@ -647,7 +652,7 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            O2 ERROR
+                                            O2 Error
                                         </span>
                                     </div>
                                     <div class="sensor-container">
@@ -661,7 +666,7 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            FAN ERROR
+                                            Fan Error
                                         </span>
                                     </div>
                                 </div>
@@ -679,7 +684,7 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            PUMP ERROR
+                                            Pump Error
                                         </span>
                                     </div>
                                     <div class="sensor-container">
@@ -693,14 +698,14 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            POWER ERROR
+                                            Power Error
                                         </span>
                                     </div>
                                 </div>
                             </div>
                             <div class="card-subtitle">
                                 <span class="subtitle">
-                                    EVA STATUS
+                                    EVA Status
                                 </span>
                             </div>
                             <div class="card-body">

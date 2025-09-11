@@ -4,6 +4,6 @@
 		"fan_error": false,
 		"oxy_error": false,
 		"batt_error": false,
-		"pump_error": true
+		"pump_error": false
 	}
 }
