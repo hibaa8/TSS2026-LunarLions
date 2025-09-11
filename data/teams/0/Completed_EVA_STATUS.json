@@ -2,18 +2,18 @@
 {
 	"eva": {
 		"started": true,
-		"paused": false,
+		"paused": true,
 		"completed": true,
-		"total_time": 97,
+		"total_time": 409,
 		"uia": {
-			"started": true,
+			"started": false,
 			"completed": true,
-			"time": 88
+			"time": 0
 		},
 		"dcu": {
-			"started": true,
+			"started": false,
 			"completed": true,
-			"time": 13
+			"time": 0
 		},
 		"rover": {
 			"started": false,
@@ -21,9 +21,9 @@
 			"time": 0
 		},
 		"spec": {
-			"started": true,
+			"started": false,
 			"completed": true,
-			"time": 79
+			"time": 0
 		}
 	}
 }

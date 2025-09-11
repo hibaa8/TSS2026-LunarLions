@@ -61,6 +61,14 @@ const DCU_SWITCHES = {
   "eva2.co2": "eva2_dcu_co2_switch",
 };
 
+// ERROR simulation switch mappings
+const ERROR_SWITCHES = {
+  oxy_error: "eva_o2_error",
+  fan_error: "eva_fan_error",
+  pump_error: "eva_pump_error",
+  batt_error: "eva_power_error",  // Map battery error to power error switch
+};
+
 // Pressurized Rover sensor and switch mappings
 const PR_SENSORS_AND_SWITCHES = {
   ac_heating: { sensor: "acHeatingSensor", switch: "acHeatingSwitch" },
@@ -198,6 +206,19 @@ function loadDCU() {
       const switchElement = document.getElementById(DCU_SWITCHES[key]);
       if (switchElement) {
         switchElement.checked = value;
+      }
+    });
+  });
+}
+
+// Loads ERROR simulation data and updates all switch states
+function loadERROR() {
+  $.getJSON("../data/ERROR.json", function (data) {
+    // Update all ERROR switches using configuration mapping
+    Object.keys(ERROR_SWITCHES).forEach((key) => {
+      const switchElement = document.getElementById(ERROR_SWITCHES[key]);
+      if (switchElement) {
+        switchElement.checked = data.error[key];
       }
     });
   });
@@ -619,6 +640,7 @@ function onload() {
   //Load immediately
   loadUIA();
   loadDCU();
+  loadERROR();
   loadEVAStatus(selectedTeam);
   loadPRStatus(selectedTeam);
   loadEVATelemetry(selectedTeam);
@@ -627,10 +649,11 @@ function onload() {
   updateTelemetry();
   updateClock();
 
-  // Continuously refreshes values from the UIA, DCU, EVA, and Telemetry
+  // Continuously refreshes values from the UIA, DCU, ERROR, EVA, and Telemetry
   setInterval(function () {
     loadUIA();
     loadDCU();
+    loadERROR();
     loadEVAStatus(selectedTeam);
     loadPRStatus(selectedTeam);
     loadEVATelemetry(selectedTeam);
