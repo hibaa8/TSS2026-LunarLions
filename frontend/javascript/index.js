@@ -323,10 +323,11 @@ function loadPRStatus(team) {
       pausePRTSS();
     } else if (prStarted) {
       prRunningIndex = team;
-      prRunningTeam = document.getElementById(
-        "room" + (team + 1) + "Name"
-      ).innerText;
+      const teamNameElement = document.getElementById("room" + (team + 1) + "Name");
+      prRunningTeam = teamNameElement ? teamNameElement.innerText : "Team " + (team + 1);
       resumePRTSS();
+    } else {
+      stopPRTSS();
     }
   });
 }
@@ -747,9 +748,11 @@ function pauseTSS() {
     document.documentElement
   ).getPropertyValue("--yellow");
   startButton.textContent = "RESUME";
+  startButton.disabled = false;
   stopButton.style.backgroundColor = getComputedStyle(
     document.documentElement
   ).getPropertyValue("--button-red");
+  stopButton.disabled = false;
   document.getElementById("evaTimer").style.display = "contents";
 
   // Station buttons are always visible in the new layout
@@ -758,22 +761,16 @@ function pauseTSS() {
 
 // Updates Telemetry frontend when TSS is resumed
 function resumeTSS() {
-  startButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--button-grey");
-  startButton.textContent = "PAUSE";
-  stopButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--button-red");
-
   startButton.name = "eva_pause_team";
   startButton.style.backgroundColor = getComputedStyle(
     document.documentElement
   ).getPropertyValue("--button-grey");
   startButton.textContent = "PAUSE";
+  startButton.disabled = false;
   stopButton.style.backgroundColor = getComputedStyle(
     document.documentElement
   ).getPropertyValue("--button-red");
+  stopButton.disabled = false;
   document.getElementById("evaTimer").style.display = "contents";
 
   // Station buttons are always visible in the new layout
@@ -787,9 +784,11 @@ function stopTSS() {
     document.documentElement
   ).getPropertyValue("--green");
   startButton.textContent = "START";
+  startButton.disabled = false;
   stopButton.style.backgroundColor = getComputedStyle(
     document.documentElement
   ).getPropertyValue("--button-grey");
+  stopButton.disabled = true;
 
   // Station buttons remain visible in new layout but are disabled via updateStationStatus
   document.getElementById("evaTimer").style.display = "contents";
@@ -798,51 +797,58 @@ function stopTSS() {
 
 // Updates Telemetry frontend when TSS is paused
 function pausePRTSS() {
-  startPRButton.name = "pr_unpause_team";
-  startPRButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--yellow");
-  startPRButton.textContent = "RESUME";
-  stopPRButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--button-red");
-  stopPRButton.disabled = false;
+  if (startPRButton) {
+    startPRButton.name = "pr_unpause_team";
+    startPRButton.style.backgroundColor = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--yellow");
+    startPRButton.textContent = "RESUME";
+    startPRButton.disabled = false;
+  }
+  if (stopPRButton) {
+    stopPRButton.style.backgroundColor = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--button-red");
+    stopPRButton.disabled = false;
+  }
   document.getElementById("prTimer").style.display = "contents";
 }
 
 // Updates Telemetry frontend when TSS is resumed
 function resumePRTSS() {
-  startPRButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--button-grey");
-  startPRButton.textContent = "PAUSE";
-  stopPRButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--button-red");
-
-  startPRButton.name = "pr_pause_team";
-  startPRButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--button-grey");
-  startPRButton.textContent = "PAUSE";
-  stopPRButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--button-red");
-  stopPRButton.disabled = false;
+  if (startPRButton) {
+    startPRButton.name = "pr_pause_team";
+    startPRButton.style.backgroundColor = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--button-grey");
+    startPRButton.textContent = "PAUSE";
+    startPRButton.disabled = false;
+  }
+  if (stopPRButton) {
+    stopPRButton.style.backgroundColor = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--button-red");
+    stopPRButton.disabled = false;
+  }
   document.getElementById("prTimer").style.display = "contents";
 }
 
 // Updates Telemetry frontend when TSS is stopped
 function stopPRTSS() {
-  startPRButton.name = "pr_start_team";
-  startPRButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--green");
-  startPRButton.textContent = "START";
-  stopPRButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--button-grey");
-  stopPRButton.disabled = true;
+  if (startPRButton) {
+    startPRButton.name = "pr_start_team";
+    startPRButton.style.backgroundColor = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--green");
+    startPRButton.textContent = "START";
+    startPRButton.disabled = false;
+  }
+  if (stopPRButton) {
+    stopPRButton.style.backgroundColor = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--button-grey");
+    stopPRButton.disabled = true;
+  }
   document.getElementById("prTimer").style.display = "contents";
   document.getElementById("prTimer").innerText = "ROVER TIME: 00:00:00";
 }
