@@ -422,7 +422,7 @@ function loadLights(team) {
             (evaStarted && !evaComplete) ||
             pr_data.pr_telemetry.sim_running
           ) {
-            option.style.color = "rgba(0, 240, 10, 1)"; // Green for active
+            option.style.color = "rgba(40, 174, 95, 1)"; // Green for active
           } else if (evaComplete) {
             option.style.color = "rgba(0, 0, 255, 1)"; // Blue for completed
           } else {
@@ -736,7 +736,7 @@ function updateStationStatus(
   else if (complete) {
     StationButton.textContent = "COMPLETED";
     StationButton.style.display = "none";
-    StationStatus.style.color = "rgba(0, 240, 10, 1)";
+    StationStatus.style.color = "rgba(40, 174, 95, 1)";
     StationStatus.textContent = "Completed";
   }
 }

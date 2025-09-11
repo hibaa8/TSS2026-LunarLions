@@ -19,7 +19,7 @@
   --light-green: #28ae5f;
   --blue: #0064ff;
   --sharp-blue: #3889abff;
-  --light-blue: #08212b;
+  --light-blue: #06212cff;
   --dark-blue: #001628;
   font-family: "Geist Mono", "Courier New", Consolas, monospace;
 }
@@ -327,7 +327,7 @@ nav {
 .switch {
   width: 2.95rem;
   height: 1.25rem;
-  margin-left: 0.5rem;
+  margin-left: 0rem;
   margin-right: 0.5rem;
   position: relative;
   display: inline-block;
@@ -413,7 +413,6 @@ input:checked + .slider:before {
 }
 
 .sensor-container {
-  width: 10%;
   position: relative;
   display: flex;
   align-items: start;

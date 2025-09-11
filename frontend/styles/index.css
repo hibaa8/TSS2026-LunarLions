@@ -197,16 +197,20 @@
 
 /**************** Stations CSS ****************/
 .station-rectangle {
-  margin: 0.5rem 0.5rem 0.5rem 0.5rem;
-  width: calc(100% - 1rem);
+  margin: 0;
+  width: 100%;
   height: 3rem;
   background-color: var(--dark-blue);
-  border: 2px solid var(--sharp-blue);
+  border-bottom: 2px solid var(--sharp-blue);
   position: relative;
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
   justify-content: space-between;
+}
+
+.station-rectangle:first-child {
+  border-top: 2px solid var(--sharp-blue);
 }
 
 .station-name-section {
@@ -224,6 +228,7 @@
   width: 25%;
   height: 100%;
   position: relative;
+  border-right: 2px solid var(--sharp-blue);
   display: flex;
   align-items: center;
   justify-content: center;

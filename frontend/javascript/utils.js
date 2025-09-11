@@ -6,7 +6,7 @@
 function updateSensor(elementId, isActive) {
   const element = document.getElementById(elementId);
   if (element) {
-    element.style.backgroundColor = isActive ? "rgba(0, 240, 10, 1)" : "rgba(100, 100, 100, 1)";
+    element.style.backgroundColor = isActive ? "rgba(40, 174, 95, 1)" : "rgba(100, 100, 100, 1)";
   }
 }
 

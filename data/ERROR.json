@@ -2,8 +2,8 @@
 {
 	"error": {
 		"fan_error": false,
-		"oxy_error": true,
-		"batt_error": true,
-		"pump_error": true
+		"oxy_error": false,
+		"batt_error": false,
+		"pump_error": false
 	}
 }
