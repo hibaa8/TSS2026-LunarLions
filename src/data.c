@@ -1617,17 +1617,7 @@ bool build_json_pr_telemetry(struct pr_data_t *rover, int team_index, bool compl
 
     FILE *fp;
 
-    if (completed) {
-        char filenameTemplate[128] = "data/teams/%d/COMPLETED_ROVER_TELEMETRY.json";
-        char out_filename[256];
-        sprintf(out_filename, filenameTemplate, team_index);
 
-        fp = fopen(out_filename, "w");
-        if (fp == NULL) {
-            printf("Error: Unable to open the file.\n");
-            return false;
-        }
-    } else {
         char filenameTemplate[128] = "data/teams/%d/ROVER_TELEMETRY.json";
         char out_filename[256];
         sprintf(out_filename, filenameTemplate, team_index);
@@ -1637,7 +1627,6 @@ bool build_json_pr_telemetry(struct pr_data_t *rover, int team_index, bool compl
             printf("Error: Unable to open the file.\n");
             return false;
         }
-    }
 
     fputs(json_str, fp);
     fclose(fp);
