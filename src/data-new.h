@@ -40,7 +40,7 @@ struct backend_data_t {
 
 // Backend Lifecycle Functions
 struct backend_data_t* init_backend();
-void simulate_backend(struct backend_data_t* backend);
+void start_simulation(struct backend_data_t* backend);
 void cleanup_backend(struct backend_data_t*  backend);
 
 // UDP Request Handlers
@@ -49,6 +49,9 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
 
 // Data management
 void update_json_file(const char* filename, cJSON* json);
+void sync_simulation_to_json(struct backend_data_t* backend, int team_index);
+cJSON* get_json_file(const char* filename, const int team_number);
+void send_json_file(const char* filename, const int team_number, unsigned char* data);
 
 // Helper functions
 
