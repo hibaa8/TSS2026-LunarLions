@@ -417,10 +417,10 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
         return;
     }
 
-    // Load existing EVA.json file to preserve other sections
+    // Load EVA JSON file for the team
     cJSON* root = get_json_file("EVA", team_index);
     if (root == NULL) {
-        printf("Error: Could not load existing EVA.json for team %d\n", team_index);
+        printf("Error: Could not load EVA.json for team %d\n", team_index);
         return;
     }
     

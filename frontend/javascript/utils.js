@@ -110,3 +110,47 @@ function updateEvaSpecData(evaData, evaNum, specFields) {
   // Update dropdown selection
   document.getElementById(`dropdownEV${evaNum}`).value = evaData.id;
 }
+
+/**
+ * Automatically updates all elements with data-path attributes from a data object
+ * @param {Object} data - The data object to extract values from
+ * @param {Object} calculatedValues - Optional object containing calculated values
+ * @param {string} containerSelector - Optional CSS selector to limit search scope
+ */
+function updateFieldsFromData(data, calculatedValues = {}, containerSelector = null) {
+  const container = containerSelector ? document.querySelector(containerSelector) : document;
+  const elements = container.querySelectorAll('[data-path]');
+  
+  elements.forEach(element => {
+    const path = element.getAttribute('data-path');
+    const units = element.getAttribute('data-units') || '';
+    
+    let value;
+    
+    // Handle calculated values
+    if (path.startsWith('_calculated.')) {
+      const calcKey = path.replace('_calculated.', '');
+      value = calculatedValues[calcKey];
+    } else {
+      // Navigate the data object using the path
+      value = getValueByPath(data, path);
+    }
+    
+    if (value !== undefined && value !== null) {
+      const formattedValue = Number(value).toFixed(2);
+      element.innerText = units ? `${formattedValue} ${units}` : formattedValue;
+    }
+  });
+}
+
+/**
+ * Gets a value from an object using a dot notation path
+ * @param {Object} obj - The object to extract from
+ * @param {string} path - Dot notation path (e.g., "pr_telemetry.throttle")
+ * @returns {*} The value at the path, or undefined if not found
+ */
+function getValueByPath(obj, path) {
+  return path.split('.').reduce((current, key) => {
+    return current && current[key] !== undefined ? current[key] : undefined;
+  }, obj);
+}

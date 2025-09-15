@@ -26,14 +26,11 @@ let headingEV1 = document.getElementById("headingEV1");
 let xCoordinateEV2 = document.getElementById("xCoordinateEV2");
 let yCoordinateEV2 = document.getElementById("yCoordinateEV2");
 let headingEV2 = document.getElementById("headingEV2");
-let xCoordinateRover = document.getElementById("xCoordinateRover");
-let yCoordinateRover = document.getElementById("yCoordinateRover");
 
 // Configurations for the sensor and switch mappings so that can we easily loop through them
 
 // UIA switch mappings
 const UIA_SWITCHES = {
-  eva1_power: "uia_eva1_power_switch",
   eva2_power: "uia_eva2_power_switch",
   eva1_water_supply: "uia_eva1_water_supply_switch",
   eva2_water_supply: "uia_eva2_water_supply_switch",
@@ -99,10 +96,8 @@ function swapTeams(newTeam) {
 
   // Reload the team specific json files
   loadEVAStatus(selectedTeam);
-  loadEVATelemetry(selectedTeam);
-
   loadPRStatus(selectedTeam);
-  loadPRTelemetryData(selectedTeam);
+  loadAllTelemetry(selectedTeam);
 
   // Update button functionality
   // @TODO change these onclick values to just use the selectedTeam variable directly
@@ -139,17 +134,6 @@ function swapTeams(newTeam) {
   setCookie("roomNum", selectedTeam, 1);
 }
 
-// Loads the coordinates of EVA 1 and EVA 2
-function loadLocation() {
-  $.getJSON("../data/teams/" + selectedTeam + "/EVA.json", function (data) {
-    xCoordinateEV1.innerText = data.imu.eva1.posx.toFixed(2);
-    yCoordinateEV1.innerText = data.imu.eva1.posy.toFixed(2);
-    headingEV1.innerText = data.imu.eva1.heading.toFixed(2);
-    xCoordinateEV2.innerText = data.imu.eva2.posx.toFixed(2);
-    yCoordinateEV2.innerText = data.imu.eva2.posy.toFixed(2);
-    headingEV2.innerText = data.imu.eva2.heading.toFixed(2);
-  });
-}
 
 // Sets the cookie to remember the last team selected
 function setCookie(cname, cvalue, exdays) {
@@ -180,49 +164,8 @@ function getCookie(cname) {
   return 0;
 }
 
-// Loads UIA data and updates all switch states
-function loadUIA() {
-  $.getJSON("../data/teams/" + selectedTeam + "/EVA.json", function (data) {
-    // Update all UIA switches using configuration mapping
-    Object.keys(UIA_SWITCHES).forEach((key) => {
-      const switchElement = document.getElementById(UIA_SWITCHES[key]);
-      if (switchElement) {
-        switchElement.checked = data.uia[key];
-      }
-    });
-  });
-}
 
-// Loads DCU data and updates all switch states
-function loadDCU() {
-  $.getJSON("../data/teams/" + selectedTeam + "/EVA.json", function (data) {
-    // Update all DCU switches using configuration mapping
-    Object.keys(DCU_SWITCHES).forEach((key) => {
-      // Handle nested object paths like "eva1.batt"
-      const keys = key.split(".");
-      let value = data.dcu;
-      keys.forEach((k) => (value = value[k]));
 
-      const switchElement = document.getElementById(DCU_SWITCHES[key]);
-      if (switchElement) {
-        switchElement.checked = value;
-      }
-    });
-  });
-}
-
-// Loads ERROR simulation data and updates all switch states
-function loadERROR() {
-  $.getJSON("../data/teams/" + selectedTeam + "/EVA.json", function (data) {
-    // Update all ERROR switches using configuration mapping
-    Object.keys(ERROR_SWITCHES).forEach((key) => {
-      const switchElement = document.getElementById(ERROR_SWITCHES[key]);
-      if (switchElement) {
-        switchElement.checked = data.error[key];
-      }
-    });
-  });
-}
 
 /**
  * Loads EVA status, timers, and station assignments for the specified team
@@ -332,24 +275,6 @@ function loadPRStatus(team) {
   });
 }
 
-/**
- * Loads EVA telemetry data and updates all telemetry fields for both EVAs
- * Displays oxygen levels, pressures, consumption rates, and health metrics
- */
-function loadEVATelemetry(team) {
-  $.getJSON("../data/teams/" + team + "/EVA.json", function (data) {
-    // Update shared EVA time for both EVAs
-    const evaTime = formatTime(Number(data.telemetry.eva_time));
-    document.getElementById("evaTimeTelemetryState1").innerText = evaTime;
-    document.getElementById("evaTimeTelemetryState2").innerText = evaTime;
-
-    // Update EVA 1 telemetry
-    updateEVATelemetry(data.telemetry.eva1, "1");
-
-    // Update EVA 2 telemetry
-    updateEVATelemetry(data.telemetry.eva2, "2");
-  });
-}
 
 // Loads title for team specific data depending on which team is selected
 function loadTitle(oldTeam) {
@@ -435,136 +360,98 @@ function loadLights(team) {
 }
 
 /**
- * Loads Pressurized Rover telemetry data and updates sensors, switches, and telemetry displays
- * Updates rover positioning, environmental data, and system status indicators
+ * Unified function to load all telemetry data for a team
+ * Loads both EVA and Rover data and updates all fields automatically
  */
-function loadPRTelemetryData(team) {
-  $.getJSON("../data/teams/" + team + "/ROVER.json", function (data) {
+function loadAllTelemetry(team) {
+  // Load EVA data
+  $.getJSON("../data/teams/" + team + "/EVA.json", function (evaData) {
+    // Update all UIA switches using configuration mapping
+    Object.keys(UIA_SWITCHES).forEach((key) => {
+      const switchElement = document.getElementById(UIA_SWITCHES[key]);
+      if (switchElement) {
+        switchElement.checked = evaData.uia[key];
+      }
+    });
+
+    // Update all DCU switches using configuration mapping
+    Object.keys(DCU_SWITCHES).forEach((key) => {
+      const keys = key.split(".");
+      let value = evaData.dcu;
+      keys.forEach((k) => (value = value[k]));
+
+      const switchElement = document.getElementById(DCU_SWITCHES[key]);
+      if (switchElement) {
+        switchElement.checked = value;
+      }
+    });
+
+    // Update all ERROR switches using configuration mapping
+    Object.keys(ERROR_SWITCHES).forEach((key) => {
+      const switchElement = document.getElementById(ERROR_SWITCHES[key]);
+      if (switchElement) {
+        switchElement.checked = evaData.error[key];
+      }
+    });
+
+    // Update EVA coordinates
+    if (document.getElementById("xCoordinateEV1")) {
+      document.getElementById("xCoordinateEV1").innerText = evaData.imu.eva1.posx.toFixed(2);
+      document.getElementById("yCoordinateEV1").innerText = evaData.imu.eva1.posy.toFixed(2);
+      document.getElementById("headingEV1").innerText = evaData.imu.eva1.heading.toFixed(2);
+      document.getElementById("xCoordinateEV2").innerText = evaData.imu.eva2.posx.toFixed(2);
+      document.getElementById("yCoordinateEV2").innerText = evaData.imu.eva2.posy.toFixed(2);
+      document.getElementById("headingEV2").innerText = evaData.imu.eva2.heading.toFixed(2);
+    }
+
+    // Update EVA telemetry using utility function
+    const evaTime = formatTime(Number(evaData.telemetry.eva_time || 0));
+    if (document.getElementById("evaTimeTelemetryState1")) {
+      document.getElementById("evaTimeTelemetryState1").innerText = evaTime;
+      document.getElementById("evaTimeTelemetryState2").innerText = evaTime;
+    }
+
+    if (evaData.telemetry.eva1) {
+      updateEVATelemetry(evaData.telemetry.eva1, "1");
+    }
+    if (evaData.telemetry.eva2) {
+      updateEVATelemetry(evaData.telemetry.eva2, "2");
+    }
+
+    // Auto-update EVA fields with data attributes
+    updateFieldsFromData(evaData);
+  });
+
+  // Load Rover data
+  $.getJSON("../data/teams/" + team + "/ROVER.json", function (roverData) {
     // Update all PR sensors and switches using configuration mapping
     Object.keys(PR_SENSORS_AND_SWITCHES).forEach((key) => {
       const config = PR_SENSORS_AND_SWITCHES[key];
       updateSensorAndSwitch(
         config.sensor,
         config.switch,
-        data.pr_telemetry[key]
+        roverData.pr_telemetry[key]
       );
     });
 
-    // Convert power consumption percentages to kWh
+    // Calculate power consumption values (complex calculations preserved)
     const total_battery_capacity = 4320000; // Electric car capacity in Joules
     const power_consumption_rate =
-      ((total_battery_capacity * data.pr_telemetry.power_consumption_rate) /
+      ((total_battery_capacity * roverData.pr_telemetry.power_consumption_rate) /
         100 /
         1000) *
       3600;
     const motor_power_consumption =
-      ((total_battery_capacity * data.pr_telemetry.motor_power_consumption) /
+      ((total_battery_capacity * roverData.pr_telemetry.motor_power_consumption) /
         100 /
         1000) *
       3600;
 
-    // Update PR positioning and movement data
-    updateTelemetryField("throttle", data.pr_telemetry.throttle, "%");
-    updateTelemetryField("steering", data.pr_telemetry.steering);
-    updateTelemetryField("current_pos_x", data.pr_telemetry.current_pos_x);
-    updateTelemetryField("current_pos_y", data.pr_telemetry.current_pos_y);
-    updateTelemetryField("current_pos_alt", data.pr_telemetry.current_pos_alt);
-    updateTelemetryField("heading", data.pr_telemetry.heading, "°");
-    updateTelemetryField("roll", data.pr_telemetry.roll, "°");
-    updateTelemetryField("pitch", data.pr_telemetry.pitch, "°");
-    updateTelemetryField(
-      "distance_traveled",
-      data.pr_telemetry.distance_traveled,
-      "m"
-    );
-    updateTelemetryField("speed", data.pr_telemetry.speed, "m/s");
-    updateTelemetryField(
-      "surface_incline",
-      data.pr_telemetry.surface_incline,
-      "°"
-    );
-
-    // Update environmental and system data
-    updateTelemetryField(
-      "oxygen_pressure",
-      data.pr_telemetry.oxygen_pressure,
-      "psi"
-    );
-    updateTelemetryField("oxygen_levels", data.pr_telemetry.oxygen_levels, "%");
-    updateTelemetryField("oxygen_tank", data.pr_telemetry.oxygen_tank, "%");
-    updateTelemetryField(
-      "solar_panel_dust_accum",
-      data.pr_telemetry.solar_panel_dust_accum,
-      "%"
-    );
-    updateTelemetryField("battery_level", data.pr_telemetry.battery_level, "%");
-    updateTelemetryField("ac_fan_pri", data.pr_telemetry.ac_fan_pri, "rpm");
-    updateTelemetryField("ac_fan_sec", data.pr_telemetry.ac_fan_sec, "rpm");
-    updateTelemetryField(
-      "cabin_pressure",
-      data.pr_telemetry.cabin_pressure,
-      "psi"
-    );
-    updateTelemetryField(
-      "cabin_temperature",
-      data.pr_telemetry.cabin_temperature,
-      "°C"
-    );
-    updateTelemetryField(
-      "power_consumption_rate",
+    // Auto-update Rover fields with data attributes
+    updateFieldsFromData(roverData, {
       power_consumption_rate,
-      "kWh"
-    );
-    updateTelemetryField(
-      "solar_panel_efficiency",
-      data.pr_telemetry.solar_panel_efficiency
-    );
-    updateTelemetryField(
-      "external_temp",
-      data.pr_telemetry.external_temp,
-      "°C"
-    );
-    updateTelemetryField(
-      "pr_coolant_level",
-      data.pr_telemetry.pr_coolant_level,
-      "L"
-    );
-    updateTelemetryField(
-      "pr_coolant_pressure",
-      data.pr_telemetry.pr_coolant_pressure,
-      "psi"
-    );
-    updateTelemetryField(
-      "pr_coolant_tank",
-      data.pr_telemetry.pr_coolant_tank,
-      "%"
-    );
-    updateTelemetryField(
-      "motor_power_consumption",
-      motor_power_consumption,
-      "kWh"
-    );
-    updateTelemetryField(
-      "terrain_condition",
-      data.pr_telemetry.terrain_condition
-    );
-    updateTelemetryField(
-      "mission_elapsed_time",
-      data.pr_telemetry.mission_elapsed_time
-    );
-    updateTelemetryField(
-      "mission_planned_time",
-      data.pr_telemetry.mission_planned_time
-    );
-    updateTelemetryField(
-      "point_of_no_return",
-      data.pr_telemetry.point_of_no_return
-    );
-    updateTelemetryField(
-      "distance_from_base",
-      data.pr_telemetry.distance_from_base,
-      "m"
-    );
+      motor_power_consumption
+    });
   });
 }
 
@@ -607,12 +494,9 @@ function onload() {
   xCoordinateEV2 = document.getElementById("xCoordinateEV2");
   yCoordinateEV2 = document.getElementById("yCoordinateEV2");
   headingEV2 = document.getElementById("headingEV2");
-  xCoordinateRover = document.getElementById("xCoordinateRover");
-  yCoordinateRover = document.getElementById("yCoordinateRover");
 
   // Grabs cookie to update current room selected
   oldTeam = getCookie("roomNum");
-  console.log("selected team is " + oldTeam);
   loadTitle(oldTeam);
 
   // Set initial dropdown selection
@@ -628,27 +512,17 @@ function onload() {
   loadTeams();
 
   //Load immediately
-  loadUIA();
-  loadDCU();
-  loadERROR();
   loadEVAStatus(selectedTeam);
   loadPRStatus(selectedTeam);
-  loadEVATelemetry(selectedTeam);
-  loadPRTelemetryData(selectedTeam);
-  loadLocation();
+  loadAllTelemetry(selectedTeam);
   updateTelemetry();
   updateClock();
 
-  // Continuously refreshes values from the UIA, DCU, ERROR, EVA, and Telemetry
+  // Continuously refreshes all telemetry data
   setInterval(function () {
-    loadUIA();
-    loadDCU();
-    loadERROR();
     loadEVAStatus(selectedTeam);
     loadPRStatus(selectedTeam);
-    loadEVATelemetry(selectedTeam);
-    loadPRTelemetryData(selectedTeam);
-    loadLocation();
+    loadAllTelemetry(selectedTeam);
     updateClock();
   }, 1000);
 }
@@ -671,9 +545,7 @@ function updateClock() {
 function roomSelect(inputVal) {
   // Convert string to number if needed
   const roomNumber = parseInt(inputVal);
-  console.log("Room selected:", roomNumber);
 
-  // minus 1 handles the zero indexing of the team number folders
   swapTeams(roomNumber);
 }
 
@@ -730,42 +602,6 @@ function updateStationStatus(
   }
 }
 
-// Updates Telemetry frontend when TSS is paused
-function pauseTSS() {
-  startButton.name = "eva_unpause_team";
-  startButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--yellow");
-  startButton.textContent = "RESUME";
-  startButton.disabled = false;
-  stopButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--button-red");
-  stopButton.disabled = false;
-  document.getElementById("evaTimer").style.display = "contents";
-
-  // Station buttons are always visible in the new layout
-  // Status updates are handled by updateStationStatus function
-}
-
-// Updates Telemetry frontend when TSS is resumed
-function resumeTSS() {
-  startButton.name = "eva_pause_team";
-  startButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--button-grey");
-  startButton.textContent = "PAUSE";
-  startButton.disabled = false;
-  stopButton.style.backgroundColor = getComputedStyle(
-    document.documentElement
-  ).getPropertyValue("--button-red");
-  stopButton.disabled = false;
-  document.getElementById("evaTimer").style.display = "contents";
-
-  // Station buttons are always visible in the new layout
-  // Status updates are handled by updateStationStatus function
-}
-
 // Updates Telemetry frontend when TSS is stopped
 function stopTSS() {
   startButton.name = "eva_start_team";
@@ -782,44 +618,6 @@ function stopTSS() {
   // Station buttons remain visible in new layout but are disabled via updateStationStatus
   document.getElementById("evaTimer").style.display = "contents";
   document.getElementById("evaTimer").innerText = "EVA TIME: 00:00:00";
-}
-
-// Updates Telemetry frontend when TSS is paused
-function pausePRTSS() {
-  if (startPRButton) {
-    startPRButton.name = "pr_unpause_team";
-    startPRButton.style.backgroundColor = getComputedStyle(
-      document.documentElement
-    ).getPropertyValue("--yellow");
-    startPRButton.textContent = "RESUME";
-    startPRButton.disabled = false;
-  }
-  if (stopPRButton) {
-    stopPRButton.style.backgroundColor = getComputedStyle(
-      document.documentElement
-    ).getPropertyValue("--button-red");
-    stopPRButton.disabled = false;
-  }
-  document.getElementById("prTimer").style.display = "contents";
-}
-
-// Updates Telemetry frontend when TSS is resumed
-function resumePRTSS() {
-  if (startPRButton) {
-    startPRButton.name = "pr_pause_team";
-    startPRButton.style.backgroundColor = getComputedStyle(
-      document.documentElement
-    ).getPropertyValue("--button-grey");
-    startPRButton.textContent = "PAUSE";
-    startPRButton.disabled = false;
-  }
-  if (stopPRButton) {
-    stopPRButton.style.backgroundColor = getComputedStyle(
-      document.documentElement
-    ).getPropertyValue("--button-red");
-    stopPRButton.disabled = false;
-  }
-  document.getElementById("prTimer").style.display = "contents";
 }
 
 // Updates Telemetry frontend when TSS is stopped
