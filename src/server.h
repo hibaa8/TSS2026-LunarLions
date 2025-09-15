@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include "lib/cjson/cJSON.h"
 #include "network.h"
 #include "data-new.h"

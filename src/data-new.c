@@ -131,21 +131,21 @@ void handle_udp_get_request(unsigned int command, unsigned char* data, struct ba
     team_number = (unsigned int)fl;
     printf("Team number: %u\n", team_number);
     
-    // Handle different GET requests - each command returns entire JSON file
+    // Handle different GET requests - most requests now return EVA with specific sections
     switch (command) {
         case 1: // ROVER TELEMETRY
             printf("Getting ROVER telemetry data.\n");
-            send_json_file("ROVER_TELEMETRY", team_number, data);
+            send_json_file("ROVER", team_number, data);
             break;
 
-        case 2: // EVA TELEMETRY
+        case 2: // EVA TELEMETRY (full consolidated file)
             printf("Getting EVA telemetry data.\n");
-            send_json_file("EVA_TELEMETRY", team_number, data);
+            send_json_file("EVA", team_number, data);
             break;
             
-        case 3: // EVA STATUS
-            printf("Getting EVA status data.\n");
-            send_json_file("EVA_STATUS", team_number, data);
+        case 3: // EVA STATUS (now part of EVA)
+            printf("Getting EVA status data (from consolidated EVA file).\n");
+            send_json_section("EVA", team_number, "status", data);
             break;
             
         case 4: // COMM
@@ -153,19 +153,24 @@ void handle_udp_get_request(unsigned int command, unsigned char* data, struct ba
             send_json_file("COMM", team_number, data);
             break;
             
-        case 5: // DCU
-            printf("Getting DCU data.\n");
-            send_json_file("DCU", team_number, data);
+        case 5: // DCU (now part of EVA)
+            printf("Getting DCU data (from consolidated EVA file).\n");
+            send_json_section("EVA", team_number, "dcu", data);
             break;
             
-        case 6: // ERROR
-            printf("Getting ERROR data.\n");
-            send_json_file("ERROR", team_number, data);
+        case 6: // ERROR (now part of EVA)
+            printf("Getting ERROR data (from consolidated EVA file).\n");
+            send_json_section("EVA", team_number, "error", data);
             break;
             
-        case 7: // UIA
-            printf("Getting UIA data.\n");
-            send_json_file("UIA", team_number, data);
+        case 7: // UIA (now part of EVA)
+            printf("Getting UIA data (from consolidated EVA file).\n");
+            send_json_section("EVA", team_number, "uia", data);
+            break;
+
+        case 8: // IMU (now part of EVA)
+            printf("Getting IMU data (from consolidated EVA file).\n");
+            send_json_section("EVA", team_number, "imu", data);
             break;
 
         default:
@@ -203,7 +208,7 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
 /**
  * Updates the specified JSON file and specified field name with a new value in the correct section
  * 
- * @param filename Name of the JSON file to update (e.g., "EVA_TELEMETRY")
+ * @param filename Name of the JSON file to update (e.g., "EVA")
  * @param team_number Team number to identify the correct team directory
  * @param section Section within the JSON file to update (e.g., "telemetry")
  * @param field Field name within the section to update (e.g., "batt_time_left")
@@ -277,7 +282,7 @@ void update_json_file(const char* filename, const int team_number, const char* s
 /**
  * Loads and returns a cJSON object from the specified JSON file for a given team
  * 
- * @param filename Name of the JSON file to load (e.g., "EVA_TELEMETRY")
+ * @param filename Name of the JSON file to load (e.g., "EVA")
  * @param team_number Team number to identify the correct team directory
  * @return Pointer to the cJSON object representing the file content, or NULL on failure
  */
@@ -317,7 +322,7 @@ cJSON* get_json_file(const char* filename, const int team_number) {
 /**
  * Sends the entire JSON file content as response data
  * 
- * @param filename Name of the JSON file (e.g., "EVA_TELEMETRY")
+ * @param filename Name of the JSON file (e.g., "EVA")
  * @param team_number Team number (0 for global files like COMM, DCU, etc.)
  * @param data Response buffer to populate with JSON string
  */
@@ -347,6 +352,53 @@ void send_json_file(const char* filename, const int team_number, unsigned char* 
 }
 
 /**
+ * Sends a specific section from a JSON file as response data
+ * 
+ * @param filename Name of the JSON file (e.g., "EVA")
+ * @param team_number Team number to identify the correct team directory
+ * @param section_name Name of the section to extract (e.g., "dcu", "status")
+ * @param data Response buffer to populate with JSON string
+ */
+void send_json_section(const char* filename, const int team_number, const char* section_name, unsigned char* data) {
+    cJSON* json = get_json_file(filename, team_number);
+    if (json == NULL) {
+        printf("Error: Could not load JSON file %s for team %d\n", filename, team_number);
+        return;
+    }
+    
+    // Get the specific section
+    cJSON* section = cJSON_GetObjectItemCaseSensitive(json, section_name);
+    if (section == NULL) {
+        printf("Error: Section %s not found in file %s\n", section_name, filename);
+        cJSON_Delete(json);
+        return;
+    }
+    
+    // Create a new JSON object with just this section
+    cJSON* response = cJSON_CreateObject();
+    cJSON_AddItemToObject(response, section_name, cJSON_Duplicate(section, 1));
+    
+    // Convert to string
+    char* json_str = cJSON_Print(response);
+    if (json_str == NULL) {
+        printf("Error: Failed to convert section JSON to string\n");
+        cJSON_Delete(json);
+        cJSON_Delete(response);
+        return;
+    }
+    
+    // Copy to response data buffer
+    size_t json_len = strlen(json_str);
+    memcpy(data, json_str, json_len);
+    data[json_len] = '\0'; // Null terminate
+    
+    // Cleanup
+    free(json_str);
+    cJSON_Delete(json);
+    cJSON_Delete(response);
+}
+
+/**
  * Synchronizes the simulation engine data to the corresponding JSON file for a specific team
  * 
  * @param backend Backend data structure containing all telemetry and simulation engines
@@ -365,25 +417,63 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
         return;
     }
 
-    // Create the complete EVA_TELEMETRY structure
-    cJSON* root = cJSON_CreateObject();
-    cJSON* telemetry = cJSON_CreateObject();
+    // Load existing EVA.json file to preserve other sections
+    cJSON* root = get_json_file("EVA", team_index);
+    if (root == NULL) {
+        printf("Error: Could not load existing EVA.json for team %d\n", team_index);
+        return;
+    }
     
-    // Add all simulation fields directly to telemetry section
+    // Get or create the telemetry section
+    cJSON* telemetry = cJSON_GetObjectItemCaseSensitive(root, "telemetry");
+    if (telemetry == NULL) {
+        telemetry = cJSON_CreateObject();
+        cJSON_AddItemToObject(root, "telemetry", telemetry);
+    }
+    
+    // Get or create eva1 and eva2 sections under telemetry
+    cJSON* eva1_section = cJSON_GetObjectItemCaseSensitive(telemetry, "eva1");
+    if (eva1_section == NULL) {
+        eva1_section = cJSON_CreateObject();
+        cJSON_AddItemToObject(telemetry, "eva1", eva1_section);
+    }
+    
+    cJSON* eva2_section = cJSON_GetObjectItemCaseSensitive(telemetry, "eva2");
+    if (eva2_section == NULL) {
+        eva2_section = cJSON_CreateObject();
+        cJSON_AddItemToObject(telemetry, "eva2", eva2_section);
+    }
+    
+    // Update simulation fields in their respective sections
     for (int i = 0; i < engine->total_field_count; i++) {
         sim_field_t* field = engine->update_order[i];
         if (field != NULL) {
             double value = (field->type == SIM_TYPE_FLOAT) ? field->current_value.f : (double)field->current_value.i;
-            cJSON_AddNumberToObject(telemetry, field->field_name, value);
+            
+            // Determine target section based on component name
+            cJSON* target_section = NULL;
+            if (strcmp(field->component_name, "eva1") == 0) {
+                target_section = eva1_section;
+            } else if (strcmp(field->component_name, "eva2") == 0) {
+                target_section = eva2_section;
+            }
+            // Skip rover component data - don't write it to telemetry root
+            
+            if (target_section != NULL) {
+                // Check if field already exists and replace it, otherwise add new
+                cJSON* existing_field = cJSON_GetObjectItemCaseSensitive(target_section, field->field_name);
+                if (existing_field != NULL) {
+                    cJSON_SetNumberValue(existing_field, value);
+                } else {
+                    cJSON_AddNumberToObject(target_section, field->field_name, value);
+                }
+            }
         }
     }
     
-    // Add telemetry to root
-    cJSON_AddItemToObject(root, "telemetry", telemetry);
-    
     // Write to file
     char filepath[100];
-    snprintf(filepath, sizeof(filepath), "data/teams/%d/EVA_TELEMETRY.json", team_index);
+    snprintf(filepath, sizeof(filepath), "data/teams/%d/EVA.json", team_index);
     
     char* json_str = cJSON_Print(root);
     FILE* fp = fopen(filepath, "w");

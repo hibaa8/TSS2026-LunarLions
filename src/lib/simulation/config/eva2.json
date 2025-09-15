@@ -1,0 +1,178 @@
+{
+	"component_name": "eva2",
+	"fields": {
+		"eva_time": {
+			"type": "float",
+			"algorithm": "linear_growth",
+			"start_value": 0,
+			"growth_rate": 1,
+			"max_value": 1800
+		},
+		"batt_time_left": {
+			"type": "float",
+			"algorithm": "linear_decay",
+			"start_value": 1800,
+			"end_value": 0,
+			"duration_seconds": 1800
+		},
+		"oxy_pri_storage": {
+			"type": "float",
+			"algorithm": "linear_decay",
+			"start_value": 100,
+			"end_value": 25,
+			"duration_seconds": 1950
+		},
+		"oxy_sec_storage": {
+			"type": "float",
+			"algorithm": "linear_decay",
+			"start_value": 100,
+			"end_value": 25,
+			"duration_seconds": 1950
+		},
+		"oxy_pri_pressure": {
+			"type": "float",
+			"algorithm": "sine_wave",
+			"base_value": 2850,
+			"amplitude": 180,
+			"frequency": 0.0008
+		},
+		"oxy_sec_pressure": {
+			"type": "float",
+			"algorithm": "sine_wave",
+			"base_value": 2800,
+			"amplitude": 120,
+			"frequency": 0.0010
+		},
+		"oxy_time_left": {
+			"type": "int",
+			"algorithm": "dependent_value",
+			"formula": "(oxy_pri_storage + oxy_sec_storage) * 7.1",
+			"depends_on": [
+				"oxy_pri_storage",
+				"oxy_sec_storage"
+			]
+		},
+		"heart_rate": {
+			"type": "float",
+			"algorithm": "dependent_value",
+			"formula": "82.0 + (temperature - 21.0) * 1.8",
+			"depends_on": [
+				"temperature"
+			]
+		},
+		"oxy_consumption": {
+			"type": "float",
+			"algorithm": "dependent_value",
+			"formula": "heart_rate * 5.8 + 120.0",
+			"depends_on": [
+				"heart_rate"
+			]
+		},
+		"co2_production": {
+			"type": "float",
+			"algorithm": "dependent_value",
+			"formula": "heart_rate * 22.0 - 1450.0",
+			"depends_on": [
+				"heart_rate"
+			]
+		},
+		"suit_pressure_oxy": {
+			"type": "float",
+			"algorithm": "sine_wave",
+			"base_value": 4.2,
+			"amplitude": 0.12,
+			"frequency": 0.008
+		},
+		"suit_pressure_co2": {
+			"type": "float",
+			"algorithm": "sine_wave",
+			"base_value": 0.12,
+			"amplitude": 0.08,
+			"frequency": 0.006
+		},
+		"suit_pressure_other": {
+			"type": "float",
+			"algorithm": "linear_decay",
+			"start_value": 0,
+			"end_value": 0,
+			"duration_seconds": 900
+		},
+		"suit_pressure_total": {
+			"type": "float",
+			"algorithm": "dependent_value",
+			"formula": "suit_pressure_oxy + suit_pressure_co2 + suit_pressure_other",
+			"depends_on": [
+				"suit_pressure_oxy",
+				"suit_pressure_co2",
+				"suit_pressure_other"
+			]
+		},
+		"fan_pri_rpm": {
+			"type": "float",
+			"algorithm": "dependent_value",
+			"formula": "7500.0 + suit_pressure_co2 * 4500.0",
+			"depends_on": [
+				"suit_pressure_co2"
+			]
+		},
+		"fan_sec_rpm": {
+			"type": "float",
+			"algorithm": "sine_wave",
+			"base_value": 8500,
+			"amplitude": 2500,
+			"frequency": 0.035
+		},
+		"helmet_pressure_co2": {
+			"type": "float",
+			"algorithm": "dependent_value",
+			"formula": "suit_pressure_co2 * 1.1",
+			"depends_on": [
+				"suit_pressure_co2"
+			]
+		},
+		"scrubber_a_co2_storage": {
+			"type": "float",
+			"algorithm": "dependent_value",
+			"formula": "helmet_pressure_co2 * 0.75 + 0.08",
+			"depends_on": [
+				"helmet_pressure_co2"
+			]
+		},
+		"scrubber_b_co2_storage": {
+			"type": "float",
+			"algorithm": "linear_growth",
+			"start_value": 0,
+			"growth_rate": 0.07,
+			"max_value": 1
+		},
+		"temperature": {
+			"type": "float",
+			"algorithm": "sine_wave",
+			"base_value": 20.5,
+			"amplitude": 2.5,
+			"frequency": 0.012
+		},
+		"coolant_ml": {
+			"type": "float",
+			"algorithm": "dependent_value",
+			"formula": "125.0 - temperature * 1.8",
+			"depends_on": [
+				"temperature"
+			]
+		},
+		"coolant_gas_pressure": {
+			"type": "float",
+			"algorithm": "sine_wave",
+			"base_value": 260,
+			"amplitude": 90,
+			"frequency": 0.007
+		},
+		"coolant_liquid_pressure": {
+			"type": "float",
+			"algorithm": "sine_wave",
+			"base_value": 460,
+			"amplitude": 70,
+			"frequency": 0.005
+		}
+	}
+}

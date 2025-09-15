@@ -1,6 +1,6 @@
 UDP GET data from JSON files,Command (unsigned int),Data type,,,UDP POST data to TSS,Command (unsigned int),Data type,,,TSS to Unreal,Command (unsigned int),Data type
 ,,,,,,,,,,,,
-COMM.json,,,,,ROVER_TELEMETRY,,,,,ROVER_TELEMETRY,,
+COMM.json,,,,,ROVER,,,,,ROVER,,
 comm_tower,1,bool,,,ac_heating,1103,bool,,,breaks,2000,bool
 ,,,,,ac_cooling,1104,bool,,,lights_on,2001,bool
 DCU.json,,,,,co2_scrubber,1105,bool,,,steering,2002,float
@@ -136,7 +136,7 @@ spec_started,116,bool,,,,,,,,,,
 spec_completed,117,bool,,,,,,,,,,
 spec_time,118,float,,,,,,,,,,
 ,,,,,,,,,,,,
-ROVER_TELEMETRY.json,,,,,,,,,,,,
+ROVER.json,,,,,,,,,,,,
 ac_heating,119,bool,,,,,,,,,,
 ac_cooling,120,bool,,,,,,,,,,
 co2_scubber,121,bool,,,,,,,,,,

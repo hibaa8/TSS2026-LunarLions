@@ -141,7 +141,7 @@ function swapTeams(newTeam) {
 
 // Loads the coordinates of EVA 1 and EVA 2
 function loadLocation() {
-  $.getJSON("../data/IMU.json", function (data) {
+  $.getJSON("../data/teams/" + selectedTeam + "/EVA.json", function (data) {
     xCoordinateEV1.innerText = data.imu.eva1.posx.toFixed(2);
     yCoordinateEV1.innerText = data.imu.eva1.posy.toFixed(2);
     headingEV1.innerText = data.imu.eva1.heading.toFixed(2);
@@ -182,7 +182,7 @@ function getCookie(cname) {
 
 // Loads UIA data and updates all switch states
 function loadUIA() {
-  $.getJSON("../data/UIA.json", function (data) {
+  $.getJSON("../data/teams/" + selectedTeam + "/EVA.json", function (data) {
     // Update all UIA switches using configuration mapping
     Object.keys(UIA_SWITCHES).forEach((key) => {
       const switchElement = document.getElementById(UIA_SWITCHES[key]);
@@ -195,7 +195,7 @@ function loadUIA() {
 
 // Loads DCU data and updates all switch states
 function loadDCU() {
-  $.getJSON("../data/DCU.json", function (data) {
+  $.getJSON("../data/teams/" + selectedTeam + "/EVA.json", function (data) {
     // Update all DCU switches using configuration mapping
     Object.keys(DCU_SWITCHES).forEach((key) => {
       // Handle nested object paths like "eva1.batt"
@@ -213,7 +213,7 @@ function loadDCU() {
 
 // Loads ERROR simulation data and updates all switch states
 function loadERROR() {
-  $.getJSON("../data/ERROR.json", function (data) {
+  $.getJSON("../data/teams/" + selectedTeam + "/EVA.json", function (data) {
     // Update all ERROR switches using configuration mapping
     Object.keys(ERROR_SWITCHES).forEach((key) => {
       const switchElement = document.getElementById(ERROR_SWITCHES[key]);
@@ -229,24 +229,24 @@ function loadERROR() {
  * Updates EVA timer displays and station status indicators
  */
 function loadEVAStatus(team) {
-  $.getJSON("../data/teams/" + team + "/EVA_STATUS.json", function (data) {
+  $.getJSON("../data/teams/" + team + "/EVA.json", function (data) {
     // Format and display EVA timers using utility function
     document.getElementById("evaTimer").innerText =
-      "EVA TIME: " + formatTime(data.eva.total_time);
+      "EVA TIME: " + formatTime(data.status.total_time);
     document.getElementById("uiaTimer").innerText = formatTime(
-      data.eva.uia.time
+      data.status.uia.time
     ); // Keep HH:MM:SS format for new layout
     document.getElementById("specTimer").innerText = formatTime(
-      data.eva.spec.time
+      data.status.spec.time
     ); // Keep HH:MM:SS format for new layout
     document.getElementById("dcuTimer").innerText = formatTime(
-      data.eva.dcu.time
+      data.status.dcu.time
     ); // Keep HH:MM:SS format for new layout
 
     // Button UI States Visuals
-    var evaStarted = data.eva.started;
-    var evaPaused = data.eva.paused;
-    var evaComplete = data.eva.completed;
+    var evaStarted = data.status.started;
+    var evaPaused = data.status.paused;
+    var evaComplete = data.status.completed;
     if (evaComplete || !evaStarted) {
       stopTSS();
     } else if (evaStarted && evaPaused) {
@@ -262,22 +262,22 @@ function loadEVAStatus(team) {
     // Stations Status
     updateStationStatus(
       evaStarted,
-      data.eva.uia.started,
-      data.eva.uia.completed,
+      data.status.uia.started,
+      data.status.uia.completed,
       uiaStatus,
       uiaButton
     );
     updateStationStatus(
       evaStarted,
-      data.eva.dcu.started,
-      data.eva.dcu.completed,
+      data.status.dcu.started,
+      data.status.dcu.completed,
       dcuStatus,
       dcuButton
     );
     updateStationStatus(
       evaStarted,
-      data.eva.spec.started,
-      data.eva.spec.completed,
+      data.status.spec.started,
+      data.status.spec.completed,
       specStatus,
       specButton
     );
@@ -289,7 +289,7 @@ function loadEVAStatus(team) {
  * Updates PR timer display and button states
  */
 function loadPRStatus(team) {
-  $.getJSON("../data/teams/" + team + "/ROVER_TELEMETRY.json", function (data) {
+  $.getJSON("../data/teams/" + team + "/ROVER.json", function (data) {
     // Format and display PR timer using utility function
     document.getElementById("prTimer").innerText =
       "ROVER TIME: " + formatTime(data.pr_telemetry.mission_elapsed_time);
@@ -337,7 +337,7 @@ function loadPRStatus(team) {
  * Displays oxygen levels, pressures, consumption rates, and health metrics
  */
 function loadEVATelemetry(team) {
-  $.getJSON("../data/teams/" + team + "/EVA_TELEMETRY.json", function (data) {
+  $.getJSON("../data/teams/" + team + "/EVA.json", function (data) {
     // Update shared EVA time for both EVAs
     const evaTime = formatTime(Number(data.telemetry.eva_time));
     document.getElementById("evaTimeTelemetryState1").innerText = evaTime;
@@ -396,16 +396,16 @@ function loadTeams() {
 
 // Loads status lights for room
 function loadLights(team) {
-  $.getJSON("../data/teams/" + team + "/EVA_STATUS.json", function (data) {
+  $.getJSON("../data/teams/" + team + "/EVA.json", function (data) {
     $.getJSON(
-      "../data/teams/" + team + "/ROVER_TELEMETRY.json",
+      "../data/teams/" + team + "/ROVER.json",
       function (pr_data) {
         // Button UI States Visuals
-        var evaStarted = data.eva.started || pr_data.pr_telemetry.sim_running;
+        var evaStarted = data.status.started || pr_data.pr_telemetry.sim_running;
         var evaPaused =
-          (data.eva.started && data.eva.paused) ||
+          (data.status.started && data.status.paused) ||
           (pr_data.pr_telemetry.sim_running && pr_data.pr_telemetry.sim_paused);
-        var evaComplete = data.eva.completed || pr_data.pr_telemetry.completed;
+        var evaComplete = data.status.completed || pr_data.pr_telemetry.completed;
 
         if (
           pr_data.pr_telemetry.sim_running ||
@@ -439,7 +439,7 @@ function loadLights(team) {
  * Updates rover positioning, environmental data, and system status indicators
  */
 function loadPRTelemetryData(team) {
-  $.getJSON("../data/teams/" + team + "/ROVER_TELEMETRY.json", function (data) {
+  $.getJSON("../data/teams/" + team + "/ROVER.json", function (data) {
     // Update all PR sensors and switches using configuration mapping
     Object.keys(PR_SENSORS_AND_SWITCHES).forEach((key) => {
       const config = PR_SENSORS_AND_SWITCHES[key];
@@ -600,17 +600,6 @@ function onload() {
 
   specButton = document.getElementById("assignSPEC");
   specStatus = document.getElementById("specStatus");
-
-  // ROV elements removed - they don't exist in HTML
-  // rovButton = document.getElementById("assignROV");
-  // rov = document.getElementById("rovTimerContainer");
-  // rovStatus = document.getElementById("rovStatus");
-  // rovBullet = document.getElementById("rovBulletPoint");
-  // rovName = document.getElementById("rovName");
-  // rovFont = document.getElementById("rovNameFont");
-
-  // videoFeed element removed - it doesn't exist in HTML
-  // video = document.getElementById("videoFeed");
 
   xCoordinateEV1 = document.getElementById("xCoordinateEV1");
   yCoordinateEV1 = document.getElementById("yCoordinateEV1");

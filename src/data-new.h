@@ -19,9 +19,10 @@ enum ROVER_SECTIONS {
 enum EVA_SECTIONS {
     telemetry,
     status,
-    uia,
     dcu,
-    error
+    error,
+    imu,
+    uia
 };
 
 struct backend_data_t {
@@ -52,6 +53,7 @@ void update_json_file(const char* filename, const int team_number, const char* s
 void sync_simulation_to_json(struct backend_data_t* backend, int team_index);
 cJSON* get_json_file(const char* filename, const int team_number);
 void send_json_file(const char* filename, const int team_number, unsigned char* data);
+void send_json_section(const char* filename, const int team_number, const char* section_name, unsigned char* data);
 
 // Helper functions
 void reverse_bytes(unsigned char* bytes);

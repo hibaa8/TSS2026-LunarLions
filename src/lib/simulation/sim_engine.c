@@ -86,7 +86,8 @@ bool sim_engine_load_predefined_configs(sim_engine_t* engine) {
     // Predefined list of configuration files to load
     // @TODO can generalize this more in some way?
     const char* config_files[] = {
-        "src/lib/simulation/config/eva.json",
+        "src/lib/simulation/config/eva1.json",
+        "src/lib/simulation/config/eva2.json",
         "src/lib/simulation/config/rover.json"
     };
     const int config_count = sizeof(config_files) / sizeof(config_files[0]);

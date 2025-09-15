@@ -203,12 +203,12 @@ Here's a list of get commands you can send to the socket. They are mostly relate
 | 31-41 | Get EVA 1 SPEC states (excludes `name` field) | `SPEC.json` |
 | 42-52 | Get EVA 2 SPEC states (excludes `name` field) | `SPEC.json` |
 | 53-62 | Get UIA states | `UIA.json` |
-| 63 | Get current EVA time for the team number passed in the data field as a float | `/teams/x/EVA_TELEMETRY.json` |
-| 64-85 | Get TELEMETRY states for EVA1 and the team number passed in the data field as a float | `/teams/x/EVA_TELEMETRY.json` |
-| 86-107 | Get TELEMETRY states for EVA1 and the team number passed in the data field as a float | `/teams/x/EVA_TELEMETRY.json` |
+| 63 | Get current EVA time for the team number passed in the data field as a float | `/teams/x/EVA.json` |
+| 64-85 | Get TELEMETRY states for EVA1 and the team number passed in the data field as a float | `/teams/x/EVA.json` |
+| 86-107 | Get TELEMETRY states for EVA1 and the team number passed in the data field as a float | `/teams/x/EVA.json` |
 | 108-123 | Get EVA states for the team number passed in the data field as a float | `/teams/x/EVA_STATUS.json` |
-| 124-171 | Get Pressurized Rover states for the team currently running the PR sim | `/teams/x/ROVER_TELEMETRY.json` |
-| 172 | Get Pressurized Rover LIDAR data, explaned below | `/teams/x/ROVER_TELEMETRY.json` |
+| 124-171 | Get Pressurized Rover states for the team currently running the PR sim | `/teams/x/ROVER.json` |
+| 172 | Get Pressurized Rover LIDAR data, explaned below | `/teams/x/ROVER.json` |
 
 ## Pressurized Rover LIDAR
 

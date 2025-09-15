@@ -17,6 +17,11 @@ int main(int argc, char *argv[]) {
     // Setup high precision timing
     clock_setup(&profile_context);
 
+    // Ignore SIGPIPE to prevent crashes when client disconnects
+    #ifndef _WIN32
+        signal(SIGPIPE, SIG_IGN);
+    #endif
+
     // Windows specific initialization
     #if defined(_WIN32)
         WSADATA d;

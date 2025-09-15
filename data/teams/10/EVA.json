@@ -1,0 +1,159 @@
+
+{
+	"telemetry": {
+		"eva_time": 0,
+		"eva1": {
+			"batt_time_left": 4320.000000,
+			"oxy_pri_storage": 20.000000,
+			"oxy_sec_storage": 20.000000,
+			"oxy_pri_pressure": 0.000000,
+			"oxy_sec_pressure": 0.000000,
+			"oxy_time_left": 4320,
+			"heart_rate": 80.000000,
+			"oxy_consumption": 0.000000,
+			"co2_production": 0.000000,
+			"suit_pressure_oxy": 3.072300,
+			"suit_pressure_co2": 0.005900,
+			"suit_pressure_other": 11.554200,
+			"suit_pressure_total": 14.632401,
+			"fan_pri_rpm": 0.000000,
+			"fan_sec_rpm": 0.000000,
+			"helmet_pressure_co2": 0.000000,
+			"scrubber_a_co2_storage": 0.000000,
+			"scrubber_b_co2_storage": 0.000000,
+			"temperature": 70.000000,
+			"coolant_ml": 20.000000,
+			"coolant_gas_pressure": 0.000000,
+			"coolant_liquid_pressure": 0.000000
+		},
+		"eva2": {
+			"batt_time_left": 4320.000000,
+			"oxy_pri_storage": 20.000000,
+			"oxy_sec_storage": 20.000000,
+			"oxy_pri_pressure": 0.000000,
+			"oxy_sec_pressure": 0.000000,
+			"oxy_time_left": 4320,
+			"heart_rate": 80.000000,
+			"oxy_consumption": 0.000000,
+			"co2_production": 0.000000,
+			"suit_pressure_oxy": 3.072300,
+			"suit_pressure_co2": 0.005900,
+			"suit_pressure_other": 11.554200,
+			"suit_pressure_total": 14.632401,
+			"fan_pri_rpm": 0.000000,
+			"fan_sec_rpm": 0.000000,
+			"helmet_pressure_co2": 0.000000,
+			"scrubber_a_co2_storage": 0.000000,
+			"scrubber_b_co2_storage": 0.000000,
+			"temperature": 70.000000,
+			"coolant_ml": 20.000000,
+			"coolant_gas_pressure": 0.000000,
+			"coolant_liquid_pressure": 0.000000
+		},
+		"throttle": 0.0,
+		"steering": 0.0,
+		"current_pos_alt": 100.0,
+		"heading": 0.0,
+		"pitch": 0.0,
+		"roll": 0.0,
+		"distance_traveled": 0.0,
+		"surface_incline": 0.0,
+		"oxygen_tank": 0.0,
+		"oxygen_pressure": 0.0,
+		"oxygen_levels": 0.0,
+		"ac_fan_pri": 0.0,
+		"ac_fan_sec": 0.0,
+		"cabin_pressure": 0.0,
+		"battery_level": 0.0,
+		"power_consumption_rate": 0.0,
+		"external_temp": 0.0,
+		"pr_coolant_level": 0.0,
+		"pr_coolant_pressure": 0.0,
+		"pr_coolant_tank": 0.0,
+		"radiator": 0.0,
+		"terrain_condition": 0.0,
+		"solar_panel_dust_accum": 0.0,
+		"mission_planned_time": 0,
+		"dest_x": 0.0,
+		"dest_y": 0.0,
+		"dest_z": 0.0,
+		"speed": 0.0,
+		"cabin_temperature": 0.0,
+		"solar_panel_efficiency": 0.0,
+		"motor_power_consumption": 0.0
+	},
+	"status": {
+		"started": false,
+		"paused": false,
+		"completed": false,
+		"total_time": 0,
+		"uia": {
+			"started": false,
+			"completed": false,
+			"time": 0
+		},
+		"dcu": {
+			"started": false,
+			"completed": false,
+			"time": 0
+		},
+		"rover": {
+			"started": false,
+			"completed": false,
+			"time": 0
+		},
+		"spec": {
+			"started": false,
+			"completed": false,
+			"time": 0
+		}
+	},
+	"dcu": {
+		"eva1": {
+			"batt": false,
+			"oxy": false,
+			"comm": false,
+			"fan": false,
+			"pump": false,
+			"co2": false
+		},
+		"eva2": {
+			"batt": false,
+			"oxy": false,
+			"comm": false,
+			"fan": false,
+			"pump": false,
+			"co2": false
+		}
+	},
+	"error": {
+		"fan_error": false,
+		"oxy_error": false,
+		"batt_error": false,
+		"pump_error": false
+	},
+	"imu": {
+		"eva1": {
+			"posx": 0.000000,
+			"posy": 0.000000,
+			"heading": 0.000000
+		},
+		"eva2": {
+			"posx": 0.000000,
+			"posy": 0.000000,
+			"heading": 0.000000
+		}
+	},
+	"uia": {
+		"eva1_power": false,
+		"eva1_oxy": false,
+		"eva1_water_supply": false,
+		"eva1_water_waste": false,
+		"eva2_power": false,
+		"eva2_oxy": false,
+		"eva2_water_supply": false,
+		"eva2_water_waste": false,
+		"oxy_vent": false,
+		"depress": false
+	}
+}
