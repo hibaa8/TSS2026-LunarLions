@@ -154,3 +154,111 @@ function getValueByPath(obj, path) {
     return current && current[key] !== undefined ? current[key] : undefined;
   }, obj);
 }
+
+/**
+ * Converts legacy form field names to new route-based format
+ * @param {string} fieldName - Legacy field name (e.g., "error_fan", "pr_ac_heating")
+ * @param {string} value - The value to set
+ * @returns {string} Route-based update string (e.g., "eva.error.fan_error=true")
+ */
+function convertToRouteFormat(fieldName, value) {
+  // Handle EVA error simulation fields (error_oxy, error_fan, error_pump, error_power)
+  if (fieldName.startsWith('error_')) {
+    const errorType = fieldName.substring(6); // Remove "error_" prefix
+    // Map error_fan to fan_error, error_oxy to oxy_error, etc.
+    return `eva.error.${errorType}_error=${value}`;
+  }
+  
+  // Handle pressurized rover fields (pr_ac_heating, pr_ac_cooling, etc.)
+  if (fieldName.startsWith('pr_')) {
+    const prField = fieldName.substring(3); // Remove "pr_" prefix
+    return `rover.pr_telemetry.${prField}=${value}`;
+  }
+  
+  // Handle UIA fields (uia_eva1_power, uia_eva2_power, etc.)
+  if (fieldName.startsWith('uia_')) {
+    const uiaField = fieldName.substring(4); // Remove "uia_" prefix
+    return `eva.uia.${uiaField}=${value}`;
+  }
+  
+  // Handle DCU fields - these would need custom mapping based on actual form names
+  if (fieldName.startsWith('dcu_')) {
+    const dcuField = fieldName.substring(4); // Remove "dcu_" prefix
+    return `eva.dcu.${dcuField}=${value}`;
+  }
+  
+  // Handle EVA start/stop team commands
+  if (fieldName === 'eva_start_team') {
+    return `eva.status.started=true`;
+  }
+  if (fieldName === 'eva_end_team') {
+    return `eva.status.started=false`;
+  }
+  
+  // Handle station assignment commands (eva_start_UIA_team, eva_start_DCU_team, etc.)
+  if (fieldName.startsWith('eva_start_') && fieldName.endsWith('_team')) {
+    const station = fieldName.substring(10, fieldName.length - 5); // Extract station name
+    return `eva.status.${station.toLowerCase()}.started=true`;
+  }
+  if (fieldName.startsWith('eva_end_') && fieldName.endsWith('_team')) {
+    const station = fieldName.substring(8, fieldName.length - 5); // Extract station name  
+    return `eva.status.${station.toLowerCase()}.started=false`;
+  }
+  
+  // Handle pressurized rover start/stop commands
+  if (fieldName === 'pr_start_team') {
+    return `rover.pr_telemetry.sim_running=true`;
+  }
+  if (fieldName === 'pr_end_team') {
+    return `rover.pr_telemetry.sim_running=false`;
+  }
+  
+  // Default fallback for unrecognized fields
+  console.warn(`Unrecognized field name: ${fieldName}`);
+  return `${fieldName}=${value}`;
+}
+
+/**
+ * Sends a route-based update to the backend
+ * @param {string} routeUpdate - Route-based update string (e.g., "eva.error.fan_error=true")
+ */
+function sendRouteUpdate(routeUpdate) {
+  // For now, just log the update - this would be replaced with actual HTTP request
+  console.log(`Sending route update: ${routeUpdate}`);
+  
+  // TODO: Replace with actual HTTP POST request to backend
+  // This would need to be integrated with whatever server framework is being used
+  // Example using fetch API:
+  // fetch('/api/update', {
+  //   method: 'POST',
+  //   headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  //   body: routeUpdate
+  // });
+}
+
+/**
+ * Intercepts form submissions and converts them to route-based updates
+ * @param {Event} event - Form submit event
+ */
+function interceptFormSubmit(event) {
+  event.preventDefault(); // Prevent default form submission
+  
+  const form = event.target;
+  const formData = new FormData(form);
+  
+  // Convert each form field to route format
+  // Note: FormData handles checkbox + hidden field correctly by only including the checked value
+  for (const [fieldName, value] of formData.entries()) {
+    if (value && value !== 'false') { // Only send updates for 'true' values or non-empty values
+      // Check if fieldName is already in route format
+      if (fieldName.includes('.')) {
+        // Already in route format, just send it
+        sendRouteUpdate(`${fieldName}=${value}`);
+      } else {
+        // Convert legacy format to route format
+        const routeUpdate = convertToRouteFormat(fieldName, value);
+        sendRouteUpdate(routeUpdate);
+      }
+    }
+  }
+}

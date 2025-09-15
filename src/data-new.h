@@ -49,16 +49,15 @@ void handle_udp_get_request(unsigned int command, unsigned char* data, struct ba
 void handle_udp_post_request(unsigned int command, unsigned char* data, struct backend_data_t* backend);
 
 // Data management
-void update_json_file(const char* filename, const int team_number, const char* section, const char* field, char* new_value);
+void update_json_file(const char* filename, const int team_number, const char* section, const char* field_path, char* new_value);
 void sync_simulation_to_json(struct backend_data_t* backend, int team_index);
 cJSON* get_json_file(const char* filename, const int team_number);
 void send_json_file(const char* filename, const int team_number, unsigned char* data);
-void send_json_section(const char* filename, const int team_number, const char* section_name, unsigned char* data);
 
 // Helper functions
 void reverse_bytes(unsigned char* bytes);
 bool big_endian();
-bool update_resource(char* request_content, struct backend_data_t* backend);
-float get_rover_field_value(struct backend_data_t* backend, int team_index, const char* field_name);
+bool html_form_json_update(char* request_content, struct backend_data_t* backend);
+double get_field_from_json(const char* filename, const int team_number, const char* field_path, double default_value);
 
 #endif // DATA_H

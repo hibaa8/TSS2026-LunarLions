@@ -525,6 +525,22 @@ function onload() {
     loadAllTelemetry(selectedTeam);
     updateClock();
   }, 1000);
+  
+  // Setup route-based form handling for all forms
+  setupRouteBasedForms();
+}
+
+/**
+ * Sets up route-based form handling by attaching event listeners to all forms
+ */
+function setupRouteBasedForms() {
+  // Find all forms and attach the route-based submit handler
+  const forms = document.querySelectorAll('form');
+  forms.forEach(form => {
+    form.addEventListener('submit', interceptFormSubmit);
+  });
+  
+  console.log(`Route-based form handling setup for ${forms.length} forms`);
 }
 
 // Updates the navigation clock display with current time in military format

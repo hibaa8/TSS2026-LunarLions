@@ -1,6 +1,3 @@
-// server.c - Main application server handling TCP/UDP connections, manages telemetry data, web
-// interface, and Unreal Engine communication
-
 #include "server.h"
 
 struct profile_context_t profile_context;
@@ -16,11 +13,6 @@ int main(int argc, char *argv[]) {
 
     // Setup high precision timing
     clock_setup(&profile_context);
-
-    // Ignore SIGPIPE to prevent crashes when client disconnects
-    #ifndef _WIN32
-        signal(SIGPIPE, SIG_IGN);
-    #endif
 
     // Windows specific initialization
     #if defined(_WIN32)
@@ -245,7 +237,7 @@ int main(int argc, char *argv[]) {
                                     send_400(client);
                                     drop_tcp_client(&clients, client);
                                 } else {
-                                    if (update_resource(request_content, backend)) {
+                                    if (html_form_json_update(request_content, backend)) {
                                         send_304(client);
                                     } else {
                                         send_400(client);
@@ -326,7 +318,6 @@ static bool continue_server(void) {
 
     FD_ZERO(&console_fd);
     FD_SET(0, &console_fd);
-    
     int read_files = select(1, &console_fd, 0, 0, &select_wait);
 
     if (read_files > 0) {
@@ -367,12 +358,12 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
         return;
     }
 
-    // Extract current rover state from simulation engine
-    int brakes = (int)get_rover_field_value(backend, backend->running_pr_sim, "brakes");
-    int lights_on = (int)get_rover_field_value(backend, backend->running_pr_sim, "lights_on");
-    float steering = get_rover_field_value(backend, backend->running_pr_sim, "steering");
-    float throttle = get_rover_field_value(backend, backend->running_pr_sim, "throttle");
-    int switch_dest = (int)get_rover_field_value(backend, backend->running_pr_sim, "switch_dest");
+    // Extract current rover state from JSON file
+    int brakes = (int)get_field_from_json("ROVER", backend->running_pr_sim, "pr_telemetry.brakes", 0.0);
+    int lights_on = (int)get_field_from_json("ROVER", backend->running_pr_sim, "pr_telemetry.lights_on", 0.0);
+    float steering = (float)get_field_from_json("ROVER", backend->running_pr_sim, "pr_telemetry.steering", 0.0);
+    float throttle = (float)get_field_from_json("ROVER", backend->running_pr_sim, "pr_telemetry.throttle", 0.0);
+    int switch_dest = (int)get_field_from_json("ROVER", backend->running_pr_sim, "pr_telemetry.switch_dest", 0.0);
 
     unsigned int time = backend->server_up_time;
     unsigned char buffer[12];
