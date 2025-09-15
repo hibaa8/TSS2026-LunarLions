@@ -248,7 +248,8 @@ void update_json_file(const char* filename, const int team_number, const char* s
     }
 
     // Update the specified field with the new value
-    cJSON_ReplaceItemInObject(section_json, field, new_value);
+    cJSON* new_json_value = cJSON_CreateString(new_value);
+    cJSON_ReplaceItemInObject(section_json, field, new_json_value);
 
     // Write updated JSON back to file
     char *json_str = cJSON_Print(json);
@@ -372,7 +373,8 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
     for (int i = 0; i < engine->total_field_count; i++) {
         sim_field_t* field = engine->update_order[i];
         if (field != NULL) {
-            cJSON_AddNumberToObject(telemetry, field->field_name, field->current_value);
+            double value = (field->type == SIM_TYPE_FLOAT) ? field->current_value.f : (double)field->current_value.i;
+            cJSON_AddNumberToObject(telemetry, field->field_name, value);
         }
     }
     
@@ -392,5 +394,113 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
     
     free(json_str);
     cJSON_Delete(root);
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//                              Helper Functions
+///////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Reverses the byte order of a 4-byte value for endianness conversion
+ * 
+ * @param bytes Pointer to 4-byte array to reverse
+ */
+void reverse_bytes(unsigned char *bytes) {
+    // expects 4 bytes to be flipped
+    char temp;
+    for (int i = 0; i < 2; i++) {
+        temp = bytes[i];
+        bytes[i] = bytes[3 - i];
+        bytes[3 - i] = temp;
+    }
+}
+
+/**
+ * Determines if the system uses big-endian byte ordering
+ * 
+ * @return true if system is big-endian, false if little-endian
+ */
+bool big_endian() {
+    unsigned int i = 1;
+    unsigned char temp[4];
+
+    memcpy(temp, &i, 4);
+
+    if (temp[0] == 1) {
+        // System is little-endian
+        return false;
+    } else {
+        // System is big-endian
+        return true;
+    }
+}
+
+/**
+ * Basic update_resource function - routes resource updates based on prefix
+ * TODO: Implement specific update handlers as needed for your simulation
+ * 
+ * @param request_content String containing the resource update request
+ * @param backend Backend data structure
+ * @return true if update was successful, false otherwise
+ */
+bool update_resource(char* request_content, struct backend_data_t* backend) {
+    if (strncmp(request_content, "eva_", 4) == 0) {
+        // Handle EVA updates - TODO: implement eva update logic
+        printf("EVA update requested: %s\n", request_content + 4);
+        return true;
+    } else if (strncmp(request_content, "rover_", 6) == 0) {
+        // Handle rover updates - TODO: implement rover update logic
+        printf("Rover update requested: %s\n", request_content + 6);
+        return true;
+    } else if (strncmp(request_content, "dcu_", 4) == 0) {
+        // Handle DCU updates - TODO: implement DCU update logic
+        printf("DCU update requested: %s\n", request_content + 4);
+        return true;
+    } else if (strncmp(request_content, "uia_", 4) == 0) {
+        // Handle UIA updates - TODO: implement UIA update logic
+        printf("UIA update requested: %s\n", request_content + 4);
+        return true;
+    } else if (strncmp(request_content, "error_", 6) == 0) {
+        // Handle error simulation updates - TODO: implement error logic
+        printf("Error update requested: %s\n", request_content + 6);
+        return true;
+    }
+    
+    printf("Unknown resource update: %s\n", request_content);
+    return false;
+}
+
+/**
+ * Retrieves a rover field value from the simulation engine
+ * 
+ * @param backend Backend data structure
+ * @param team_index Team index for the rover simulation
+ * @param field_name Name of the field to retrieve
+ * @return Field value as float, or 0.0 if not found
+ */
+float get_rover_field_value(struct backend_data_t* backend, int team_index, const char* field_name) {
+    if (team_index < 0 || team_index >= NUM_TEAMS) {
+        printf("Invalid team index %d for get_rover_field_value\n", team_index);
+        return 0.0f;
+    }
+    
+    sim_engine_t* engine = backend->sim_engine[team_index];
+    if (engine == NULL) {
+        printf("Simulation engine for team %d is NULL\n", team_index);
+        return 0.0f;
+    }
+    
+    sim_value_t value = sim_engine_get_field_value(engine, field_name);
+    
+    // Find the field to determine its type
+    for (int i = 0; i < engine->total_field_count; i++) {
+        sim_field_t* field = engine->update_order[i];
+        if (field != NULL && strcmp(field->field_name, field_name) == 0) {
+            return (field->type == SIM_TYPE_FLOAT) ? value.f : (float)value.i;
+        }
+    }
+    
+    // Default to float if field type not found
+    return value.f;
 }
 
