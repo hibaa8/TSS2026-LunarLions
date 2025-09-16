@@ -189,6 +189,13 @@
       "end_value": 0.0,
       "duration_seconds": 1350.0
     },
+    "mission_elapsed_time": {
+      "type": "float",
+      "algorithm": "linear_growth",
+      "start_value": 0,
+      "end_value": 1350,
+      "duration_seconds": 1350.0
+    },
     "dest_x": {
       "type": "float",
       "algorithm": "sine_wave",
