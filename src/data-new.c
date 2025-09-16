@@ -348,6 +348,7 @@ void send_json_file(const char* filename, const int team_number, unsigned char* 
     cJSON_Delete(json);
 }
 
+
 /**
  * Synchronizes the simulation engine data to the corresponding JSON file for a specific team
  * 
@@ -374,6 +375,22 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
         return;
     }
     
+    // Get or create the status section and update existing started field
+    cJSON* status = cJSON_GetObjectItemCaseSensitive(root, "status");
+    if (status == NULL) {
+        status = cJSON_CreateObject();
+        cJSON_AddItemToObject(root, "status", status);
+    }
+
+    // Update existing started field (check if eva1 OR eva2 is running)
+    bool eva_running = sim_engine_is_component_running(engine, "eva1") || sim_engine_is_component_running(engine, "eva2");
+    cJSON* started_field = cJSON_GetObjectItemCaseSensitive(status, "started");
+    if (started_field != NULL) {
+        cJSON_SetBoolValue(started_field, eva_running);
+    } else {
+        cJSON_AddBoolToObject(status, "started", eva_running);
+    }
+
     // Get or create the telemetry section
     cJSON* telemetry = cJSON_GetObjectItemCaseSensitive(root, "telemetry");
     if (telemetry == NULL) {
@@ -447,6 +464,15 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
         pr_telemetry = cJSON_CreateObject();
         cJSON_AddItemToObject(rover_root, "pr_telemetry", pr_telemetry);
     }
+
+    // Update simulation running status in pr_telemetry (check if rover is running)
+    bool rover_running = sim_engine_is_component_running(engine, "rover");
+    cJSON* rover_sim_running_field = cJSON_GetObjectItemCaseSensitive(pr_telemetry, "sim_running");
+    if (rover_sim_running_field != NULL) {
+        cJSON_SetBoolValue(rover_sim_running_field, rover_running);
+    } else {
+        cJSON_AddBoolToObject(pr_telemetry, "sim_running", rover_running);
+    }
     
     // Update rover simulation fields
     for (int i = 0; i < engine->total_field_count; i++) {
@@ -489,6 +515,7 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
  */
 bool html_form_json_update(char* request_content, struct backend_data_t* backend) {
     // Parse URL-encoded data: "route=value&room=X"
+    // @TODO: simplify this function
     int team_number = 0;
     char* route = NULL;
     char* value = NULL;
@@ -524,7 +551,8 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
     }
 
     printf("Processing route update: %s = %s (team %d)\n", route, value, team_number);
-    
+
+
     // Parse the route (split by dots)
     char route_copy[256];
     strncpy(route_copy, route, sizeof(route_copy) - 1);
@@ -564,6 +592,34 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
         const char* field = route_parts[2];
         
         update_json_file(filename, team_number, section, field, value);
+
+        // Handle simulation control for specific fields
+        if (strcmp(filename, "ROVER") == 0 && strcmp(section, "pr_telemetry") == 0 && strcmp(field, "sim_running") == 0) {
+            if (team_number >= 0 && team_number < NUM_TEAMS && backend->sim_engine[team_number]) {
+                if (strcmp(value, "true") == 0) {
+                    sim_engine_start_component(backend->sim_engine[team_number], "rover");
+                    printf("Started rover simulation for team %d\n", team_number);
+                } else {
+                    sim_engine_reset_component(backend->sim_engine[team_number], "rover");
+                    printf("Reset rover simulation for team %d\n", team_number);
+                }
+            }
+        }
+
+        if (strcmp(filename, "EVA") == 0 && strcmp(section, "status") == 0 && strcmp(field, "started") == 0) {
+            if (team_number >= 0 && team_number < NUM_TEAMS && backend->sim_engine[team_number]) {
+                if (strcmp(value, "true") == 0) {
+                    sim_engine_start_component(backend->sim_engine[team_number], "eva1");
+                    sim_engine_start_component(backend->sim_engine[team_number], "eva2");
+                    printf("Started EVA simulation for team %d\n", team_number);
+                } else {
+                    sim_engine_reset_component(backend->sim_engine[team_number], "eva1");
+                    sim_engine_reset_component(backend->sim_engine[team_number], "eva2");
+                    printf("Reset EVA simulation for team %d\n", team_number);
+                }
+            }
+        }
+
         return true;
     } else if (part_count > 3) {
         // Nested case: file.section.subsection.field or deeper
@@ -581,6 +637,20 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
         // For now, handle nested updates by directly updating the JSON
         // This requires extending update_json_file to handle nested paths
         update_json_file(filename, team_number, section, nested_field, value);
+
+        // Handle simulation control for specific nested fields
+        if (strcmp(filename, "ROVER") == 0 && strcmp(section, "pr_telemetry") == 0 && strcmp(nested_field, "sim_running") == 0) {
+            if (team_number >= 0 && team_number < NUM_TEAMS && backend->sim_engine[team_number]) {
+                if (strcmp(value, "true") == 0) {
+                    sim_engine_start_component(backend->sim_engine[team_number], "rover");
+                    printf("Started rover simulation for team %d\n", team_number);
+                } else {
+                    sim_engine_reset_component(backend->sim_engine[team_number], "rover");
+                    printf("Reset rover simulation for team %d\n", team_number);
+                }
+            }
+        }
+
         return true;
     } else {
         printf("Error: Invalid route format: %s\n", route);

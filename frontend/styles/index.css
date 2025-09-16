@@ -121,6 +121,7 @@
   width: 6.5rem;
   color: var(--white);
   font-size: 0.9rem;
+  font-family: inherit;
   margin-right: 0.5rem;
   background-color: var(--green);
   opacity: 0.75;
@@ -133,6 +134,7 @@
   width: 6.5rem;
   color: var(--white);
   font-size: 0.9rem;
+  font-family: inherit;
   background-color: var(--dark-grey);
   opacity: 0.75;
   border: 2px solid #5a5a5a;

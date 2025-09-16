@@ -65,7 +65,7 @@ async function fetchData() {
       return; // don't set textContent for checkboxes
     }
 
-    // Handle action buttons (START/STOP) - enable/disable based on current state
+    // Handle action buttons (START/RESET) - enable/disable based on current state
     if (el.tagName === "BUTTON" && el.hasAttribute("data-action")) {
       const action = el.getAttribute("data-action");
       const isRunning = Boolean(value);
@@ -74,12 +74,12 @@ async function fetchData() {
         // START button: enabled when NOT running
         el.disabled = isRunning;
         el.style.opacity = isRunning ? "0.5" : "1";
-      } else if (action === "stop") {
-        // STOP button: enabled when IS running
+      } else if (action === "reset") {
+        // RESET button: enabled when IS running
         el.disabled = !isRunning;
         el.style.opacity = !isRunning ? "0.5" : "1";
       }
-      
+
       return; // don't set textContent for action buttons
     }
 
@@ -170,17 +170,18 @@ function setupEventListeners() {
       const path = event.target.getAttribute("data-path");
       const action = event.target.getAttribute("data-action");
 
-      let value;
+      // For action buttons, directly update the status field
       if (action === "start") {
-        value = true;
-      } else if (action === "stop") {
-        value = false;
+        // Start: set the field to true
+        updateServerData(path, true);
+      } else if (action === "reset") {
+        // Reset: set the field to false
+        updateServerData(path, false);
       } else {
         // Fallback to old data-value system for backward compatibility
-        value = event.target.getAttribute("data-value") === "true";
+        const value = event.target.getAttribute("data-value") === "true";
+        updateServerData(path, value);
       }
-
-      updateServerData(path, value);
     });
   });
 

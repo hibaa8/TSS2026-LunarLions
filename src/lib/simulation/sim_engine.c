@@ -24,8 +24,6 @@ sim_engine_t* sim_engine_create(void) {
     sim_engine_t* engine = calloc(1, sizeof(sim_engine_t));
     if (!engine) return NULL;
     
-    engine->simulation_time = 0.0f;
-    engine->last_update_time = 0.0f;
     engine->initialized = false;
     
     return engine;
@@ -187,6 +185,8 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
     component->component_name = strdup(component_name);
     component->field_count = field_count;
     component->fields = calloc(field_count, sizeof(sim_field_t));
+    component->running = false;  // Start stopped by default
+    component->simulation_time = 0.0f;  // Initialize component simulation time
     
     // Parse fields
     int field_idx = 0;
@@ -240,7 +240,7 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
             field->depends_count = 0;
             field->depends_on = NULL;
         }
-        
+
         field->initialized = false;
         field_idx++;
     }
@@ -362,7 +362,17 @@ bool sim_engine_initialize(sim_engine_t* engine) {
     // Initialize all fields
     for (int i = 0; i < engine->total_field_count; i++) {
         sim_field_t* field = engine->update_order[i];
-        field->start_time = engine->simulation_time;
+
+        // Find the component this field belongs to and use its simulation time
+        sim_component_t* component = NULL;
+        for (int j = 0; j < engine->component_count; j++) {
+            if (strcmp(engine->components[j].component_name, field->component_name) == 0) {
+                component = &engine->components[j];
+                break;
+            }
+        }
+
+        field->start_time = component ? component->simulation_time : 0.0f;
         field->initialized = true;
         
         // Set initial values based on algorithm
@@ -414,31 +424,158 @@ bool sim_engine_initialize(sim_engine_t* engine) {
  */
 void sim_engine_update(sim_engine_t* engine, float delta_time) {
     if (!engine || !engine->initialized) return;
-    
-    engine->simulation_time += delta_time;
-    
-    // Update all fields in dependency order
+
+    // First, advance simulation time for all running components
+    for (int i = 0; i < engine->component_count; i++) {
+        if (engine->components[i].running) {
+            engine->components[i].simulation_time += delta_time;
+        }
+    }
+
+    // Update all fields in dependency order (only for running components)
     for (int i = 0; i < engine->total_field_count; i++) {
         sim_field_t* field = engine->update_order[i];
+
+        // Find the component this field belongs to
+        sim_component_t* component = NULL;
+        for (int j = 0; j < engine->component_count; j++) {
+            if (strcmp(engine->components[j].component_name, field->component_name) == 0) {
+                component = &engine->components[j];
+                break;
+            }
+        }
+
+        // Only update if component is running
+        if (!component || !component->running) continue;
+
         field->previous_value = field->current_value;
-        
+
         switch (field->algorithm) {
             case SIM_ALGO_SINE_WAVE:
-                field->current_value = sim_algo_sine_wave(field, engine->simulation_time);
+                field->current_value = sim_algo_sine_wave(field, component->simulation_time);
                 break;
             case SIM_ALGO_LINEAR_DECAY:
-                field->current_value = sim_algo_linear_decay(field, engine->simulation_time);
+                field->current_value = sim_algo_linear_decay(field, component->simulation_time);
                 break;
             case SIM_ALGO_LINEAR_GROWTH:
-                field->current_value = sim_algo_linear_growth(field, engine->simulation_time);
+                field->current_value = sim_algo_linear_growth(field, component->simulation_time);
                 break;
             case SIM_ALGO_DEPENDENT_VALUE:
-                field->current_value = sim_algo_dependent_value(field, engine->simulation_time, engine);
+                field->current_value = sim_algo_dependent_value(field, component->simulation_time, engine);
                 break;
         }
     }
-    
-    engine->last_update_time = engine->simulation_time;
+}
+
+/**
+ * Starts simulation updates for a specific component.
+ *
+ * @param engine Pointer to the simulation engine
+ * @param component_name Name of the component to start (e.g., "rover", "eva1", "eva2")
+ */
+void sim_engine_start_component(sim_engine_t* engine, const char* component_name) {
+    if (!engine || !engine->initialized || !component_name) return;
+
+    for (int i = 0; i < engine->component_count; i++) {
+        if (strcmp(engine->components[i].component_name, component_name) == 0) {
+            engine->components[i].running = true;
+            printf("Started component '%s' simulation\n", component_name);
+            return;
+        }
+    }
+
+    printf("Warning: Component '%s' not found\n", component_name);
+}
+
+/**
+ * Stops simulation updates for a specific component.
+ *
+ * @param engine Pointer to the simulation engine
+ * @param component_name Name of the component to stop (e.g., "rover", "eva1", "eva2")
+ */
+void sim_engine_stop_component(sim_engine_t* engine, const char* component_name) {
+    if (!engine || !component_name) return;
+
+    for (int i = 0; i < engine->component_count; i++) {
+        if (strcmp(engine->components[i].component_name, component_name) == 0) {
+            engine->components[i].running = false;
+            printf("Stopped component '%s' simulation\n", component_name);
+            return;
+        }
+    }
+
+    printf("Warning: Component '%s' not found\n", component_name);
+}
+
+/**
+ * Resets all fields of a specific component to their initial state and stops the component.
+ *
+ * @param engine Pointer to the simulation engine
+ * @param component_name Name of the component to reset (e.g., "rover", "eva1", "eva2")
+ */
+void sim_engine_reset_component(sim_engine_t* engine, const char* component_name) {
+    if (!engine || !engine->initialized || !component_name) return;
+
+    // Find and stop the component
+    sim_component_t* target_component = NULL;
+    for (int i = 0; i < engine->component_count; i++) {
+        if (strcmp(engine->components[i].component_name, component_name) == 0) {
+            target_component = &engine->components[i];
+            target_component->running = false;
+            target_component->simulation_time = 0.0f;  // Reset component simulation time
+            break;
+        }
+    }
+
+    if (!target_component) {
+        printf("Warning: Component '%s' not found\n", component_name);
+        return;
+    }
+
+    // Reset all fields of this component
+    for (int i = 0; i < engine->total_field_count; i++) {
+        sim_field_t* field = engine->update_order[i];
+        if (field && strcmp(field->component_name, component_name) == 0) {
+            // Reset field timing to component time (which is now 0)
+            field->start_time = target_component->simulation_time;
+
+            // Set initial values based on algorithm
+            switch (field->algorithm) {
+                case SIM_ALGO_SINE_WAVE: {
+                    cJSON* base_value = cJSON_GetObjectItem(field->params, "base_value");
+                    if (base_value && cJSON_IsNumber(base_value)) {
+                        field->current_value.f = (float)cJSON_GetNumberValue(base_value);
+                    }
+                    break;
+                }
+                case SIM_ALGO_LINEAR_DECAY: {
+                    cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
+                    if (start_value && cJSON_IsNumber(start_value)) {
+                        field->current_value.f = (float)cJSON_GetNumberValue(start_value);
+                    }
+                    break;
+                }
+                case SIM_ALGO_LINEAR_GROWTH: {
+                    cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
+                    if (start_value && cJSON_IsNumber(start_value)) {
+                        field->current_value.f = (float)cJSON_GetNumberValue(start_value);
+                    } else {
+                        field->current_value.f = 0.0f;
+                    }
+                    break;
+                }
+                case SIM_ALGO_DEPENDENT_VALUE: {
+                    // Will be calculated during first update
+                    field->current_value.f = 0.0f;
+                    break;
+                }
+            }
+
+            field->previous_value = field->current_value;
+        }
+    }
+
+    printf("Reset component '%s' simulation\n", component_name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -481,4 +618,22 @@ sim_value_t sim_engine_get_field_value(sim_engine_t* engine, const char* field_n
     if (!field) return empty;
     
     return field->current_value;
+}
+
+/**
+ * Checks if a specific component is currently running.
+ *
+ * @param engine Pointer to the simulation engine
+ * @param component_name Name of the component to check
+ * @return true if the component is running, false otherwise
+ */
+bool sim_engine_is_component_running(sim_engine_t* engine, const char* component_name) {
+    if (!engine || !component_name) return false;
+
+    for (int i = 0; i < engine->component_count; i++) {
+        if (strcmp(engine->components[i].component_name, component_name) == 0) {
+            return engine->components[i].running;
+        }
+    }
+    return false;
 }
