@@ -488,22 +488,42 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
  * @return true if update was successful, false otherwise
  */
 bool html_form_json_update(char* request_content, struct backend_data_t* backend) {
-    // Extract team number - assume team 0 for now, can be extended later @TODO fix this
+    // Parse URL-encoded data: "route=value&room=X"
     int team_number = 0;
-    
-    // Find the equals sign to separate route from value
-    char* equals_pos = strchr(request_content, '=');
-    if (equals_pos == NULL) {
-        printf("Error: Invalid format, missing '=' in request: %s\n", request_content);
+    char* route = NULL;
+    char* value = NULL;
+
+    // Create a copy to work with since strtok modifies the string
+    char request_copy[1024];
+    strncpy(request_copy, request_content, sizeof(request_copy) - 1);
+    request_copy[sizeof(request_copy) - 1] = '\0';
+
+    // Parse URL-encoded parameters
+    char* param = strtok(request_copy, "&");
+    while (param != NULL) {
+        char* equals_pos = strchr(param, '=');
+        if (equals_pos != NULL) {
+            *equals_pos = '\0';  // Split parameter name and value
+            char* param_name = param;
+            char* param_value = equals_pos + 1;
+
+            if (strcmp(param_name, "room") == 0) {
+                team_number = atoi(param_value);
+            } else {
+                // route parameter I.E. "eva.error.fan_error"
+                route = param_name;
+                value = param_value;
+            }
+        }
+        param = strtok(NULL, "&");
+    }
+
+    if (route == NULL || value == NULL) {
+        printf("Error: Invalid format, missing route or value in request: %s\n", request_content);
         return false;
     }
-    
-    // Split route and value
-    *equals_pos = '\0';  // Null-terminate the route part
-    char* route = request_content;
-    char* value = equals_pos + 1;
-    
-    printf("Processing route update: %s = %s\n", route, value);
+
+    printf("Processing route update: %s = %s (team %d)\n", route, value, team_number);
     
     // Parse the route (split by dots)
     char route_copy[256];
