@@ -97,7 +97,6 @@ bool sim_engine_load_predefined_configs(sim_engine_t* engine) {
     for (int i = 0; i < config_count; i++) {
         if (sim_engine_load_component(engine, config_files[i])) {
             loaded_count++;
-            printf("Loaded: %s\n", config_files[i]);
         } else {
             printf("Warning: Failed to load component file: %s\n", config_files[i]);
             success = false;
@@ -109,7 +108,6 @@ bool sim_engine_load_predefined_configs(sim_engine_t* engine) {
         return false;
     }
     
-    printf("Successfully loaded %d component configuration files.\n", loaded_count);
     return success;
 }
 

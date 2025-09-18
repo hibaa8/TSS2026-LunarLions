@@ -54,6 +54,7 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index);
 cJSON* get_json_file(const char* filename, const int team_number);
 void send_json_file(const char* filename, const int team_number, unsigned char* data);
 void update_eva_station_timing(int team_number);
+void reset_eva_station_timing(int team_number);
 
 // Helper functions
 void reverse_bytes(unsigned char* bytes);
