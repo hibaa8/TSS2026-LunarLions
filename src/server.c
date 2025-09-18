@@ -264,7 +264,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Update simulation state based on the elapsed time
-        start_simulation(backend);
+        increment_simulation(backend);
 
         // Sync simulation data to JSON files for all teams
         for (int i = 0; i < NUM_TEAMS; i++) {

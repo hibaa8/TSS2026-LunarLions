@@ -49,9 +49,8 @@ struct backend_data_t *init_backend() {
  *
  * @param backend Backend data structure containing all telemetry and simulation engines
  */
-void start_simulation(struct backend_data_t *backend) {
+void increment_simulation(struct backend_data_t *backend) {
     // Increment server time
-    // @TODO double check the timing logic here is correct
     int new_time = time(NULL) - backend->start_time;
     bool time_incremented = false;
     if (new_time != backend->server_up_time) {
@@ -68,6 +67,9 @@ void start_simulation(struct backend_data_t *backend) {
             if (backend->sim_engine[i]) {
                 sim_engine_update(backend->sim_engine[i], delta_time);
             }
+
+            // Update EVA station timing for each team
+            update_eva_station_timing(i);
         }
     }
 }
@@ -716,6 +718,83 @@ double get_field_from_json(const char* filename, const int team_number, const ch
     
     cJSON_Delete(json);
     return result;
+}
+
+/**
+ * Updates EVA station timing for a specific team based on started states
+ * Increments time for stations that are started and marks completed when stopped
+ *
+ * @param team_number Team number to update station timing for
+ */
+void update_eva_station_timing(int team_number) {
+    // Load current EVA JSON data for the team
+    cJSON* eva_json = get_json_file("EVA", team_number);
+    if (eva_json == NULL) {
+        return;
+    }
+
+    // Get the status section
+    cJSON* status = cJSON_GetObjectItemCaseSensitive(eva_json, "status");
+    if (status == NULL) {
+        cJSON_Delete(eva_json);
+        return;
+    }
+
+    bool json_modified = false;
+    const char* stations[] = {"uia", "dcu", "spec"};
+    int num_stations = sizeof(stations) / sizeof(stations[0]);
+
+    // Process each station
+    for (int i = 0; i < num_stations; i++) {
+        const char* station_name = stations[i];
+
+        // Get station object
+        cJSON* station = cJSON_GetObjectItemCaseSensitive(status, station_name);
+        if (station == NULL) {
+            continue;
+        }
+
+        // Get started and time fields
+        cJSON* started_field = cJSON_GetObjectItemCaseSensitive(station, "started");
+        cJSON* time_field = cJSON_GetObjectItemCaseSensitive(station, "time");
+        cJSON* completed_field = cJSON_GetObjectItemCaseSensitive(station, "completed");
+
+        if (started_field == NULL || time_field == NULL) {
+            continue;
+        }
+
+        bool is_started = cJSON_IsTrue(started_field);
+        double current_time = cJSON_GetNumberValue(time_field);
+
+        // If station is started, increment time
+        if (is_started) {
+            cJSON_SetNumberValue(time_field, current_time + 1.0);
+            json_modified = true;
+        }
+
+        // Check if station was just stopped (completed should be set when started changes from true to false)
+        // This is handled by the frontend toggle logic, but we can ensure completed status is consistent
+        if (!is_started && completed_field != NULL && cJSON_IsFalse(completed_field) && current_time > 0) {
+            cJSON_SetBoolValue(completed_field, true);
+            json_modified = true;
+        }
+    }
+
+    // Save changes if JSON was modified
+    if (json_modified) {
+        char filepath[100];
+        snprintf(filepath, sizeof(filepath), "data/teams/%d/EVA.json", team_number);
+
+        char* json_str = cJSON_Print(eva_json);
+        FILE* fp = fopen(filepath, "w");
+        if (fp) {
+            fputs(json_str, fp);
+            fclose(fp);
+        }
+        free(json_str);
+    }
+
+    cJSON_Delete(eva_json);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

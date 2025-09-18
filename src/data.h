@@ -41,7 +41,7 @@ struct backend_data_t {
 
 // Backend Lifecycle Functions
 struct backend_data_t* init_backend();
-void start_simulation(struct backend_data_t* backend);
+void increment_simulation(struct backend_data_t* backend);
 void cleanup_backend(struct backend_data_t*  backend);
 
 // UDP Request Handlers
@@ -53,6 +53,7 @@ void update_json_file(const char* filename, const int team_number, const char* s
 void sync_simulation_to_json(struct backend_data_t* backend, int team_index);
 cJSON* get_json_file(const char* filename, const int team_number);
 void send_json_file(const char* filename, const int team_number, unsigned char* data);
+void update_eva_station_timing(int team_number);
 
 // Helper functions
 void reverse_bytes(unsigned char* bytes);

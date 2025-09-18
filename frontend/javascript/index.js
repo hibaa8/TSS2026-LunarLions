@@ -87,6 +87,8 @@ async function fetchData() {
     const format = el.getAttribute("data-format");
     if (format === "time" && typeof value === "number") {
       value = formatTime(value);
+    } else if (format === "status" && typeof value === "boolean") {
+      value = value ? "Complete" : "Incomplete";
     } else if (typeof value === "number") {
       // Handle other number formatting for text elements
       value = value.toFixed(2);
