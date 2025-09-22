@@ -9,6 +9,13 @@
 #include "../cjson/cJSON.h"
 
 ///////////////////////////////////////////////////////////////////////////////////
+//                                  Constants
+///////////////////////////////////////////////////////////////////////////////////
+
+#define SIM_TEAMS_DATA_ROOT "data/teams"
+#define SIM_CONFIG_ROOT "src/lib/simulation/config"
+
+///////////////////////////////////////////////////////////////////////////////////
 //                                  Data Types
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -21,7 +28,8 @@ typedef enum {
     SIM_ALGO_SINE_WAVE,
     SIM_ALGO_LINEAR_DECAY,
     SIM_ALGO_LINEAR_GROWTH,
-    SIM_ALGO_DEPENDENT_VALUE
+    SIM_ALGO_DEPENDENT_VALUE,
+    SIM_ALGO_EXTERNAL_VALUE
 } sim_algorithm_type_t;
 
 typedef union {
@@ -64,6 +72,7 @@ typedef struct {
     sim_field_t** update_order;  // Fields sorted by dependencies
     int total_field_count;
 
+    int team_index;  // Team folder index for external_value fields
     bool initialized;
 } sim_engine_t;
 
@@ -72,7 +81,7 @@ typedef struct {
 ///////////////////////////////////////////////////////////////////////////////////
 
 // Engine lifecycle
-sim_engine_t* sim_engine_create(void);
+sim_engine_t* sim_engine_create(int team_index);
 void sim_engine_destroy(sim_engine_t* engine);
 
 // Configuration loading

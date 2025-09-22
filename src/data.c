@@ -27,7 +27,7 @@ struct backend_data_t *init_backend() {
 
     // Initialize simulation engine for each team
     for (int i = 0; i < NUM_TEAMS; i++) {
-        backend->sim_engine[i] = sim_engine_create();
+        backend->sim_engine[i] = sim_engine_create(i);
         if (backend->sim_engine[i]) {
             if (!sim_engine_load_predefined_configs(backend->sim_engine[i])) {
                 printf("Warning: Failed to load simulation configurations for team %d\n", i);

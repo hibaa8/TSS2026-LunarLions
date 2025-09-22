@@ -3,17 +3,21 @@
   "fields": {
     "throttle": {
       "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": 30.0,
-      "amplitude": 25.0,
-      "frequency": 0.02
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.throttle"
+    },
+    "brakes": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.brakes"
     },
     "steering": {
       "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": 0.0,
-      "amplitude": 0.8,
-      "frequency": 0.015
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.steering"
     },
     "current_pos_alt": {
       "type": "float",

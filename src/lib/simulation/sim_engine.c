@@ -17,15 +17,17 @@
 
 /**
  * Creates and initializes a new simulation engine instance.
- * 
+ *
+ * @param team_index Team index (0-9) for external_value fields to read from
  * @return Pointer to new simulation engine, or NULL if creation failed
  */
-sim_engine_t* sim_engine_create(void) {
+sim_engine_t* sim_engine_create(int team_index) {
     sim_engine_t* engine = calloc(1, sizeof(sim_engine_t));
     if (!engine) return NULL;
-    
+
     engine->initialized = false;
-    
+    engine->team_index = team_index || 0;  // default to team 0 if invalid
+
     return engine;
 }
 
@@ -84,9 +86,9 @@ bool sim_engine_load_predefined_configs(sim_engine_t* engine) {
     // Predefined list of configuration files to load
     // @TODO can generalize this more in some way?
     const char* config_files[] = {
-        "src/lib/simulation/config/eva1.json",
-        "src/lib/simulation/config/eva2.json",
-        "src/lib/simulation/config/rover.json"
+        SIM_CONFIG_ROOT "/eva1.json",
+        SIM_CONFIG_ROOT "/eva2.json",
+        SIM_CONFIG_ROOT "/rover.json"
     };
     const int config_count = sizeof(config_files) / sizeof(config_files[0]);
     
@@ -403,6 +405,11 @@ bool sim_engine_initialize(sim_engine_t* engine) {
                 field->current_value.f = 0.0f;
                 break;
             }
+            case SIM_ALGO_EXTERNAL_VALUE: {
+                // Will be calculated during first update
+                field->current_value.f = 0.0f;
+                break;
+            }
         }
         
         field->previous_value = field->current_value;
@@ -460,6 +467,9 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
                 break;
             case SIM_ALGO_DEPENDENT_VALUE:
                 field->current_value = sim_algo_dependent_value(field, component->simulation_time, engine);
+                break;
+            case SIM_ALGO_EXTERNAL_VALUE:
+                field->current_value = sim_algo_external_value(field, component->simulation_time, engine);
                 break;
         }
     }
@@ -563,6 +573,11 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
                     break;
                 }
                 case SIM_ALGO_DEPENDENT_VALUE: {
+                    // Will be calculated during first update
+                    field->current_value.f = 0.0f;
+                    break;
+                }
+                case SIM_ALGO_EXTERNAL_VALUE: {
                     // Will be calculated during first update
                     field->current_value.f = 0.0f;
                     break;

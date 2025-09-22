@@ -12,6 +12,7 @@ sim_value_t sim_algo_sine_wave(sim_field_t* field, float current_time);
 sim_value_t sim_algo_linear_decay(sim_field_t* field, float current_time);
 sim_value_t sim_algo_linear_growth(sim_field_t* field, float current_time);
 sim_value_t sim_algo_dependent_value(sim_field_t* field, float current_time, sim_engine_t* engine);
+sim_value_t sim_algo_external_value(sim_field_t* field, float current_time, sim_engine_t* engine);
 
 // Algorithm parameter validation
 bool sim_algo_validate_sine_wave_params(cJSON* params);
