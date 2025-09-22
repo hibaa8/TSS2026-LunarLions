@@ -33,16 +33,30 @@ function onload() {
  * Note: this is a bit of a hodgepodge to mantain backwards compatibility with the old system I.E. timers, boolean switches, etc
  */
 async function fetchData() {
-  // Fetch both EVA and ROVER data simultaneously
-  const [evaResponse, roverResponse] = await Promise.all([
-    fetch(`/data/teams/${currentRoom}/EVA.json`),
-    fetch(`/data/teams/${currentRoom}/ROVER.json`)
-  ]);
+  let evaData, roverData;
 
-  const [evaData, roverData] = await Promise.all([
-    evaResponse.json(),
-    roverResponse.json()
-  ]);
+  try {
+    // Fetch both EVA and ROVER data simultaneously
+    const [evaResponse, roverResponse] = await Promise.all([
+      fetch(`/data/teams/${currentRoom}/EVA.json`),
+      fetch(`/data/teams/${currentRoom}/ROVER.json`)
+    ]);
+
+    // Check for fatal HTTP errors
+    if (!evaResponse.ok && !roverResponse.ok) {
+      alert(`Cannot connect to telemetry server. Both EVA and Rover data unavailable for Room ${currentRoom}.`);
+      return;
+    }
+
+    [evaData, roverData] = await Promise.all([
+      evaResponse.json(),
+      roverResponse.json()
+    ]);
+  } catch (error) {
+    console.error('Fatal error fetching data:', error);
+    alert(`Lost connection to telemetry server. Please check your network connection.`);
+    return;
+  }
 
   // Update the EVA and ROVER fields in the DOM
   const elements = document.querySelectorAll("[data-path]");
@@ -111,41 +125,62 @@ async function fetchData() {
  * @param value New value for the field
  */
 async function updateServerData(path, value) {
-  const params = new URLSearchParams();
-  params.append(path, value);
-  params.append("room", currentRoom);
+  try {
+    const params = new URLSearchParams();
+    params.append(path, value);
+    params.append("room", currentRoom);
 
-  await fetch(`/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: params,
-  });
+    const response = await fetch(`/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params,
+    });
+
+    // Only alert for server errors (5xx), not client errors (4xx)
+    if (response.status >= 500) {
+      alert(`Server error while updating ${path}. Server may be down.`);
+    }
+  } catch (error) {
+    console.error('Fatal error updating server data:', error);
+    alert(`Cannot communicate with server. Check your network connection.`);
+  }
 }
 
 /**
  * Fetches the list of teams and populates the team selection dropdown
  */
 async function getTeams() {
-  // Fetch the TEAMS.json data to update the dropdown
-  const response = await fetch(`/data/TEAMS.json`);
-  const teamsData = await response.json();
+  try {
+    // Fetch the TEAMS.json data to update the dropdown
+    const response = await fetch(`/data/TEAMS.json`);
 
-  // Update the team selector dropdown
-  const teamSelector = document.getElementById("roomSelector");
-  teamSelector.innerHTML = ""; // Clear existing options
+    if (!response.ok) {
+      alert(`Cannot load team configuration. Server may be down.`);
+      return;
+    }
 
-  // Iterate over the teams object
-  Object.entries(teamsData.teams).forEach(([teamKey, teamName], index) => {
-    const option = document.createElement("option");
-    option.value = index;
-    option.textContent = `${teamName} | Room: ${index}`;
-    teamSelector.appendChild(option);
-  });
+    const teamsData = await response.json();
 
-  // Set the current room selection
-  teamSelector.value = currentRoom;
+    // Update the team selector dropdown
+    const teamSelector = document.getElementById("roomSelector");
+    teamSelector.innerHTML = ""; // Clear existing options
+
+    // Iterate over the teams object
+    Object.entries(teamsData.teams).forEach(([teamKey, teamName], index) => {
+      const option = document.createElement("option");
+      option.value = index;
+      option.textContent = `${teamName} | Room: ${index}`;
+      teamSelector.appendChild(option);
+    });
+
+    // Set the current room selection
+    teamSelector.value = currentRoom;
+  } catch (error) {
+    console.error('Fatal error loading teams:', error);
+    alert(`Cannot load team configuration. Check your network connection.`);
+  }
 }
 
 // EVENT LISTENERS
