@@ -25,6 +25,13 @@ enum EVA_SECTIONS {
     uia
 };
 
+// UDP command mapping structure
+typedef struct {
+    unsigned int command;
+    const char* path;        // Full dot-separated path like "rover.pr_telemetry.brakes"
+    const char* data_type;   // "bool" or "float"
+} udp_command_mapping_t;
+
 struct backend_data_t {
     // Timing information
     uint32_t start_time;
@@ -61,5 +68,54 @@ void reverse_bytes(unsigned char* bytes);
 bool big_endian();
 bool html_form_json_update(char* request_content, struct backend_data_t* backend);
 double get_field_from_json(const char* filename, const int team_number, const char* field_path, double default_value);
+
+// UDP data extraction helpers
+unsigned int extract_team_number(unsigned char* data);
+bool extract_bool_value(unsigned char* data);
+float extract_float_value(unsigned char* data);
+
+// UDP command to JSON path mapping table
+static const udp_command_mapping_t udp_command_mappings[] = {
+    // ROVER commands (from tss-commands.csv)
+    {1103, "rover.pr_telemetry.ac_heating", "bool"},
+    {1104, "rover.pr_telemetry.ac_cooling", "bool"},
+    {1105, "rover.pr_telemetry.co2_scrubber", "bool"},
+    {1106, "rover.pr_telemetry.lights_on", "bool"},
+    {1107, "rover.pr_telemetry.brakes", "bool"},
+    {1108, "rover.pr_telemetry.in_sunlight", "bool"},
+    {1109, "rover.pr_telemetry.throttle", "float"},
+    {1110, "rover.pr_telemetry.steering", "float"},
+    {1111, "rover.pr_telemetry.current_pos_x", "float"},
+    {1112, "rover.pr_telemetry.current_pos_y", "float"},
+    {1113, "rover.pr_telemetry.current_pos_alt", "float"},
+    {1114, "rover.pr_telemetry.heading", "float"},
+    {1115, "rover.pr_telemetry.pitch", "float"},
+    {1116, "rover.pr_telemetry.roll", "float"},
+    {1117, "rover.pr_telemetry.distance_traveled", "float"},
+    {1118, "rover.pr_telemetry.speed", "float"},
+    {1119, "rover.pr_telemetry.surface_incline", "float"},
+    {1120, "rover.pr_telemetry.switch_dest", "bool"},
+    {1121, "rover.pr_telemetry.dest_x", "float"},
+    {1122, "rover.pr_telemetry.dest_y", "float"},
+    {1123, "rover.pr_telemetry.dest_z", "float"},
+    {1124, "rover.pr_telemetry.fan_pri", "bool"},
+    {1125, "rover.pr_telemetry.internal_lights_on", "bool"},
+    {1126, "rover.pr_telemetry.dust_wiper", "bool"},
+    {1130, "rover.pr_telemetry.lidar", "float"}, // Note: lidar is float array in CSV, treating as float for now
+
+    // UIA commands (from peripheral device)
+    {2001, "eva.uia.eva1_power", "bool"},
+    {2002, "eva.uia.eva1_oxy", "bool"},
+    {2003, "eva.uia.eva1_water_supply", "bool"},
+    {2004, "eva.uia.eva1_water_waste", "bool"},
+    {2005, "eva.uia.eva2_power", "bool"},
+    {2006, "eva.uia.eva2_oxy", "bool"},
+    {2007, "eva.uia.eva2_water_supply", "bool"},
+    {2008, "eva.uia.eva2_water_waste", "bool"},
+    {2009, "eva.uia.oxy_vent", "bool"},
+    {2010, "eva.uia.depress", "bool"},
+
+    {0, NULL, NULL} // Sentinel
+};
 
 #endif // DATA_H

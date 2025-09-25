@@ -100,6 +100,7 @@ void cleanup_backend(struct backend_data_t *backend) {
 //                             UDP Request Handlers
 ///////////////////////////////////////////////////////////////////////////////////
 
+
 /**
  * Handles UDP GET requests for data retrieval
  * 
@@ -134,25 +135,46 @@ void handle_udp_get_request(unsigned int command, unsigned char* data, struct ba
 }
 
 /**
- * Handles UDP POST requests for data updates like changing the state of the pressurized rover
- * 
+ * Handles UDP POST requests for data updates using command-to-path mapping
+ *
  * @param command Command identifier for the POST request
  * @param data Request buffer containing data to update
  * @param backend Backend data structure containing all telemetry and simulation engines
  */
 void handle_udp_post_request(unsigned int command, unsigned char* data, struct backend_data_t* backend) {
-    // Handle different POST requests based on command
-    switch (command) {
-        // @TODO handle all UDP post requests here
-        case 1011: // Update Rover brakes
-            printf("Updating Rover brakes for all teams.\n");
-            // Implement udp_post_update_rover_brakes for all teams
+    // Find the mapping for this command
+    const udp_command_mapping_t* mapping = NULL;
+    for (int i = 0; udp_command_mappings[i].path != NULL; i++) {
+        if (udp_command_mappings[i].command == command) {
+            mapping = &udp_command_mappings[i];
             break;
-        
-        default:
-            printf("Invalid POST command: %u\n", command);
-            break;
+        }
     }
+
+    if (!mapping) {
+        printf("Invalid POST command: %u\n", command);
+        return;
+    }
+
+    // Extract team number and value from UDP data
+    unsigned int team_number = extract_team_number(data);
+    char value_str[32];
+
+    if (strcmp(mapping->data_type, "bool") == 0) {
+        bool value = extract_bool_value(data);
+        strcpy(value_str, value ? "true" : "false");
+    } else if (strcmp(mapping->data_type, "float") == 0) {
+        float value = extract_float_value(data);
+        sprintf(value_str, "%.6f", value);
+    }
+
+    // Create request content in the same format as HTML forms
+    char request_content[256];
+    sprintf(request_content, "%s=%s&room=%d", mapping->path, value_str, team_number);
+
+    // Reuse existing html_form_json_update function for all the JSON and simulation logic
+    printf("Processing UDP command %u: %s = %s (team %d)\n", command, mapping->path, value_str, team_number);
+    html_form_json_update(request_content, backend);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -888,7 +910,7 @@ void reverse_bytes(unsigned char *bytes) {
 
 /**
  * Determines if the system uses big-endian byte ordering
- * 
+ *
  * @return true if system is big-endian, false if little-endian
  */
 bool big_endian() {
@@ -904,4 +926,40 @@ bool big_endian() {
         // System is big-endian
         return true;
     }
+}
+
+/**
+ * Extracts team number from UDP data (last 4 bytes as float)
+ *
+ * @param data UDP data buffer
+ * @return Team number as unsigned int
+ */
+unsigned int extract_team_number(unsigned char* data) {
+    float team_float;
+    memcpy(&team_float, data + 8, 4); // Team number is in last 4 bytes (after 4-byte command + 4-byte value)
+    return (unsigned int)team_float;
+}
+
+/**
+ * Extracts boolean value from UDP data (bytes 4-7 as float, non-zero = true)
+ *
+ * @param data UDP data buffer
+ * @return Boolean value
+ */
+bool extract_bool_value(unsigned char* data) {
+    float bool_float;
+    memcpy(&bool_float, data + 4, 4); // Value starts at offset 4 (after 4-byte command)
+    return bool_float != 0.0f;
+}
+
+/**
+ * Extracts float value from UDP data (bytes 4-7)
+ *
+ * @param data UDP data buffer
+ * @return Float value
+ */
+float extract_float_value(unsigned char* data) {
+    float value;
+    memcpy(&value, data + 4, 4); // Value starts at offset 4 (after 4-byte command)
+    return value;
 }
