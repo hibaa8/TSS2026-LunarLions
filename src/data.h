@@ -10,7 +10,6 @@
 #include <stdio.h>  
 
 
-#define NUM_TEAMS 10
 
 enum ROVER_SECTIONS {
     pr_telemetry
@@ -41,8 +40,8 @@ struct backend_data_t {
     int running_pr_sim;
     bool pr_sim_paused;
 
-    // Simulation engine (one for each team)
-    sim_engine_t* sim_engine[NUM_TEAMS];
+    // Simulation engine
+    sim_engine_t* sim_engine;
 };
 
 
@@ -56,21 +55,20 @@ void handle_udp_get_request(unsigned int command, unsigned char* data, struct ba
 void handle_udp_post_request(unsigned int command, unsigned char* data, struct backend_data_t* backend);
 
 // Data management
-void update_json_file(const char* filename, const int team_number, const char* section, const char* field_path, char* new_value);
-void sync_simulation_to_json(struct backend_data_t* backend, int team_index);
-cJSON* get_json_file(const char* filename, const int team_number);
-void send_json_file(const char* filename, const int team_number, unsigned char* data);
-void update_eva_station_timing(int team_number);
-void reset_eva_station_timing(int team_number);
+void update_json_file(const char* filename, const char* section, const char* field_path, char* new_value);
+void sync_simulation_to_json(struct backend_data_t* backend);
+cJSON* get_json_file(const char* filename);
+void send_json_file(const char* filename, unsigned char* data);
+void update_eva_station_timing(void);
+void reset_eva_station_timing(void);
 
 // Helper functions
 void reverse_bytes(unsigned char* bytes);
 bool big_endian();
 bool html_form_json_update(char* request_content, struct backend_data_t* backend);
-double get_field_from_json(const char* filename, const int team_number, const char* field_path, double default_value);
+double get_field_from_json(const char* filename, const char* field_path, double default_value);
 
 // UDP data extraction helpers
-unsigned int extract_team_number(unsigned char* data);
 bool extract_bool_value(unsigned char* data);
 float extract_float_value(unsigned char* data);
 

@@ -1,5 +1,4 @@
 // GLOBAL VARIABLES
-let currentRoom = 0;
 
 /**
  * Called when the index.html page is loaded, sets up the periodic data fetching
@@ -7,17 +6,11 @@ let currentRoom = 0;
 function onload() {
   updateClock(); // set clock immediately on load (will be updated every second later)
 
-  // Get the current room from the cookie
-  currentRoom = getCookie("room") || 0;
-
   // Fetch fresh data from the backend every one second
   setInterval(() => {
     fetchData();
     updateClock();
   }, 1000);
-
-  // Fetch the teams to populate the dropdown
-  getTeams();
 
   // Set up event listeners for switches and buttons
   setupEventListeners();
@@ -38,13 +31,13 @@ async function fetchData() {
   try {
     // Fetch both EVA and ROVER data simultaneously
     const [evaResponse, roverResponse] = await Promise.all([
-      fetch(`/data/teams/${currentRoom}/EVA.json`),
-      fetch(`/data/teams/${currentRoom}/ROVER.json`)
+      fetch(`/data/EVA.json`),
+      fetch(`/data/ROVER.json`)
     ]);
 
     // Check for fatal HTTP errors
     if (!evaResponse.ok && !roverResponse.ok) {
-      alert(`Cannot connect to telemetry server. Both EVA and Rover data unavailable for Room ${currentRoom}.`);
+      alert(`Cannot connect to telemetry server. Both EVA and Rover data unavailable.`);
       return;
     }
 
@@ -128,7 +121,6 @@ async function updateServerData(path, value) {
   try {
     const params = new URLSearchParams();
     params.append(path, value);
-    params.append("room", currentRoom);
 
     const response = await fetch(`/`, {
       method: "POST",
@@ -145,41 +137,6 @@ async function updateServerData(path, value) {
   } catch (error) {
     console.error('Fatal error updating server data:', error);
     alert(`Cannot communicate with server. Check your network connection.`);
-  }
-}
-
-/**
- * Fetches the list of teams and populates the team selection dropdown
- */
-async function getTeams() {
-  try {
-    // Fetch the TEAMS.json data to update the dropdown
-    const response = await fetch(`/data/TEAMS.json`);
-
-    if (!response.ok) {
-      alert(`Cannot load team configuration. Server may be down.`);
-      return;
-    }
-
-    const teamsData = await response.json();
-
-    // Update the team selector dropdown
-    const teamSelector = document.getElementById("roomSelector");
-    teamSelector.innerHTML = ""; // Clear existing options
-
-    // Iterate over the teams object
-    Object.entries(teamsData.teams).forEach(([teamKey, teamName], index) => {
-      const option = document.createElement("option");
-      option.value = index;
-      option.textContent = `${teamName} | Room: ${index}`;
-      teamSelector.appendChild(option);
-    });
-
-    // Set the current room selection
-    teamSelector.value = currentRoom;
-  } catch (error) {
-    console.error('Fatal error loading teams:', error);
-    alert(`Cannot load team configuration. Check your network connection.`);
   }
 }
 
@@ -222,16 +179,6 @@ function setupEventListeners() {
     });
   });
 
-  // Change the current room when the dropdown is changed
-  document
-    .getElementById("roomSelector")
-    .addEventListener("change", (event) => {
-      currentRoom = event.target.value;
-      setCookie("room", currentRoom);
-
-      // Fetch the new data after changing the room
-      fetchData();
-    });
 }
 
 // HELPER FUNCTIONS

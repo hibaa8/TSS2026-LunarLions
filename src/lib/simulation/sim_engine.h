@@ -12,7 +12,7 @@
 //                                  Constants
 ///////////////////////////////////////////////////////////////////////////////////
 
-#define SIM_TEAMS_DATA_ROOT "data/teams"
+#define SIM_DATA_ROOT "data"
 #define SIM_CONFIG_ROOT "src/lib/simulation/config"
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,6 @@ typedef struct {
     sim_field_t** update_order;  // Fields sorted by dependencies
     int total_field_count;
 
-    int team_index;  // Team folder index for external_value fields
     bool initialized;
 } sim_engine_t;
 
@@ -81,7 +80,7 @@ typedef struct {
 ///////////////////////////////////////////////////////////////////////////////////
 
 // Engine lifecycle
-sim_engine_t* sim_engine_create(int team_index);
+sim_engine_t* sim_engine_create();
 void sim_engine_destroy(sim_engine_t* engine);
 
 // Configuration loading

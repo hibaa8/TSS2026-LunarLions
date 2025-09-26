@@ -11,8 +11,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Initializes the backend data structure and simulation engines for each team
- * 
+ * Initializes the backend data structure and simulation engine
+ *
  * @return Pointer to the initialized backend data structure
  */
 struct backend_data_t *init_backend() {
@@ -25,20 +25,18 @@ struct backend_data_t *init_backend() {
     backend->running_pr_sim = -1;
     backend->pr_sim_paused = false;
 
-    // Initialize simulation engine for each team
-    for (int i = 0; i < NUM_TEAMS; i++) {
-        backend->sim_engine[i] = sim_engine_create(i);
-        if (backend->sim_engine[i]) {
-            if (!sim_engine_load_predefined_configs(backend->sim_engine[i])) {
-                printf("Warning: Failed to load simulation configurations for team %d\n", i);
-            }
-
-            if (!sim_engine_initialize(backend->sim_engine[i])) {
-                printf("Warning: Failed to initialize simulation engine for team %d\n", i);
-            }
-        } else {
-            printf("Warning: Failed to create simulation engine for team %d\n", i);
+    // Initialize simulation engine
+    backend->sim_engine = sim_engine_create();
+    if (backend->sim_engine) {
+        if (!sim_engine_load_predefined_configs(backend->sim_engine)) {
+            printf("Warning: Failed to load simulation configurations\n");
         }
+
+        if (!sim_engine_initialize(backend->sim_engine)) {
+            printf("Warning: Failed to initialize simulation engine\n");
+        }
+    } else {
+        printf("Warning: Failed to create simulation engine\n");
     }
 
     printf("Backend and simulation engine initialized successfully\n");
@@ -65,14 +63,12 @@ void increment_simulation(struct backend_data_t *backend) {
         // Update simulation engine with elapsed time
         float delta_time = 1.0f;  // 1 second per update
 
-        for (int i = 0; i < NUM_TEAMS; i++) {
-            if (backend->sim_engine[i]) {
-                sim_engine_update(backend->sim_engine[i], delta_time);
-            }
-
-            // Update EVA station timing for each team
-            update_eva_station_timing(i);
+        if (backend->sim_engine) {
+            sim_engine_update(backend->sim_engine, delta_time);
         }
+
+        // Update EVA station timing
+        update_eva_station_timing();
     }
 }
 
@@ -84,11 +80,9 @@ void increment_simulation(struct backend_data_t *backend) {
 void cleanup_backend(struct backend_data_t *backend) {
     if (!backend) return;
 
-    // Cleanup simulation engines for each team
-    for (int i = 0; i < NUM_TEAMS; i++) {
-        if (backend->sim_engine[i]) {
-            sim_engine_destroy(backend->sim_engine[i]);
-        }
+    // Cleanup simulation engine
+    if (backend->sim_engine) {
+        sim_engine_destroy(backend->sim_engine);
     }
 
     // Free backend data structure
@@ -109,23 +103,16 @@ void cleanup_backend(struct backend_data_t *backend) {
  * @param backend Backend data structure containing all telemetry and simulation engines
  */
 void handle_udp_get_request(unsigned int command, unsigned char* data, struct backend_data_t* backend) {
-    // Extract team number from data buffer if needed
-    unsigned int team_number = 0;
-    float fl;
-    memcpy(&fl, data, 4);
-    team_number = (unsigned int)fl;
-    printf("Team number: %u\n", team_number);
-    
     // Handle different GET requests
     switch (command) {
         case 1: // ROVER TELEMETRY
             printf("Getting ROVER telemetry data.\n");
-            send_json_file("ROVER", team_number, data);
+            send_json_file("ROVER", data);
             break;
 
         case 2: // EVA TELEMETRY (full consolidated file)
             printf("Getting EVA telemetry data.\n");
-            send_json_file("EVA", team_number, data);
+            send_json_file("EVA", data);
             break;
 
         default:
@@ -156,22 +143,18 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
         return;
     }
 
-    // Extract team number and value from UDP data
-    unsigned int team_number;
+    // Extract value from UDP data
     char value_str[32];
 
-    // UIA commands (2000+ range) are from physical hardware, always team 0
+    // UIA commands (2000+ range) are from physical hardware
     if (command >= 2000 && command < 3000) {
-        team_number = 0;
         // For UIA, the bool value is directly in the 4-byte data field
         float bool_float;
         memcpy(&bool_float, data, 4);
         bool value = bool_float != 0.0f;
         strcpy(value_str, value ? "true" : "false");
     } else {
-        // Other commands extract team number from extended packet format
-        team_number = extract_team_number(data);
-
+        // Other commands extract value from packet format
         if (strcmp(mapping->data_type, "bool") == 0) {
             bool value = extract_bool_value(data);
             strcpy(value_str, value ? "true" : "false");
@@ -183,10 +166,10 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
 
     // Create request content in the same format as HTML forms
     char request_content[256];
-    sprintf(request_content, "%s=%s&room=%d", mapping->path, value_str, team_number);
+    sprintf(request_content, "%s=%s", mapping->path, value_str);
 
     // Reuse existing html_form_json_update function for all the JSON and simulation logic
-    printf("Processing UDP command %u: %s = %s (team %d)\n", command, mapping->path, value_str, team_number);
+    printf("Processing UDP command %u: %s = %s\n", command, mapping->path, value_str);
     html_form_json_update(request_content, backend);
 }
 
@@ -198,15 +181,14 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
  * Updates a field within the specified JSON file (supports both simple and nested field paths)
  * 
  * @param filename Name of the JSON file to update (e.g., "EVA")
- * @param team_number Team number to identify the correct team directory
  * @param section Section within the JSON file to update (e.g., "telemetry")
  * @param field_path Field path within the section to update (e.g., "batt_time_left" or "eva1.batt")
  * @param new_value New value to set for the specified field
  */
-void update_json_file(const char* filename, const int team_number, const char* section, const char* field_path, char* new_value) {
-    // Construct the file path based on team number
+void update_json_file(const char* filename, const char* section, const char* field_path, char* new_value) {
+    // Construct the file path
     char file_path[100];
-    snprintf(file_path, sizeof(file_path), "data/teams/%d/%s.json", team_number, filename);
+    snprintf(file_path, sizeof(file_path), "data/%s.json", filename);
 
     // Read existing JSON file
     FILE *fp = fopen(file_path, "r");
@@ -316,16 +298,15 @@ void update_json_file(const char* filename, const int team_number, const char* s
 }
 
 /**
- * Loads and returns a cJSON object from the specified JSON file for a given team
- * 
+ * Loads and returns a cJSON object from the specified JSON file
+ *
  * @param filename Name of the JSON file to load (e.g., "EVA")
- * @param team_number Team number to identify the correct team directory
  * @return Pointer to the cJSON object representing the file content, or NULL on failure
  */
-cJSON* get_json_file(const char* filename, const int team_number) {
-    // Construct the file path based on team number
+cJSON* get_json_file(const char* filename) {
+    // Construct the file path
     char file_path[100];
-    snprintf(file_path, sizeof(file_path), "data/teams/%d/%s.json", team_number, filename);
+    snprintf(file_path, sizeof(file_path), "data/%s.json", filename);
 
     // Read existing JSON file
     FILE *fp = fopen(file_path, "r");
@@ -357,15 +338,14 @@ cJSON* get_json_file(const char* filename, const int team_number) {
 
 /**
  * Sends the entire JSON file content as response data
- * 
+ *
  * @param filename Name of the JSON file (e.g., "EVA")
- * @param team_number Team number (0 for global files like COMM, DCU, etc.)
  * @param data Response buffer to populate with JSON string
  */
-void send_json_file(const char* filename, const int team_number, unsigned char* data) {
-    cJSON* json = get_json_file(filename, team_number);
+void send_json_file(const char* filename, unsigned char* data) {
+    cJSON* json = get_json_file(filename);
     if (json == NULL) {
-        printf("Error: Could not load JSON file %s for team %d\n", filename, team_number);
+        printf("Error: Could not load JSON file %s\n", filename);
         return;
     }
     
@@ -389,28 +369,22 @@ void send_json_file(const char* filename, const int team_number, unsigned char* 
 
 
 /**
- * Synchronizes the simulation engine data to the corresponding JSON file for a specific team
- * 
- * @param backend Backend data structure containing all telemetry and simulation engines
- * @param team_index Index of the team to synchronize (0 to NUM_TEAMS-1)
+ * Synchronizes the simulation engine data to the corresponding JSON files
+ *
+ * @param backend Backend data structure containing telemetry and simulation engine
  */
-void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
-    if (team_index < 0 || team_index >= NUM_TEAMS) {
-        printf("Error: Invalid team index %d for synchronization.\n", team_index);
-        return;
-    }
-
-    sim_engine_t* engine = backend->sim_engine[team_index];
+void sync_simulation_to_json(struct backend_data_t* backend) {
+    sim_engine_t* engine = backend->sim_engine;
 
     if (engine == NULL) {
-        printf("Error: Simulation engine for team %d is NULL.\n", team_index);
+        printf("Error: Simulation engine is NULL.\n");
         return;
     }
 
-    // Load EVA JSON file for the team
-    cJSON* root = get_json_file("EVA", team_index);
+    // Load EVA JSON file
+    cJSON* root = get_json_file("EVA");
     if (root == NULL) {
-        printf("Error: Could not load EVA.json for team %d\n", team_index);
+        printf("Error: Could not load EVA.json\n");
         return;
     }
     
@@ -478,7 +452,7 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
     
     // Write EVA file
     char filepath[100];
-    snprintf(filepath, sizeof(filepath), "data/teams/%d/EVA.json", team_index);
+    snprintf(filepath, sizeof(filepath), "data/EVA.json");
     
     char* json_str = cJSON_Print(root);
     FILE* fp = fopen(filepath, "w");
@@ -491,9 +465,9 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
     cJSON_Delete(root);
     
     // Now sync rover data to ROVER.json
-    cJSON* rover_root = get_json_file("ROVER", team_index);
+    cJSON* rover_root = get_json_file("ROVER");
     if (rover_root == NULL) {
-        printf("Error: Could not load ROVER.json for team %d\n", team_index);
+        printf("Error: Could not load ROVER.json\n");
         return;
     }
     
@@ -530,7 +504,7 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
     }
     
     // Write ROVER file
-    snprintf(filepath, sizeof(filepath), "data/teams/%d/ROVER.json", team_index);
+    snprintf(filepath, sizeof(filepath), "data/ROVER.json");
     
     char* rover_json_str = cJSON_Print(rover_root);
     FILE* rover_fp = fopen(filepath, "w");
@@ -553,9 +527,7 @@ void sync_simulation_to_json(struct backend_data_t* backend, int team_index) {
  * @return true if update was successful, false otherwise
  */
 bool html_form_json_update(char* request_content, struct backend_data_t* backend) {
-    // Parse URL-encoded data: "route=value&room=X"
-    // @TODO: simplify this function
-    int team_number = 0;
+    // Parse URL-encoded data: "route=value"
     char* route = NULL;
     char* value = NULL;
 
@@ -573,13 +545,10 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
             char* param_name = param;
             char* param_value = equals_pos + 1;
 
-            if (strcmp(param_name, "room") == 0) {
-                team_number = atoi(param_value);
-            } else {
-                // route parameter I.E. "eva.error.fan_error"
-                route = param_name;
-                value = param_value;
-            }
+            // route parameter I.E. "eva.error.fan_error"
+            route = param_name;
+            value = param_value;
+            break;  // Take the first parameter as the route
         }
         param = strtok(NULL, "&");
     }
@@ -589,7 +558,7 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
         return false;
     }
 
-    printf("Processing route update: %s = %s (team %d)\n", route, value, team_number);
+    printf("Processing route update: %s = %s\n", route, value);
 
 
     // Parse the route (split by dots)
@@ -630,32 +599,32 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
         const char* section = route_parts[1];
         const char* field = route_parts[2];
         
-        update_json_file(filename, team_number, section, field, value);
+        update_json_file(filename, section, field, value);
 
         // Handle simulation control for specific fields
         if (strcmp(filename, "ROVER") == 0 && strcmp(section, "pr_telemetry") == 0 && strcmp(field, "sim_running") == 0) {
-            if (team_number >= 0 && team_number < NUM_TEAMS && backend->sim_engine[team_number]) {
+            if (backend->sim_engine) {
                 if (strcmp(value, "true") == 0) {
-                    sim_engine_start_component(backend->sim_engine[team_number], "rover");
-                    printf("Started rover simulation for team %d\n", team_number);
+                    sim_engine_start_component(backend->sim_engine, "rover");
+                    printf("Started rover simulation\n");
                 } else {
-                    sim_engine_reset_component(backend->sim_engine[team_number], "rover");
-                    printf("Reset rover simulation for team %d\n", team_number);
+                    sim_engine_reset_component(backend->sim_engine, "rover");
+                    printf("Reset rover simulation\n");
                 }
             }
         }
 
         if (strcmp(filename, "EVA") == 0 && strcmp(section, "status") == 0 && strcmp(field, "started") == 0) {
-            if (team_number >= 0 && team_number < NUM_TEAMS && backend->sim_engine[team_number]) {
+            if (backend->sim_engine) {
                 if (strcmp(value, "true") == 0) {
-                    sim_engine_start_component(backend->sim_engine[team_number], "eva1");
-                    sim_engine_start_component(backend->sim_engine[team_number], "eva2");
-                    printf("Started EVA simulation for team %d\n", team_number);
+                    sim_engine_start_component(backend->sim_engine, "eva1");
+                    sim_engine_start_component(backend->sim_engine, "eva2");
+                    printf("Started EVA simulation\n");
                 } else {
-                    sim_engine_reset_component(backend->sim_engine[team_number], "eva1");
-                    sim_engine_reset_component(backend->sim_engine[team_number], "eva2");
-                    reset_eva_station_timing(team_number);
-                    printf("Reset EVA simulation for team %d\n", team_number);
+                    sim_engine_reset_component(backend->sim_engine, "eva1");
+                    sim_engine_reset_component(backend->sim_engine, "eva2");
+                    reset_eva_station_timing();
+                    printf("Reset EVA simulation\n");
                 }
             }
         }
@@ -676,17 +645,17 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
         
         // For now, handle nested updates by directly updating the JSON
         // This requires extending update_json_file to handle nested paths
-        update_json_file(filename, team_number, section, nested_field, value);
+        update_json_file(filename, section, nested_field, value);
 
         // Handle simulation control for specific nested fields
         if (strcmp(filename, "ROVER") == 0 && strcmp(section, "pr_telemetry") == 0 && strcmp(nested_field, "sim_running") == 0) {
-            if (team_number >= 0 && team_number < NUM_TEAMS && backend->sim_engine[team_number]) {
+            if (backend->sim_engine) {
                 if (strcmp(value, "true") == 0) {
-                    sim_engine_start_component(backend->sim_engine[team_number], "rover");
-                    printf("Started rover simulation for team %d\n", team_number);
+                    sim_engine_start_component(backend->sim_engine, "rover");
+                    printf("Started rover simulation\n");
                 } else {
-                    sim_engine_reset_component(backend->sim_engine[team_number], "rover");
-                    printf("Reset rover simulation for team %d\n", team_number);
+                    sim_engine_reset_component(backend->sim_engine, "rover");
+                    printf("Reset rover simulation\n");
                 }
             }
         }
@@ -700,15 +669,14 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
 
 /**
  * Gets a field value from a JSON file using a dot-separated path
- * 
+ *
  * @param filename Name of the JSON file (e.g., "ROVER", "EVA")
- * @param team_number Team number to identify the correct team directory
  * @param field_path Dot-separated path to the field (e.g., "pr_telemetry.brakes" or "telemetry.eva1.batt")
  * @param default_value Default value to return if field is not found or invalid
  * @return Field value as double, or default_value if not found
  */
-double get_field_from_json(const char* filename, const int team_number, const char* field_path, double default_value) {
-    cJSON* json = get_json_file(filename, team_number);
+double get_field_from_json(const char* filename, const char* field_path, double default_value) {
+    cJSON* json = get_json_file(filename);
     if (json == NULL) {
         return default_value;
     }
@@ -759,14 +727,12 @@ double get_field_from_json(const char* filename, const int team_number, const ch
 }
 
 /**
- * Updates EVA station timing for a specific team based on started states
+ * Updates EVA station timing based on started states
  * Increments time for stations that are started and marks completed when stopped
- *
- * @param team_number Team number to update station timing for
  */
-void update_eva_station_timing(int team_number) {
-    // Load current EVA JSON data for the team
-    cJSON* eva_json = get_json_file("EVA", team_number);
+void update_eva_station_timing(void) {
+    // Load current EVA JSON data
+    cJSON* eva_json = get_json_file("EVA");
     if (eva_json == NULL) {
         return;
     }
@@ -821,7 +787,7 @@ void update_eva_station_timing(int team_number) {
     // Save changes if JSON was modified
     if (json_modified) {
         char filepath[100];
-        snprintf(filepath, sizeof(filepath), "data/teams/%d/EVA.json", team_number);
+        snprintf(filepath, sizeof(filepath), "data/EVA.json");
 
         char* json_str = cJSON_Print(eva_json);
         FILE* fp = fopen(filepath, "w");
@@ -836,13 +802,11 @@ void update_eva_station_timing(int team_number) {
 }
 
 /**
- * Resets EVA station timing for a specific team by setting all station times to 0 and completed status to false
- *
- * @param team_number Team number to reset timing for
+ * Resets EVA station timing by setting all station times to 0 and completed status to false
  */
-void reset_eva_station_timing(int team_number) {
-    // Load current EVA JSON data for the team
-    cJSON* eva_json = get_json_file("EVA", team_number);
+void reset_eva_station_timing(void) {
+    // Load current EVA JSON data
+    cJSON* eva_json = get_json_file("EVA");
     if (eva_json == NULL) {
         return;
     }
@@ -888,7 +852,7 @@ void reset_eva_station_timing(int team_number) {
     // Save changes if JSON was modified
     if (json_modified) {
         char filepath[100];
-        snprintf(filepath, sizeof(filepath), "data/teams/%d/EVA.json", team_number);
+        snprintf(filepath, sizeof(filepath), "data/EVA.json");
 
         char* json_str = cJSON_Print(eva_json);
         FILE* fp = fopen(filepath, "w");
@@ -939,18 +903,6 @@ bool big_endian() {
         // System is big-endian
         return true;
     }
-}
-
-/**
- * Extracts team number from UDP data (last 4 bytes as float)
- *
- * @param data UDP data buffer
- * @return Team number as unsigned int
- */
-unsigned int extract_team_number(unsigned char* data) {
-    float team_float;
-    memcpy(&team_float, data + 8, 4); // Team number is in last 4 bytes (after 4-byte command + 4-byte value)
-    return (unsigned int)team_float;
 }
 
 /**

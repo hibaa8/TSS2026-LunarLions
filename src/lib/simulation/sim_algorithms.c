@@ -176,12 +176,12 @@ sim_value_t sim_algo_dependent_value(sim_field_t* field, float current_time, sim
 }
 
 /**
- * External value algorithm for fetching values from team data JSON files.
- * Reads the specified field from SIM_TEAMS_DATA_ROOT/{team_index}/{file_path}.
+ * External value algorithm for fetching values from data JSON files.
+ * Reads the specified field from data/{file_path}.
  *
  * @param field Pointer to the field containing algorithm parameters
  * @param current_time Current simulation time (unused for external values)
- * @param engine Pointer to the simulation engine containing team_index
+ * @param engine Pointer to the simulation engine
  * @return Value fetched from external JSON file
  */
 sim_value_t sim_algo_external_value(sim_field_t* field, float current_time, sim_engine_t* engine) {
@@ -206,9 +206,9 @@ sim_value_t sim_algo_external_value(sim_field_t* field, float current_time, sim_
     const char* file_path = cJSON_GetStringValue(file_path_param);
     const char* field_path = cJSON_GetStringValue(field_path_param);
 
-    // Construct full file path: {SIM_TEAMS_DATA_ROOT}/{team_index}/{file_path}
+    // Construct full file path: data/{file_path}
     char full_path[512];
-    snprintf(full_path, sizeof(full_path), "%s/%d/%s", SIM_TEAMS_DATA_ROOT, engine->team_index, file_path);
+    snprintf(full_path, sizeof(full_path), "data/%s", file_path);
 
     // Read and parse JSON file
     FILE* file = fopen(full_path, "r");

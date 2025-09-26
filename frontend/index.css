@@ -76,11 +76,11 @@ nav {
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
-  justify-content: space-between;
 }
 
 #nav-clock {
   font-size: 1rem;
+  margin-left: 0.25rem;
   color: var(--light-grey);
 }
 

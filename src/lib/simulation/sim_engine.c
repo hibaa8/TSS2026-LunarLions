@@ -18,15 +18,13 @@
 /**
  * Creates and initializes a new simulation engine instance.
  *
- * @param team_index Team index (0-9) for external_value fields to read from
  * @return Pointer to new simulation engine, or NULL if creation failed
  */
-sim_engine_t* sim_engine_create(int team_index) {
+sim_engine_t* sim_engine_create() {
     sim_engine_t* engine = calloc(1, sizeof(sim_engine_t));
     if (!engine) return NULL;
 
     engine->initialized = false;
-    engine->team_index = team_index || 0;  // default to team 0 if invalid
 
     return engine;
 }
