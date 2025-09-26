@@ -5,7 +5,7 @@ struct profile_context_t profile_context;
 // Static function declarations
 static bool continue_server(void);
 static void get_contents(char *buffer, unsigned int *time, unsigned int *command,
-                         unsigned char *data);
+                         unsigned char *data, int packet_size);
 static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t len,
                           struct backend_data_t *backend);
 
@@ -89,17 +89,51 @@ int main(int argc, char *argv[]) {
             int received_bytes =
                 recvfrom(udp_socket, client->udp_request, MAX_UDP_REQUEST_SIZE, 0,
                          (struct sockaddr *)&client->udp_addr, &client->address_length);
+
+            // Debug: Print raw bytes received
+            printf("Raw bytes received (%d bytes): ", received_bytes);
+            for (int i = 0; i < received_bytes; i++) {
+                printf("%02X ", (unsigned char)client->udp_request[i]);
+            }
+            printf("\n");
+            printf("System is %s-endian\n", big_endian() ? "big" : "little");
+
+            // Always interpret UDP packets as big-endian
+            // Convert from network (big-endian) to host byte order
             if (!big_endian()) {
-                reverse_bytes(client->udp_request);
-                reverse_bytes(client->udp_request + 4);
-                reverse_bytes(client->udp_request + 8);
+                // System is little-endian, so convert big-endian UDP to little-endian
+                reverse_bytes(client->udp_request);     // timestamp (bytes 0-3)
+                reverse_bytes(client->udp_request + 4); // command (bytes 4-7)
+
+                // Only convert value bytes if this is a POST request (12 bytes)
+                if (received_bytes >= 12) {
+                    reverse_bytes(client->udp_request + 8); // value (bytes 8-11)
+                }
+
+                // Debug: Print bytes after conversion
+                printf("After big-endian conversion: ");
+                for (int i = 0; i < received_bytes; i++) {
+                    printf("%02X ", (unsigned char)client->udp_request[i]);
+                }
+                printf("\n");
+            } else {
+                // System is big-endian, UDP packets are already in correct format
+                printf("No conversion needed (system is big-endian)\n");
             }
 
             unsigned int time = 0;
             unsigned int command = 0;
             char data[4] = {0};
 
-            get_contents(client->udp_request, &time, &command, data);
+            get_contents(client->udp_request, &time, &command, data, received_bytes);
+
+            // Print out received UDP packet for debugging
+            if (received_bytes >= 12) {
+                printf("Received UDP POST: [time: %u][command: %u][data: %02X %02X %02X %02X]\n",
+                       time, command, data[0], data[1], data[2], data[3]);
+            } else {
+                printf("Received UDP GET: [time: %u][command: %u]\n", time, command);
+            }
 
             // Process UDP command based on command range
             if (command < 1000) {  // GET requests
@@ -124,9 +158,12 @@ int main(int argc, char *argv[]) {
                 memcpy(response_buffer + 4, &command, 4);
                 memcpy(response_buffer + 8, json_data, json_len + 1);
 
+                // Always send UDP responses in big-endian format
+                // Convert from host byte order to network (big-endian) byte order
                 if (!big_endian()) {
-                    reverse_bytes(response_buffer);
-                    reverse_bytes(response_buffer + 4);
+                    // System is little-endian, convert to big-endian for UDP transmission
+                    reverse_bytes(response_buffer);     // timestamp
+                    reverse_bytes(response_buffer + 4); // command/data length
                 }
 
                 // Send response
@@ -335,10 +372,18 @@ static bool continue_server(void) {
  * @param data Pointer to store 4-byte data payload
  */
 static void get_contents(char *buffer, unsigned int *time, unsigned int *command,
-                         unsigned char *data) {
+                         unsigned char *data, int packet_size) {
+    // Always extract timestamp and command (present in both GET and POST)
     memcpy(time, buffer, 4);
     memcpy(command, buffer + 4, 4);
-    memcpy(data, buffer + 8, 4);
+
+    // Only extract data for POST requests (12 bytes total)
+    if (packet_size >= 12) {
+        memcpy(data, buffer + 8, 4);
+    } else {
+        // For GET requests, clear the data buffer
+        memset(data, 0, 4);
+    }
 }
 
 /**
@@ -367,7 +412,10 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     unsigned char buffer[12];
 
     // Convert endianness if needed
+    // Always send UDP packets in big-endian format
+    // Convert from host byte order to network (big-endian) byte order
     if (!big_endian()) {
+        // System is little-endian, convert to big-endian for UDP transmission
         reverse_bytes((unsigned char *)&time);
         reverse_bytes((unsigned char *)&steering);
         reverse_bytes((unsigned char *)&throttle);
