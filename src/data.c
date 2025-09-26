@@ -157,15 +157,28 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
     }
 
     // Extract team number and value from UDP data
-    unsigned int team_number = extract_team_number(data);
+    unsigned int team_number;
     char value_str[32];
 
-    if (strcmp(mapping->data_type, "bool") == 0) {
-        bool value = extract_bool_value(data);
+    // UIA commands (2000+ range) are from physical hardware, always team 0
+    if (command >= 2000 && command < 3000) {
+        team_number = 0;
+        // For UIA, the bool value is directly in the 4-byte data field
+        float bool_float;
+        memcpy(&bool_float, data, 4);
+        bool value = bool_float != 0.0f;
         strcpy(value_str, value ? "true" : "false");
-    } else if (strcmp(mapping->data_type, "float") == 0) {
-        float value = extract_float_value(data);
-        sprintf(value_str, "%.6f", value);
+    } else {
+        // Other commands extract team number from extended packet format
+        team_number = extract_team_number(data);
+
+        if (strcmp(mapping->data_type, "bool") == 0) {
+            bool value = extract_bool_value(data);
+            strcpy(value_str, value ? "true" : "false");
+        } else if (strcmp(mapping->data_type, "float") == 0) {
+            float value = extract_float_value(data);
+            sprintf(value_str, "%.6f", value);
+        }
     }
 
     // Create request content in the same format as HTML forms
