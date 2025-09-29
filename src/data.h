@@ -9,8 +9,6 @@
 #include <stdlib.h>
 #include <stdio.h>  
 
-
-
 enum ROVER_SECTIONS {
     pr_telemetry
 };
@@ -74,7 +72,7 @@ float extract_float_value(unsigned char* data);
 
 // UDP command to JSON path mapping table
 static const udp_command_mapping_t udp_command_mappings[] = {
-    // ROVER commands (from tss-commands.csv)
+    // ROVER commands
     {1103, "rover.pr_telemetry.ac_heating", "bool"},
     {1104, "rover.pr_telemetry.ac_cooling", "bool"},
     {1105, "rover.pr_telemetry.co2_scrubber", "bool"},
@@ -101,7 +99,7 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1126, "rover.pr_telemetry.dust_wiper", "bool"},
     {1130, "rover.pr_telemetry.lidar", "float"}, // Note: lidar is float array in CSV, treating as float for now
 
-    // UIA commands (from peripheral device)
+    // UIA commands
     {2001, "eva.uia.eva1_power", "bool"},
     {2002, "eva.uia.eva1_oxy", "bool"},
     {2003, "eva.uia.eva1_water_supply", "bool"},
@@ -112,6 +110,14 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {2008, "eva.uia.eva2_water_waste", "bool"},
     {2009, "eva.uia.oxy_vent", "bool"},
     {2010, "eva.uia.depress", "bool"},
+
+    // DCU commands
+    {2011, "eva.dcu.eva1.batt", "bool"},
+    {2012, "eva.dcu.eva1.oxy", "bool"},
+    {2013, "eva.dcu.eva1.comm", "bool"},
+    {2014, "eva.dcu.eva1.fan", "bool"},
+    {2015, "eva.dcu.eva1.pump", "bool"},
+    {2016, "eva.dcu.eva1.co2", "bool"},
 
     {0, NULL, NULL} // Sentinel
 };

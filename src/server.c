@@ -90,16 +90,8 @@ int main(int argc, char *argv[]) {
                 recvfrom(udp_socket, client->udp_request, MAX_UDP_REQUEST_SIZE, 0,
                          (struct sockaddr *)&client->udp_addr, &client->address_length);
 
-            // Debug: Print raw bytes received
-            printf("Raw bytes received (%d bytes): ", received_bytes);
-            for (int i = 0; i < received_bytes; i++) {
-                printf("%02X ", (unsigned char)client->udp_request[i]);
-            }
-            printf("\n");
-            printf("System is %s-endian\n", big_endian() ? "big" : "little");
 
             // Always interpret UDP packets as big-endian
-            // Convert from network (big-endian) to host byte order
             if (!big_endian()) {
                 // System is little-endian, so convert big-endian UDP to little-endian
                 reverse_bytes(client->udp_request);     // timestamp (bytes 0-3)
@@ -109,16 +101,6 @@ int main(int argc, char *argv[]) {
                 if (received_bytes >= 12) {
                     reverse_bytes(client->udp_request + 8); // value (bytes 8-11)
                 }
-
-                // Debug: Print bytes after conversion
-                printf("After big-endian conversion: ");
-                for (int i = 0; i < received_bytes; i++) {
-                    printf("%02X ", (unsigned char)client->udp_request[i]);
-                }
-                printf("\n");
-            } else {
-                // System is big-endian, UDP packets are already in correct format
-                printf("No conversion needed (system is big-endian)\n");
             }
 
             unsigned int time = 0;
@@ -126,14 +108,6 @@ int main(int argc, char *argv[]) {
             char data[4] = {0};
 
             get_contents(client->udp_request, &time, &command, data, received_bytes);
-
-            // Print out received UDP packet for debugging
-            if (received_bytes >= 12) {
-                printf("Received UDP POST: [time: %u][command: %u][data: %02X %02X %02X %02X]\n",
-                       time, command, data[0], data[1], data[2], data[3]);
-            } else {
-                printf("Received UDP GET: [time: %u][command: %u]\n", time, command);
-            }
 
             // Process UDP command based on command range
             if (command < 1000) {  // GET requests
@@ -175,7 +149,7 @@ int main(int argc, char *argv[]) {
                 // UDP requests are one-off, so drop client after the response
                 drop_udp_client(&udp_clients, client);
                 free(response_buffer);
-            } else if (command < 2000) {  // POST requests
+            } else if (command < 3000) {  // POST requests (1000-2999)
                 handle_udp_post_request(command, (unsigned char *)data, backend);
                 drop_udp_client(&udp_clients, client);
             } else if (command == 3000) {  // Unreal Engine registration (DUST simulation)
