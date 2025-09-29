@@ -1,4 +1,5 @@
 // GLOBAL VARIABLES
+let isConnected = true;
 
 /**
  * Called when the index.html page is loaded, sets up the periodic data fetching
@@ -10,6 +11,7 @@ function onload() {
   setInterval(() => {
     fetchData();
     updateClock();
+    updateConnectionStatus();
   }, 1000);
 
   // Set up event listeners for switches and buttons
@@ -35,19 +37,16 @@ async function fetchData() {
       fetch(`/data/ROVER.json`)
     ]);
 
-    // Check for fatal HTTP errors
-    if (!evaResponse.ok && !roverResponse.ok) {
-      alert(`Cannot connect to telemetry server. Both EVA and Rover data unavailable.`);
-      return;
-    }
 
     [evaData, roverData] = await Promise.all([
       evaResponse.json(),
       roverResponse.json()
     ]);
+
+    isConnected = true;
   } catch (error) {
     console.error('Fatal error fetching data:', error);
-    alert(`Lost connection to telemetry server. Please check your network connection.`);
+    isConnected = false;
     return;
   }
 
@@ -130,13 +129,8 @@ async function updateServerData(path, value) {
       body: params,
     });
 
-    // Only alert for server errors (5xx), not client errors (4xx)
-    if (response.status >= 500) {
-      alert(`Server error while updating ${path}. Server may be down.`);
-    }
   } catch (error) {
     console.error('Fatal error updating server data:', error);
-    alert(`Cannot communicate with server. Check your network connection.`);
   }
 }
 
@@ -257,5 +251,17 @@ function updateClock() {
   const clockElement = document.getElementById("nav-clock");
   if (clockElement) {
     clockElement.textContent = timeString;
+  }
+}
+
+/**
+ * Updates the connection status indicator in the navigation bar
+ */
+function updateConnectionStatus() {
+  const statusElement = document.getElementById("connection-status");
+  if (statusElement) {
+    const statusText = isConnected ? "Connected" : "Disconnected";
+    statusElement.innerHTML = `● ${statusText}`;
+    statusElement.style.color = isConnected ? "#28ae5f" : "#d82121ff";
   }
 }
