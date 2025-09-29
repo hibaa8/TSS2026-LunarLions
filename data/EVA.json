@@ -58,8 +58,8 @@
 		"total_time":	0,
 		"uia":	{
 			"started":	false,
-			"completed":	false,
-			"time":	0
+			"completed":	true,
+			"time":	2
 		},
 		"dcu":	{
 			"started":	false,

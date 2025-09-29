@@ -9,19 +9,6 @@
 #include <stdlib.h>
 #include <stdio.h>  
 
-enum ROVER_SECTIONS {
-    pr_telemetry
-};
-
-enum EVA_SECTIONS {
-    telemetry,
-    status,
-    dcu,
-    error,
-    imu,
-    uia
-};
-
 // UDP command mapping structure
 typedef struct {
     unsigned int command;

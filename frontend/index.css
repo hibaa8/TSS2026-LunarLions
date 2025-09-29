@@ -744,6 +744,22 @@ input:checked + .slider:before {
   gap: 0.5rem;
 }
 
+.btn-ping {
+  height: 2rem;
+  width: 6.5rem;
+  color: var(--white);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--green);
+  opacity: 0.75;
+  border: 2px solid #28e470ff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
 .btn-start:hover {
   opacity: 1;
   transition: opacity 0.3s;
@@ -754,19 +770,27 @@ input:checked + .slider:before {
   transition: opacity 0.3s;
 }
 
+.btn-ping:hover {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
 .btn-start:disabled,
-.btn-stop:disabled {
+.btn-stop:disabled,
+.btn-ping:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
 
 .btn-start:disabled:hover,
-.btn-stop:disabled:hover {
+.btn-stop:disabled:hover,
+.btn-ping:disabled:hover {
   opacity: 0.3;
 }
 
 .btn-start svg,
-.btn-stop svg {
+.btn-stop svg,
+.btn-ping svg {
   width: 0.75rem;
   height: 0.75rem;
   fill: currentColor;

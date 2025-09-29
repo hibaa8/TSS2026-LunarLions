@@ -587,8 +587,10 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
         filename = "EVA";
     } else if (strcmp(route_parts[0], "rover") == 0) {
         filename = "ROVER";
+    } else if (strcmp(route_parts[0], "ltv") == 0) {
+        filename = "LTV";
     } else {
-        printf("Error: Unsupported file type '%s'. Use 'eva' or 'rover'\n", route_parts[0]);
+        printf("Error: Unsupported file type '%s'. Use 'eva', 'rover', or 'ltv'\n", route_parts[0]);
         return false;
     }
     

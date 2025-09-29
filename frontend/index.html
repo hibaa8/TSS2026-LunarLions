@@ -38,9 +38,183 @@
         <div class="main-container">
             <div class="col-container">
                 <div class="row-container">
-                     <!------------------------------------------ Rover Panel ------------------------------------------>
+                     <!------------------------------------------ LTV Panel ------------------------------------------>
                     <div class="column">
                         <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    LTV PANEL
+                                </span>
+                            </div>
+                            <div class="card-subtitle">
+                                <span id="ltvPingsLeft" class="subtitle" data-path="ltv.signal.pings_left">
+                                    10
+                                </span>
+                                <span class="subtitle" style="margin-left: 0.3rem;">
+                                    Pings Left
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <button data-path="ltv.status.ping" data-action="ping" id="ltvPingButton" class="btn-ping">
+                                    <svg data-testid="geist-icon" height="16" stroke-linejoin="round" viewBox="0 0 16 16" width="16" style="color: currentcolor;"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.81065 1.24999L6.28032 1.78032L5.78489 2.27575L13.1824 5.75693L13.7197 5.21966L14.25 4.68933L15.3107 5.74999L14.7803 6.28032L11.0607 9.99999L15.2803 14.2197L15.8107 14.75L14.75 15.8107L14.2197 15.2803L9.99999 11.0607L6.28032 14.7803L5.74999 15.3107L4.68933 14.25L5.21966 13.7197L5.75693 13.1824L2.27575 5.78489L1.78032 6.28032L1.24999 6.81065L0.189331 5.74999L0.719661 5.21966L1.95737 3.98195C1.96537 3.97357 1.97358 3.96535 1.982 3.95732L3.95732 1.982C3.96535 1.97358 3.97357 1.96537 3.98195 1.95737L5.21966 0.719661L5.74999 0.189331L6.81065 1.24999ZM4.65759 3.40305L3.40305 4.65759L6.88423 12.0551L8.93933 9.99999L9.99999 8.93933L12.0551 6.88423L4.65759 3.40305Z" fill="currentColor"></path></svg>
+                                    PING
+                                </button>
+                            </div>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    LTV ERROR SIMULATION
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" id="ltvFuseError" data-path="ltv.errors.fuse_error">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Fuse Error
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" id="ltvCommsError" data-path="ltv.errors.comms_error">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Comms Error
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" id="ltvPowerError" data-path="ltv.errors.power_error">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Power Error
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" id="ltvGuidanceError" data-path="ltv.errors.guidance_error">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Guidance Error
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!------------------------------------------ LTV Section ------------------------------------------>
+                        <div class="card" style="border-bottom: 3px solid var(--sharp-blue);">
+                            <div class="card-header">
+                                <span class="card-title">
+                                    LTV
+                                </span>
+                            </div>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    LOCATION
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Last Known X-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="xCoordinateLTV" class="telemetry-data" data-path="ltv.location.last_known_x">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Last Known Y-Coordinate
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="yCoordinateLTV" class="telemetry-data" data-path="ltv.location.last_known_y">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Last Known Speed
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="speedLTV" class="telemetry-data" data-path="ltv.location.last_known_speed" data-units="m/s">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Last Known Heading
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="headingLTV" class="telemetry-data" data-path="ltv.location.last_known_heading" data-units="°">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-subtitle">
+                                <span class="subtitle">
+                                    SIGNAL
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Signal Strength
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span id="signalStrengthLTV" class="telemetry-data" data-path="ltv.signal.strength" data-units="%">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span class="telemetry-data">
+
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!------------------------------------------ Rover Panel ------------------------------------------>
+                        <div class="card" style="margin-top: 0.5rem;">
                             <div class="card-header">
                                 <span class="card-title">
                                     ROVER PANEL
@@ -113,7 +287,7 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            Lights On
+                                            Headlights On
                                         </span>
                                     </div>
                                 </div>
@@ -128,7 +302,7 @@
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            Fan: Primary
+                                            Primary Fan
                                         </span>
                                     </div>
                                     <div class="sensor-container">
@@ -140,42 +314,6 @@
                                     <div class="data-label">
                                         <span class="value">
                                             In sunlight
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-
-
-
-                        <!------------------------------------------ LTV Section ------------------------------------------>
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">
-                                    LTV
-                                </span>
-                            </div>
-                            <div class="card-body">
-                                <div class="card-content">
-                                    <div class="telemetry-label">
-                                        <span class="telemetry-data">
-                                            X-Coordinate
-                                        </span>
-                                    </div>
-                                    <div class="telemetry-value">
-                                        <span id="xCoordinateRover" class="telemetry-data">
-                                            ------
-                                        </span>
-                                    </div>
-                                    <div class="telemetry-label">
-                                        <span class="telemetry-data">
-                                            Y-Coordinate
-                                        </span>
-                                    </div>
-                                    <div class="telemetry-value">
-                                        <span id="yCoordinateRover" class="telemetry-data">
-                                            ------
                                         </span>
                                     </div>
                                 </div>

@@ -28,19 +28,21 @@ function onload() {
  * Note: this is a bit of a hodgepodge to mantain backwards compatibility with the old system I.E. timers, boolean switches, etc
  */
 async function fetchData() {
-  let evaData, roverData;
+  let evaData, roverData, ltvData;
 
   try {
-    // Fetch both EVA and ROVER data simultaneously
-    const [evaResponse, roverResponse] = await Promise.all([
+    // Fetch EVA, ROVER, and LTV data simultaneously
+    const [evaResponse, roverResponse, ltvResponse] = await Promise.all([
       fetch(`/data/EVA.json`),
-      fetch(`/data/ROVER.json`)
+      fetch(`/data/ROVER.json`),
+      fetch(`/data/LTV.json`)
     ]);
 
 
-    [evaData, roverData] = await Promise.all([
+    [evaData, roverData, ltvData] = await Promise.all([
       evaResponse.json(),
-      roverResponse.json()
+      roverResponse.json(),
+      ltvResponse.json()
     ]);
 
     isConnected = true;
@@ -50,7 +52,7 @@ async function fetchData() {
     return;
   }
 
-  // Update the EVA and ROVER fields in the DOM
+  // Update the EVA, ROVER, and LTV fields in the DOM
   const elements = document.querySelectorAll("[data-path]");
   elements.forEach((el) => {
     const path = el.getAttribute("data-path");
@@ -63,6 +65,10 @@ async function fetchData() {
 
     if (path.startsWith("rover.")) {
       value = getNestedValue(roverData, path.slice(6));
+    }
+
+    if (path.startsWith("ltv.")) {
+      value = getNestedValue(ltvData, path.slice(4));
     }
 
     // Handle checkboxes/switches (set checked property for boolean values)
