@@ -1,20 +1,6 @@
 {
 	"component_name": "eva1",
 	"fields": {
-		"eva_time": {
-			"type": "float",
-			"algorithm": "linear_growth",
-			"start_value": 0,
-			"growth_rate": 1,
-			"max_value": 1800
-		},
-		"batt_time_left": {
-			"type": "float",
-			"algorithm": "linear_decay",
-			"start_value": 1800,
-			"end_value": 0,
-			"duration_seconds": 1800
-		},
 		"oxy_pri_storage": {
 			"type": "float",
 			"algorithm": "linear_decay",

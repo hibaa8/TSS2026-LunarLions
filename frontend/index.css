@@ -751,7 +751,7 @@ input:checked + .slider:before {
   font-size: 0.9rem;
   font-family: inherit;
   background-color: var(--green);
-  opacity: 0.75;
+  opacity: 0.9;
   border: 2px solid #28e470ff;
   cursor: pointer;
   display: flex;
@@ -789,11 +789,16 @@ input:checked + .slider:before {
 }
 
 .btn-start svg,
-.btn-stop svg,
-.btn-ping svg {
+.btn-stop svg {
   width: 0.75rem;
   height: 0.75rem;
   fill: currentColor;
+}
+
+.btn-ping svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  fill: white;
 }
 
 .btn-station {

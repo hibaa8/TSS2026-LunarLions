@@ -2,7 +2,6 @@
 	"telemetry":	{
 		"eva1":	{
 			"eva_time":	0,
-			"batt_time_left":	1800,
 			"oxy_pri_storage":	100,
 			"oxy_sec_storage":	100,
 			"oxy_pri_pressure":	2750,
@@ -27,7 +26,6 @@
 		},
 		"eva2":	{
 			"eva_time":	0,
-			"batt_time_left":	1800,
 			"oxy_pri_storage":	100,
 			"oxy_sec_storage":	100,
 			"oxy_pri_pressure":	2850,

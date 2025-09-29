@@ -38,7 +38,6 @@
 		"terrain_condition":	50,
 		"solar_panel_dust_accum":	0,
 		"mission_elapsed_time":	0,
-		"mission_planned_time":	1350,
 		"point_of_no_return":	0,
 		"distance_from_base":	0,
 		"switch_dest":	false,

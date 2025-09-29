@@ -79,13 +79,6 @@
       "formula": "oxygen_tank * 30.0",
       "depends_on": ["oxygen_tank"]
     },
-    "oxygen_levels": {
-      "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": 0.13,
-      "amplitude": 0.03,
-      "frequency": 0.001
-    },
     "ac_fan_pri": {
       "type": "float",
       "algorithm": "sine_wave",
@@ -139,19 +132,6 @@
       "amplitude": 50.0,
       "frequency": 0.0008
     },
-    "pr_coolant_level": {
-      "type": "float",
-      "algorithm": "linear_decay",
-      "start_value": 44.5,
-      "end_value": 5.0,
-      "duration_seconds": 25200.0
-    },
-    "pr_coolant_pressure": {
-      "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "pr_coolant_level * 11.2 + 50.0",
-      "depends_on": ["pr_coolant_level"]
-    },
     "pr_coolant_tank": {
       "type": "float",
       "algorithm": "linear_decay",
@@ -172,33 +152,12 @@
       "formula": "speed * 150.0 + 50.0",
       "depends_on": ["speed"]
     },
-    "terrain_condition": {
-      "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": 50.0,
-      "amplitude": 30.0,
-      "frequency": 0.001
-    },
     "solar_panel_dust_accum": {
       "type": "float",
       "algorithm": "linear_growth",
       "start_value": 0.0,
       "growth_rate": 0.8,
       "max_value": 85.0
-    },
-    "mission_planned_time": {
-      "type": "float",
-      "algorithm": "linear_decay",
-      "start_value": 1350.0,
-      "end_value": 0.0,
-      "duration_seconds": 1350.0
-    },
-    "mission_elapsed_time": {
-      "type": "float",
-      "algorithm": "linear_growth",
-      "start_value": 0,
-      "end_value": 1350,
-      "duration_seconds": 1350.0
     },
     "dest_x": {
       "type": "float",
