@@ -25,12 +25,6 @@ struct backend_data_t *init_backend() {
     backend->running_pr_sim = -1;
     backend->pr_sim_paused = false;
 
-    // Initialize previous values for rover change detection
-    backend->prev_brakes = -1;
-    backend->prev_lights_on = -1;
-    backend->prev_steering = -999.0f;
-    backend->prev_throttle = -999.0f;
-
     // Initialize simulation engine
     backend->sim_engine = sim_engine_create();
     if (backend->sim_engine) {
@@ -145,16 +139,15 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
     }
 
     if (!mapping) {
-        printf("Invalid POST command: %u\n", command);
+        //printf("Invalid POST command: %u\n", command);
         return;
     }
 
     // Extract value from UDP data
     char value_str[32];
 
-    // UIA commands (2000+ range) are from physical hardware
     if (command >= 2000 && command < 3000) {
-        // For UIA, the bool value is directly in the 4-byte data field
+        // For UIA and DCU, the bool value is directly in the 4-byte data field
         float bool_float;
         memcpy(&bool_float, data, 4);
         bool value = bool_float != 0.0f;
@@ -174,9 +167,18 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
     char request_content[256];
     sprintf(request_content, "%s=%s", mapping->path, value_str);
 
+    if (command == 1109) {
+        printf("THROTTLE set to %s\n", value_str);
+        printf("Request content: %s\n", request_content);
+    }
+
     // Reuse existing html_form_json_update function for all the JSON and simulation logic
-    printf("Processing UDP command %u: %s = %s\n", command, mapping->path, value_str);
-    html_form_json_update(request_content, backend);
+    //printf("Processing UDP command %u: %s = %s\n", command, mapping->path, value_str);
+    bool result = html_form_json_update(request_content, backend);
+
+    if (command == 1109) {
+        printf("html_form_json_update returned: %s\n", result ? "true" : "false");
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -493,12 +495,17 @@ void sync_simulation_to_json(struct backend_data_t* backend) {
         cJSON_AddBoolToObject(pr_telemetry, "sim_running", rover_running);
     }
     
-    // Update rover simulation fields
+    // Update rover simulation fields (skip external_value fields as they are inputs, not outputs)
     for (int i = 0; i < engine->total_field_count; i++) {
         sim_field_t* field = engine->update_order[i];
         if (field != NULL && strcmp(field->component_name, "rover") == 0) {
+            // Skip external_value fields - these are inputs from JSON, not outputs to JSON
+            if (field->algorithm == SIM_ALGO_EXTERNAL_VALUE) {
+                continue;
+            }
+
             double value = (field->type == SIM_TYPE_FLOAT) ? field->current_value.f : (double)field->current_value.i;
-            
+
             // Check if field already exists and replace it, otherwise add new
             cJSON* existing_field = cJSON_GetObjectItemCaseSensitive(pr_telemetry, field->field_name);
             if (existing_field != NULL) {
@@ -564,7 +571,7 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
         return false;
     }
 
-    printf("Processing route update: %s = %s\n", route, value);
+    //printf("Processing route update: %s = %s\n", route, value);
 
 
     // Parse the route (split by dots)
@@ -921,7 +928,7 @@ bool big_endian() {
  */
 bool extract_bool_value(unsigned char* data) {
     float bool_float;
-    memcpy(&bool_float, data + 4, 4); // Value starts at offset 4 (after 4-byte command)
+    memcpy(&bool_float, data, 4);
     return bool_float != 0.0f;
 }
 
@@ -933,6 +940,6 @@ bool extract_bool_value(unsigned char* data) {
  */
 float extract_float_value(unsigned char* data) {
     float value;
-    memcpy(&value, data + 4, 4); // Value starts at offset 4 (after 4-byte command)
+    memcpy(&value, data, 4);
     return value;
 }
