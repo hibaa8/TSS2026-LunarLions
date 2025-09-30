@@ -47,6 +47,9 @@
                                     ROVER CONTROL
                                 </span>
                             </div>
+                            <div class="card-subtitle">
+                                <span id="prTimer" class="subtitle" data-path="rover.pr_telemetry.rover_sim_elapsed_time" data-format="time">00:00:00</span>
+                            </div>
                             <div class="card-body">
                                 <button data-path="rover.pr_telemetry.sim_running" data-action="start" id="prTssStart" class="btn-start">
                                     <svg data-testid="geist-icon" height="16" stroke-linejoin="round" viewBox="0 0 16 16" width="16" style="color: currentcolor;"><path fill-rule="evenodd" clip-rule="evenodd" d="M14.5528 7.77638C14.737 7.86851 14.737 8.13147 14.5528 8.2236L1.3618 14.8191C1.19558 14.9022 1 14.7813 1 14.5955L1 1.4045C1 1.21865 1.19558 1.09778 1.3618 1.18089L14.5528 7.77638Z" fill="currentColor"></path></svg>
@@ -773,6 +776,9 @@
                                 <span class="card-title">
                                     EVA CONTROL
                                 </span>
+                            </div>
+                                       <div class="card-subtitle">
+                                <span id="prTimer" class="subtitle" data-path="eva.telemetry.eva1.eva_elapsed_time" data-format="time">00:00:00</span>
                             </div>
                             <div class="card-body">
                                 <button data-path="eva.status.started" data-action="start" id="tssStart" class="btn-start">

@@ -159,6 +159,13 @@
 			"base_value": 440,
 			"amplitude": 90,
 			"frequency": 0.007
+		},
+		"eva_elapsed_time": {
+			"type": "float",
+			"algorithm": "linear_growth",
+			"start_value": 0,
+			"end_value": 1350,
+			"duration_seconds": 1350.0
 		}
 	}
 }

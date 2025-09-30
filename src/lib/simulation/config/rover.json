@@ -1,6 +1,36 @@
 {
   "component_name": "rover",
   "fields": {
+    "ac_heating": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.ac_heating"
+    },
+    "ac_cooling": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.ac_cooling"
+    },
+    "co2_scrubber": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.co2_scrubber"
+    },
+    "lights_on": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.lights_on"
+    },
+    "in_sunlight": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.in_sunlight"
+    },
     "throttle": {
       "type": "float",
       "algorithm": "external_value",
@@ -19,45 +49,53 @@
       "file_path": "ROVER.json",
       "field_path": "pr_telemetry.steering"
     },
-    "current_pos_alt": {
-      "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": 100.0,
-      "amplitude": 20.0,
-      "frequency": 0.001
-    },
     "heading": {
       "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "steering * 45.0 + 180.0",
-      "depends_on": ["steering"]
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.heading"
+    },
+    "current_pos_x": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.current_pos_x"
+    },
+    "current_pos_y": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.current_pos_y"
+    },
+    "current_pos_alt": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.current_pos_alt"
     },
     "pitch": {
       "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": 0.0,
-      "amplitude": 5.0,
-      "frequency": 0.01
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.pitch"
     },
     "roll": {
       "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": 0.0,
-      "amplitude": 3.0,
-      "frequency": 0.012
-    },
-    "distance_traveled": {
-      "type": "float",
-      "algorithm": "linear_growth",
-      "start_value": 0.0,
-      "growth_rate": 3.2,
-      "max_value": 50000.0
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.roll"
     },
     "speed": {
       "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "(throttle / 100.0) * 0.4 * (1.0 - terrain_condition / 200.0)",
-      "depends_on": ["throttle", "terrain_condition"]
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.speed"
+    },
+    "distance_traveled": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.distance_traveled"
     },
     "surface_incline": {
       "type": "float",
@@ -103,8 +141,8 @@
     "cabin_temperature": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "external_temp * 0.1 + 22.0",
-      "depends_on": ["external_temp"]
+      "formula": "external_temp * 0.15 + in_sunlight * 8.0 + ac_heating * 15.0 - ac_cooling * 10.0 + 20.0",
+      "depends_on": ["external_temp", "in_sunlight", "ac_heating", "ac_cooling"]
     },
     "battery_level": {
       "type": "float",
@@ -116,14 +154,20 @@
     "power_consumption_rate": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "100.0 + throttle * 0.5 + ac_fan_pri * 0.003",
-      "depends_on": ["throttle", "ac_fan_pri"]
+      "formula": "100.0 + speed * 2.0 + lights_on * 75.0 + ac_heating * 500.0 + ac_cooling * 300.0",
+      "depends_on": ["speed", "lights_on", "ac_heating", "ac_cooling"]
     },
     "solar_panel_efficiency": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "100.0 - solar_panel_dust_accum",
-      "depends_on": ["solar_panel_dust_accum"]
+      "formula": "in_sunlight * 85.0 + 15.0",
+      "depends_on": ["in_sunlight"]
+    },
+    "solar_generation": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "solar_panel_efficiency * 3.5",
+      "depends_on": ["solar_panel_efficiency"]
     },
     "external_temp": {
       "type": "float",
@@ -146,39 +190,42 @@
       "amplitude": 25.0,
       "frequency": 0.004
     },
-    "motor_power_consumption": {
+    "motor_temp": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "speed * 150.0 + 50.0",
-      "depends_on": ["speed"]
+      "formula": "speed * 5.0 + external_temp * 0.3 + 30.0",
+      "depends_on": ["speed", "external_temp"]
     },
-    "solar_panel_dust_accum": {
+    "switch_dest": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.switch_dest"
+    },
+    "fan_pri": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.fan_pri"
+    },
+    "dust_wiper": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.dust_wiper"
+    },
+    "terrain_condition": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "50.0 - surface_incline * 3.0",
+      "depends_on": ["surface_incline"]
+    },
+    "rover_sim_elapsed_time": {
       "type": "float",
       "algorithm": "linear_growth",
-      "start_value": 0.0,
-      "growth_rate": 0.8,
-      "max_value": 85.0
-    },
-    "dest_x": {
-      "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": 5000.0,
-      "amplitude": 2000.0,
-      "frequency": 0.0001
-    },
-    "dest_y": {
-      "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": 3000.0,
-      "amplitude": 1500.0,
-      "frequency": 0.00012
-    },
-    "dest_z": {
-      "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": 150.0,
-      "amplitude": 50.0,
-      "frequency": 0.0002
+      "start_value": 0,
+      "end_value": 1350,
+      "duration_seconds": 1350.0
     }
   }
 }

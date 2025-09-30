@@ -12,8 +12,8 @@
 // UDP command mapping structure
 typedef struct {
     unsigned int command;
-    const char* path;        // Full dot-separated path like "rover.pr_telemetry.brakes"
-    const char* data_type;   // "bool" or "float"
+    const char* path;        // full dot-separated path like "rover.pr_telemetry.brakes"
+    const char* data_type;   // bool or float, this makes the parsing easier
 } udp_command_mapping_t;
 
 struct backend_data_t {
@@ -77,14 +77,10 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1117, "rover.pr_telemetry.distance_traveled", "float"},
     {1118, "rover.pr_telemetry.speed", "float"},
     {1119, "rover.pr_telemetry.surface_incline", "float"},
-    {1120, "rover.pr_telemetry.switch_dest", "bool"},
-    {1121, "rover.pr_telemetry.dest_x", "float"},
-    {1122, "rover.pr_telemetry.dest_y", "float"},
-    {1123, "rover.pr_telemetry.dest_z", "float"},
     {1124, "rover.pr_telemetry.fan_pri", "bool"},
     {1125, "rover.pr_telemetry.internal_lights_on", "bool"},
     {1126, "rover.pr_telemetry.dust_wiper", "bool"},
-    {1130, "rover.pr_telemetry.lidar", "float"}, // Note: lidar is float array in CSV, treating as float for now
+    {1130, "rover.pr_telemetry.lidar", "float"}, // Note: lidar is float array @TODO need to update how I handle this command number
 
     // UIA commands
     {2001, "eva.uia.eva1_power", "bool"},
