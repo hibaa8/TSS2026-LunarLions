@@ -362,12 +362,12 @@ static void get_contents(char *buffer, unsigned int *time, unsigned int *command
 
 /**
  * Sends telemetry data to Unreal Engine via UDP packets.
- * Transmits rover state (brakes, lights, steering, throttle, switch) as separate packets.
- * 
+ * Only transmits values that have changed since last update to reduce network traffic.
+ *
  * @param socket UDP socket for transmission
  * @param address Unreal Engine's network address
  * @param len Length of address structure
- * @param backend Backend data containing rover state
+ * @param backend Backend data containing rover state and previous values
  */
 static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t len,
                           struct backend_data_t *backend) {
@@ -380,54 +380,67 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     int lights_on = (int)get_field_from_json("ROVER", "pr_telemetry.lights_on", 0.0);
     float steering = (float)get_field_from_json("ROVER", "pr_telemetry.steering", 0.0);
     float throttle = (float)get_field_from_json("ROVER", "pr_telemetry.throttle", 0.0);
-    int switch_dest = (int)get_field_from_json("ROVER", "pr_telemetry.switch_dest", 0.0);
 
     unsigned int time = backend->server_up_time;
     unsigned char buffer[12];
 
-    // Convert endianness if needed
-    // Always send UDP packets in big-endian format
-    // Convert from host byte order to network (big-endian) byte order
+    // Prepare time and endianness conversions (reused for all packets)
+    unsigned int time_be = time;
     if (!big_endian()) {
-        // System is little-endian, convert to big-endian for UDP transmission
-        reverse_bytes((unsigned char *)&time);
-        reverse_bytes((unsigned char *)&steering);
-        reverse_bytes((unsigned char *)&throttle);
+        reverse_bytes((unsigned char *)&time_be);
     }
 
-    // Send brakes command
-    unsigned int command = TSS_TO_UNREAL_BRAKES_COMMAND;
-    if (!big_endian())
-        reverse_bytes((unsigned char *)&command);
-    memcpy(buffer, &time, 4);
-    memcpy(buffer + 4, &command, 4);
-    memcpy(buffer + 8, &brakes, 4);
-    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+    // Send brakes command only if changed
+    if (brakes != backend->prev_brakes) {
+        unsigned int command = TSS_TO_UNREAL_BRAKES_COMMAND;
+        if (!big_endian())
+            reverse_bytes((unsigned char *)&command);
+        memcpy(buffer, &time_be, 4);
+        memcpy(buffer + 4, &command, 4);
+        memcpy(buffer + 8, &brakes, 4);
+        sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+        backend->prev_brakes = brakes;
+    }
 
-    // Send lights command
-    command = TSS_TO_UNREAL_LIGHTS_COMMAND;
-    if (!big_endian())
-        reverse_bytes((unsigned char *)&command);
-    memcpy(buffer, &time, 4);
-    memcpy(buffer + 4, &command, 4);
-    memcpy(buffer + 8, &lights_on, 4);
-    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+    // Send lights command only if changed
+    if (lights_on != backend->prev_lights_on) {
+        unsigned int command = TSS_TO_UNREAL_LIGHTS_COMMAND;
+        if (!big_endian())
+            reverse_bytes((unsigned char *)&command);
+        memcpy(buffer, &time_be, 4);
+        memcpy(buffer + 4, &command, 4);
+        memcpy(buffer + 8, &lights_on, 4);
+        sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+        backend->prev_lights_on = lights_on;
+    }
 
-    // Send steering command
-    command = TSS_TO_UNREAL_STEERING_COMMAND;
-    if (!big_endian())
-        reverse_bytes((unsigned char *)&command);
-    memcpy(buffer, &time, 4);
-    memcpy(buffer + 4, &command, 4);
-    memcpy(buffer + 8, &steering, 4);
-    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+    // Send steering command only if changed
+    if (steering != backend->prev_steering) {
+        float steering_be = steering;
+        if (!big_endian())
+            reverse_bytes((unsigned char *)&steering_be);
+        unsigned int command = TSS_TO_UNREAL_STEERING_COMMAND;
+        if (!big_endian())
+            reverse_bytes((unsigned char *)&command);
+        memcpy(buffer, &time_be, 4);
+        memcpy(buffer + 4, &command, 4);
+        memcpy(buffer + 8, &steering_be, 4);
+        sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+        backend->prev_steering = steering;
+    }
 
-    // Send throttle command
-    command = TSS_TO_UNREAL_THROTTLE_COMMAND;
-    if (!big_endian())
-        reverse_bytes((unsigned char *)&command);
-    memcpy(buffer, &time, 4);
-    memcpy(buffer + 4, &command, 4);
-    memcpy(buffer + 8, &throttle, 4);
-    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+    // Send throttle command only if changed
+    if (throttle != backend->prev_throttle) {
+        float throttle_be = throttle;
+        if (!big_endian())
+            reverse_bytes((unsigned char *)&throttle_be);
+        unsigned int command = TSS_TO_UNREAL_THROTTLE_COMMAND;
+        if (!big_endian())
+            reverse_bytes((unsigned char *)&command);
+        memcpy(buffer, &time_be, 4);
+        memcpy(buffer + 4, &command, 4);
+        memcpy(buffer + 8, &throttle_be, 4);
+        sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+        backend->prev_throttle = throttle;
+    }
 }

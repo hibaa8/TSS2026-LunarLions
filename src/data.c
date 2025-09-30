@@ -25,6 +25,12 @@ struct backend_data_t *init_backend() {
     backend->running_pr_sim = -1;
     backend->pr_sim_paused = false;
 
+    // Initialize previous values for rover change detection
+    backend->prev_brakes = -1;
+    backend->prev_lights_on = -1;
+    backend->prev_steering = -999.0f;
+    backend->prev_throttle = -999.0f;
+
     // Initialize simulation engine
     backend->sim_engine = sim_engine_create();
     if (backend->sim_engine) {

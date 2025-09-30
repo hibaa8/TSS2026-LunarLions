@@ -27,6 +27,12 @@ struct backend_data_t {
 
     // Simulation engine
     sim_engine_t* sim_engine;
+
+    // Previous values for change detection (TSS to Unreal)
+    int prev_brakes;
+    int prev_lights_on;
+    float prev_steering;
+    float prev_throttle;
 };
 
 
