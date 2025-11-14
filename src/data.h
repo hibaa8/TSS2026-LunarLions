@@ -102,6 +102,14 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {2015, "eva.dcu.eva1.pump", "bool"},
     {2016, "eva.dcu.eva1.co2", "bool"},
 
+    // IMU position commands
+    {2017, "eva.imu.eva1_posx", "float"},
+    {2018, "eva.imu.eva1_posy", "float"},
+    {2019, "eva.imu.eva1_heading", "float"},
+    {2020, "eva.imu.eva2_posx", "float"},
+    {2021, "eva.imu.eva2_posy", "float"},
+    {2022, "eva.imu.eva2_heading", "float"},
+
     {0, NULL, NULL} // Sentinel
 };
 
