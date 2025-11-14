@@ -65,7 +65,7 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1105, "rover.pr_telemetry.co2_scrubber", "bool"},
     {1106, "rover.pr_telemetry.lights_on", "bool"},
     {1107, "rover.pr_telemetry.brakes", "bool"},
-    {1108, "rover.pr_telemetry.in_sunlight", "bool"},
+    {1108, "rover.pr_telemetry.in_sunlight", "bool"}, // @TODO replace with Piper's new light indicator field
     {1109, "rover.pr_telemetry.throttle", "float"},
     {1110, "rover.pr_telemetry.steering", "float"},
     {1111, "rover.pr_telemetry.current_pos_x", "float"},
@@ -79,7 +79,7 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1119, "rover.pr_telemetry.surface_incline", "float"},
     {1124, "rover.pr_telemetry.fan_pri", "bool"},
     {1125, "rover.pr_telemetry.internal_lights_on", "bool"},
-    {1126, "rover.pr_telemetry.dust_wiper", "bool"},
+    {1126, "rover.pr_telemetry.dust_wiper", "bool"}, // @TODO I think we can remove this command, it is not being used
     {1130, "rover.pr_telemetry.lidar", "float"}, // Note: lidar is float array @TODO need to update how I handle this command number
 
     // UIA commands
@@ -102,13 +102,13 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {2015, "eva.dcu.eva1.pump", "bool"},
     {2016, "eva.dcu.eva1.co2", "bool"},
 
-    // IMU position commands
-    {2017, "eva.imu.eva1_posx", "float"},
-    {2018, "eva.imu.eva1_posy", "float"},
-    {2019, "eva.imu.eva1_heading", "float"},
-    {2020, "eva.imu.eva2_posx", "float"},
-    {2021, "eva.imu.eva2_posy", "float"},
-    {2022, "eva.imu.eva2_heading", "float"},
+    // IMU position commands from the TSS-Location-App Python server
+    {2017, "eva.imu.eva1.posx", "float"},
+    {2018, "eva.imu.eva1.posy", "float"},
+    {2019, "eva.imu.eva1.heading", "float"},
+    {2020, "eva.imu.eva2.posx", "float"},
+    {2021, "eva.imu.eva2.posy", "float"},
+    {2022, "eva.imu.eva2.heading", "float"},
 
     {0, NULL, NULL} // Sentinel
 };

@@ -10,7 +10,7 @@
 		"pings_left":	10
 	},
 	"errors":	{
-		"fuse_error":	true,
+		"fuse_error":	false,
 		"comms_error":	false,
 		"power_error":	false,
 		"guidance_error":	false

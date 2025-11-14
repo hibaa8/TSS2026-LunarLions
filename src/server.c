@@ -378,10 +378,9 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     int lights_on = (int)get_field_from_json("ROVER", "pr_telemetry.lights_on", 0.0);
     float steering = (float)get_field_from_json("ROVER", "pr_telemetry.steering", 0.0);
     float throttle = (float)get_field_from_json("ROVER", "pr_telemetry.throttle", 0.0);
-    int switch_dest = (int)get_field_from_json("ROVER", "pr_telemetry.switch_dest", 0.0);
 
     printf("Unreal Update: brakes=%d, lights=%d, steering=%.2f, throttle=%.2f, switch=%d\n",
-           brakes, lights_on, steering, throttle, switch_dest);
+           brakes, lights_on, steering, throttle);
 
     unsigned int time = backend->server_up_time;
     unsigned char buffer[12];

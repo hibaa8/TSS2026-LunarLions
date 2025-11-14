@@ -139,21 +139,21 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
     }
 
     if (!mapping) {
-        //printf("Invalid POST command: %u\n", command);
+        printf("Invalid UDP POST command: %u\n", command);
         return;
     }
 
     // Extract value from UDP data
     char value_str[32];
 
-    if (command >= 2000 && command < 3000) {
-        // For UIA and DCU, the bool value is directly in the 4-byte data field
+    if (mapping->data_type == "bool") {
+        // Special case for Unreal Engine commands where bool is sent as float
         float bool_float;
         memcpy(&bool_float, data, 4);
         bool value = bool_float != 0.0f;
         strcpy(value_str, value ? "true" : "false");
     } else {
-        // Other commands extract value from packet format
+        // Other commands extract float value from packet format
         if (strcmp(mapping->data_type, "bool") == 0) {
             bool value = extract_bool_value(data);
             strcpy(value_str, value ? "true" : "false");
@@ -167,18 +167,10 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
     char request_content[256];
     sprintf(request_content, "%s=%s", mapping->path, value_str);
 
-    if (command == 1109) {
-        printf("THROTTLE set to %s\n", value_str);
-        printf("Request content: %s\n", request_content);
-    }
-
     // Reuse existing html_form_json_update function for all the JSON and simulation logic
-    //printf("Processing UDP command %u: %s = %s\n", command, mapping->path, value_str);
-    bool result = html_form_json_update(request_content, backend);
+    printf("Processing UDP command %u: %s = %s\n", command, mapping->path, value_str);
 
-    if (command == 1109) {
-        printf("html_form_json_update returned: %s\n", result ? "true" : "false");
-    }
+    bool result = html_form_json_update(request_content, backend);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

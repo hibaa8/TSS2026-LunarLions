@@ -25,11 +25,11 @@
       "file_path": "ROVER.json",
       "field_path": "pr_telemetry.lights_on"
     },
-    "in_sunlight": {
+    "brakes": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.in_sunlight"
+      "field_path": "pr_telemetry.brakes"
     },
     "throttle": {
       "type": "float",
@@ -37,23 +37,11 @@
       "file_path": "ROVER.json",
       "field_path": "pr_telemetry.throttle"
     },
-    "brakes": {
-      "type": "float",
-      "algorithm": "external_value",
-      "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.brakes"
-    },
     "steering": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
       "field_path": "pr_telemetry.steering"
-    },
-    "heading": {
-      "type": "float",
-      "algorithm": "external_value",
-      "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.heading"
     },
     "current_pos_x": {
       "type": "float",
@@ -73,6 +61,12 @@
       "file_path": "ROVER.json",
       "field_path": "pr_telemetry.current_pos_alt"
     },
+    "heading": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.heading"
+    },
     "pitch": {
       "type": "float",
       "algorithm": "external_value",
@@ -85,24 +79,29 @@
       "file_path": "ROVER.json",
       "field_path": "pr_telemetry.roll"
     },
-    "speed": {
-      "type": "float",
-      "algorithm": "external_value",
-      "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.speed"
-    },
     "distance_traveled": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
       "field_path": "pr_telemetry.distance_traveled"
     },
+    "speed": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.speed"
+    },
+    "light_indicator": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.light_indicator"
+    },
     "surface_incline": {
       "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": 2.0,
-      "amplitude": 8.0,
-      "frequency": 0.005
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.surface_incline"
     },
     "oxygen_tank": {
       "type": "float",
@@ -120,29 +119,29 @@
     "ac_fan_pri": {
       "type": "float",
       "algorithm": "sine_wave",
-      "base_value": 15000.0,
-      "amplitude": 10000.0,
+      "base_value": 30000.0,
+      "amplitude": 3.0,
       "frequency": 0.003
     },
     "ac_fan_sec": {
       "type": "float",
       "algorithm": "sine_wave",
-      "base_value": 12000.0,
-      "amplitude": 8000.0,
+      "base_value": 30000.0,
+      "amplitude": 3.0,
       "frequency": 0.0025
     },
     "cabin_pressure": {
       "type": "float",
       "algorithm": "sine_wave",
       "base_value": 4.0,
-      "amplitude": 0.3,
+      "amplitude": 0.1,
       "frequency": 0.008
     },
     "cabin_temperature": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "external_temp * 0.15 + in_sunlight * 8.0 + ac_heating * 15.0 - ac_cooling * 10.0 + 20.0",
-      "depends_on": ["external_temp", "in_sunlight", "ac_heating", "ac_cooling"]
+      "formula": "external_temp * 0.15 + light_indicator * 8.0 + ac_heating * 15.0 - ac_cooling * 10.0 + 20.0",
+      "depends_on": ["external_temp", "light_indicator", "ac_heating", "ac_cooling"]
     },
     "battery_level": {
       "type": "float",
@@ -151,74 +150,31 @@
       "end_value": 5.0,
       "duration_seconds": 1350.0
     },
-    "power_consumption_rate": {
-      "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "100.0 + speed * 2.0 + lights_on * 75.0 + ac_heating * 500.0 + ac_cooling * 300.0",
-      "depends_on": ["speed", "lights_on", "ac_heating", "ac_cooling"]
-    },
-    "solar_panel_efficiency": {
-      "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "in_sunlight * 85.0 + 15.0",
-      "depends_on": ["in_sunlight"]
-    },
-    "solar_generation": {
-      "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "solar_panel_efficiency * 3.5",
-      "depends_on": ["solar_panel_efficiency"]
-    },
     "external_temp": {
       "type": "float",
       "algorithm": "sine_wave",
       "base_value": -30.0,
-      "amplitude": 50.0,
+      "amplitude": 10.0,
       "frequency": 0.0008
     },
     "pr_coolant_tank": {
       "type": "float",
-      "algorithm": "linear_decay",
-      "start_value": 100.0,
-      "end_value": 10.0,
-      "duration_seconds": 21600.0
+      "algorithm": "dependent_value",
+      "formula": "100.0",
+      "depends_on": []
     },
-    "radiator": {
+    "pr_coolant_pressure": {
       "type": "float",
       "algorithm": "sine_wave",
-      "base_value": 75.0,
-      "amplitude": 25.0,
-      "frequency": 0.004
-    },
-    "motor_temp": {
-      "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "speed * 5.0 + external_temp * 0.3 + 30.0",
-      "depends_on": ["speed", "external_temp"]
-    },
-    "switch_dest": {
-      "type": "float",
-      "algorithm": "external_value",
-      "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.switch_dest"
+      "base_value": 500.0,
+      "amplitude": 2.0,
+      "frequency": 0.01
     },
     "fan_pri": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
       "field_path": "pr_telemetry.fan_pri"
-    },
-    "dust_wiper": {
-      "type": "float",
-      "algorithm": "external_value",
-      "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.dust_wiper"
-    },
-    "terrain_condition": {
-      "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "50.0 - surface_incline * 3.0",
-      "depends_on": ["surface_incline"]
     },
     "rover_sim_elapsed_time": {
       "type": "float",
