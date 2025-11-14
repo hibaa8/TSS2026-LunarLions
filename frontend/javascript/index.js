@@ -1,5 +1,5 @@
 // GLOBAL VARIABLES
-let isConnected = true;
+let connectionFails = 0; // number of consecutive connection failures, resets on successful fetch
 
 /**
  * Called when the index.html page is loaded, sets up the periodic data fetching
@@ -31,13 +31,26 @@ async function fetchData() {
   let evaData, roverData, ltvData;
 
   try {
+    // Create abort controllers with 1 second timeout
+    const evaController = new AbortController();
+    const roverController = new AbortController();
+    const ltvController = new AbortController();
+
+    const timeoutIds = [
+      setTimeout(() => evaController.abort(), 2000),
+      setTimeout(() => roverController.abort(), 2000),
+      setTimeout(() => ltvController.abort(), 2000)
+    ];
+
     // Fetch EVA, ROVER, and LTV data simultaneously
     const [evaResponse, roverResponse, ltvResponse] = await Promise.all([
-      fetch(`/data/EVA.json`),
-      fetch(`/data/ROVER.json`),
-      fetch(`/data/LTV.json`)
+      fetch(`/data/EVA.json`, { signal: evaController.signal }),
+      fetch(`/data/ROVER.json`, { signal: roverController.signal }),
+      fetch(`/data/LTV.json`, { signal: ltvController.signal })
     ]);
 
+    // Clear timeouts on successful response
+    timeoutIds.forEach(id => clearTimeout(id));
 
     [evaData, roverData, ltvData] = await Promise.all([
       evaResponse.json(),
@@ -45,10 +58,10 @@ async function fetchData() {
       ltvResponse.json()
     ]);
 
-    isConnected = true;
+    connectionFails = 0;
   } catch (error) {
     console.error('Fatal error fetching data:', error);
-    isConnected = false;
+    connectionFails++;
     return;
   }
 
@@ -266,6 +279,7 @@ function updateClock() {
 function updateConnectionStatus() {
   const statusElement = document.getElementById("connection-status");
   if (statusElement) {
+    const isConnected = (connectionFails <= 2);
     const statusText = isConnected ? "Connected" : "Disconnected";
     statusElement.innerHTML = `● ${statusText}`;
     statusElement.style.color = isConnected ? "#28ae5f" : "#d82121ff";

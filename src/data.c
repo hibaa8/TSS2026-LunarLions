@@ -143,6 +143,14 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
         return;
     }
 
+    // Special case for handling LIDAR updates since this is a array of floats
+    if (mapping->command == 1130) {
+        // @TODO Handle LIDAR data update
+        float lidar_data[10];
+        memcpy(lidar_data, data, sizeof(lidar_data));
+        //update_lidar_data(lidar_data, backend);
+    }
+
     // Extract value from UDP data
     char value_str[32];
 

@@ -52,7 +52,6 @@
 		}
 	},
 	"status":	{
-		"eva_elapsed_time":	0,
 		"started":	false,
 		"uia":	{
 			"started":	false,
@@ -89,7 +88,7 @@
 		}
 	},
 	"error":	{
-		"fan_error":	true,
+		"fan_error":	false,
 		"oxy_error":	false,
 		"batt_error":	false,
 		"pump_error":	false

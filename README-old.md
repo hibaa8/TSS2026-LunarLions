@@ -1,77 +1,97 @@
-# TSS 2026
+<h1 align="center">
+  :man_astronaut: S.U.I.T.S. Telemetry Stream Server C :woman_astronaut:
+<br>
+| CAPCOM |
+</h1>
+<h4 align="center">
+  :telescope: CAPCOM Web Interface for the S.U.I.T.S. Telemetry Stream Server C :rocket:
+</h4>
 
-NASA Spacesuit User Interface Technologies for Students ([NASA SUITS](https://www.nasa.gov/learning-resources/spacesuit-user-interface-technologies-for-students/)) is a design challenge in which college students from across the country help design user interface solutions for future spaceflight needs.
-The following is a web interface for the SUITS telemetry stream server designed and developed for the challenge.
+---
 
-<div style="display: flex; flex-direction: row; width: fit-content; gap: 10px;">
-    <img src="https://www.nasa.gov/wp-content/uploads/2023/02/52112919543-3eff64ea32-k.jpg" alt="Image of a person wearing glasses with an augmented display at night" height="310px"/>
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-        <img src="https://www.nasa.gov/wp-content/uploads/2023/01/1.png" height="150px"/>
-        <img src="https://www.nasa.gov/wp-content/uploads/2023/02/jsc2023e029847-small.jpg" height="150px"/>
-    </div>
-</div>
+<h5 align="center">
+  <a href="https://microgravityuniversity.jsc.nasa.gov/nasasuits">NASA SUITS Website</a> •
+  <a href="#earth_americas-for-suits-teams">For SUITS Teams</a> •
+  <a href="#computer-for-nasa-team">For NASA Team</a>
+</h5>
 
-## Introduction
+---
 
-### Navigation
-- <a href="#getting-started">Getting Started</a>
-- <a href="#suits-peripherals">SUITS Peripherals</a>
-- <a href="#development">Development</a>
+<br>
 
-### What is TSS?
+## :earth_americas: Run TSS Server
 
-TSS stands for telemetry stream server and is the hub for sending and recieving data from the challenge. All data from the lunar simulator DUST is sent to TSS, and any commands to control the pressurized rover, or fetch data will be sent to TSS. The following document will detail how you can run your own instance of the server and begin developing your software and hardware.
+1. Clone the repository...
 
-### Placeholder
-
-## Getting Started
-
-
-1. Clone the repository:
-
-`
+```
 git clone https://github.com/SUITS-Techteam/TSS-2025.git
-`
+```
 
-2. Navigate into the root of the repository on your terminal of choice
-
+2. Navigate into the root of the repository
 3. To build the TSS Server, run...\
    On Linux or WSL, this will require the C compiler gcc.
 
-`
+```
 ./build.bat
-`
+```
 
-4. To run the TSS Server, run:
+You can also use the [Visual Studio build tools](https://learn.microsoft.com/en-us/cpp/build/walkthrough-compile-a-c-program-on-the-command-line?view=msvc-170) to compile with
 
-`
+```
+./buildvs.bat
+```
+
+4. To run the TSS Server, run ...
+
+```
 ./server.exe
-`
+```
 
 You should see the following lines appear...
 
 ```
-Launching Server at IP: 172.20.182.43:14141
+Hello World
+
+Launching Server at IP: 192.168.51.109:14141
 Configuring Local Address...
-Creating HTTP Socket...
-Binding HTTP Socket...
-Listening to HTTP Socket...
-Creating UDP Socket...
-Binding UDP Socket...
-Listening to UDP Socket...
-Backend and simulation engine initialized successfully
+Creating Socket...
+Binding Socket...
+Listening...
 ```
 
-5. Type the IP address printed in the first output for "Launching Server at IP: xxx.xx.xxx.xx:14141". This will open the website for the TSS server.
+To run the server on local host (which might be useful if using WSL) run the following command
 
-6. From this website, you can interact with the server. This is where you can monitor the state of the simulation, verify the display of your system, and virtually interact with the EVA devices like you will be doing in May.
+```
+./server.exe --local
+```
 
-![Image of the user interface of the main page of TSS](frontend/images/tss-main-page.png)
+You should see the following lines appear...
 
-## SUITS Peripherals
+```
+Hello World
+
+Launching Server at IP: 127.0.0.1:14141
+Configuring Local Address...
+Creating Socket...
+Binding Socket...
+Listening...
+```
+
+5. Type the IP address printed by the server into a web browser (Replace with your IP)\
+   Make sure you are on the same network as the server when connecting to it.
+
+```
+http://192.168.51.109:14141
+```
+
+6. From this website, you can interact with the TSS.\
+   This is where you can monitor the state of the server, verify the display of your system, and virtually interact with the EVA devices like you will be doing in May.
+
+![Image](frontend/images/tss-main-page.png)
+
+## TSS EVA Devices
 
 ### UIA
-Placeholder
 
 | Sensor       | Value True | Value False | Description                        |
 | ------------ | ---------- | ----------- | ---------------------------------- |
@@ -87,8 +107,6 @@ Placeholder
 | DEPRESS PUMP | ON         | OFF         | Pressurizes both EVA suits         |
 
 ### DCU
-Placeholder
-
 
 | Sensor  | Value True | Value False     | Description                                                                                           |
 | ------- | ---------- | --------------- | ----------------------------------------------------------------------------------------------------- |
@@ -99,6 +117,20 @@ Placeholder
 | PUMP    | OPEN       | CLOSED          | Describes if the coolant pump for the suit is open or closed (allows water to be flushed or supplied) |
 | CO2     | Scrubber A | Scrubber B      | Describes which scrubber is currently filling with CO2 (other is venting)                             |
 
+### COMM TOWER
+
+| Sensor | Value True | Value False | Description                                   |
+| ------ | ---------- | ----------- | --------------------------------------------- |
+| COMM   | ON         | OFF         | Describes if the comm tower is powered or not |
+
+### IMU
+
+| Value   | Description               |
+| ------- | ------------------------- |
+| POSX    | Eastward UTM Coordinates  |
+| POSY    | Northward UTM Coordinates |
+| HEADING | Direction Facing          |
+
 If you would like to test your code with simulated position values, there is a script you can
 run by typing
 
@@ -108,9 +140,40 @@ python simulate_position.py <your_ip_address>
 
 Where your ip address is the ip address of the machine that is running TSS
 
-## Development
+### ROVER
 
-### UDP Socket communication
+| Value   | Description              |
+| ------- | ------------------------ |
+| POSX    | LTV Current X Coordinate |
+| POSY    | LTV Current Y Coordinate |
+| POI_1_X | LTV POI 1 X Coordinates  |
+| POI_1_Y | LTV POI 1 Y Coordinates  |
+| POI_2_X | LTV POI 2 X Coordinates  |
+| POI_2_Y | LTV POI 2 Y Coordinates  |
+| POI_3_X | LTV POI 3 X Coordinates  |
+| POI_3_Y | LTV POI 3 Y Coordinates  |
+| PING    | LTV PING                 |
+
+### SPEC
+
+| Value | Description                             |
+| ----- | --------------------------------------- |
+| NAME  | Name of the rock sample                 |
+| ID    | ID of the rock sample                   |
+| DATA  | Chemical composition of the rock sample |
+
+---
+
+## TSS Files
+
+- Server.c: contains the main function with a loop that processes HTTP messages and simulates data in the backend.
+- Network.c: contains helper functions for the server to communicate with other devices.
+- Data.c: contains the data that the server maintains and how that data is updated.
+- frontend folder: contains a frontend for testing your device with TSS, along with all the json files that you will need from the server.
+
+This server is based on "Network Programming in C" and builds off of the HTTPs example.
+
+## UDP Socket communication
 
 Commincation with the TSS is done via a UDP socket. To request data, send a message in the following format, all in big endian:
 
@@ -131,9 +194,23 @@ Note the one exception to the above output is the PR's LIDAR data, which will in
 Here's a list of get commands you can send to the socket. They are mostly related to the json files in `frontend/data`, and will be listed as such. The command number order will match the order of data in the json file.
 | Command number | Command | Referenced .json file|
 | -------------- | ------- | ---------
+| 2-7 | Get EVA1 DCU switch states | `DCU.json` |
+| 8-13 | Get EVA2 DCU switch states | `DCU.json` |
+| 14-16 | Get ERROR states | `ERROR.json` |
+| 17-19 | Get EVA1 IMU states | `IMU.json` |
+| 20-22 | Get EVA2 IMU states | `IMU.json` |
+| 23-30 | Get ROVER states | `ROVER.json` |
+| 31-41 | Get EVA 1 SPEC states (excludes `name` field) | `SPEC.json` |
+| 42-52 | Get EVA 2 SPEC states (excludes `name` field) | `SPEC.json` |
+| 53-62 | Get UIA states | `UIA.json` |
+| 63 | Get current EVA time for the team number passed in the data field as a float | `/teams/x/EVA.json` |
+| 64-85 | Get TELEMETRY states for EVA1 and the team number passed in the data field as a float | `/teams/x/EVA.json` |
+| 86-107 | Get TELEMETRY states for EVA1 and the team number passed in the data field as a float | `/teams/x/EVA.json` |
+| 108-123 | Get EVA states for the team number passed in the data field as a float | `/teams/x/EVA_STATUS.json` |
+| 124-171 | Get Pressurized Rover states for the team currently running the PR sim | `/teams/x/ROVER.json` |
+| 172 | Get Pressurized Rover LIDAR data, explaned below | `/teams/x/ROVER.json` |
 
-
-### Rover LIDAR
+## Pressurized Rover LIDAR
 
 The pressurized rover in the DUST simulation has 13 'LIDAR' sensors. Each of these sensors are points that shoot out a ray 10 meters in a direction.The value of each sensor will be the distance in centimeters the ray took to hit something, or -1 if it didn't hit anything. The return data of the 172 command above will actually be a list of 13 float values instead of the normal 1 float. Here is a description of each sensor in order:
 
@@ -153,7 +230,7 @@ The pressurized rover in the DUST simulation has 13 'LIDAR' sensors. Each of the
 | 11           | (X=-180.000000,Y=60.000000,Z=15.000000)   | Rear right of vehicle frame   | Vehicle backwards                                 |
 | 12           | (X=-135.000000,Y=160.000000,Z=15.000000)  | Hub of back right wheel       | Yawed 40 degrees right (CCW) of vehicle backwards |
 
-### Rover Commanding
+## Pressurized Rover Commanding
 
 Commanding the PR is done through the same socket connection, using the following command format:
 
