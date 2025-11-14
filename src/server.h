@@ -17,7 +17,7 @@
 #define TSS_TO_UNREAL_THROTTLE_COMMAND 2003
 
 // Server Configuration
-#define UNREAL_UPDATE_INTERVAL_SEC 0.2
+#define UNREAL_UPDATE_INTERVAL_SEC 0.02
 
 extern struct profile_context_t profile_context;
 

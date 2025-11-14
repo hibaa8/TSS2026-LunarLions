@@ -171,7 +171,9 @@ int main(int argc, char *argv[]) {
         // Send periodic telemetry updates to Unreal Engine
         if (unreal) {
             double time_end = get_wall_clock(&profile_context);
-            if ((time_end - time_begin) > UNREAL_UPDATE_INTERVAL_SEC) {
+            double time_diff = time_end - time_begin;
+
+            if (time_diff > UNREAL_UPDATE_INTERVAL_SEC) {
                 tss_to_unreal(udp_socket, unreal_addr, unreal_addr_len, backend);
                 time_begin = time_end;
             }
@@ -371,16 +373,15 @@ static void get_contents(char *buffer, unsigned int *time, unsigned int *command
  */
 static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t len,
                           struct backend_data_t *backend) {
-    if (backend->running_pr_sim < 0) {
-        return;
-    }
-
     // Extract current rover state from JSON file
     int brakes = (int)get_field_from_json("ROVER", "pr_telemetry.brakes", 0.0);
     int lights_on = (int)get_field_from_json("ROVER", "pr_telemetry.lights_on", 0.0);
     float steering = (float)get_field_from_json("ROVER", "pr_telemetry.steering", 0.0);
     float throttle = (float)get_field_from_json("ROVER", "pr_telemetry.throttle", 0.0);
     int switch_dest = (int)get_field_from_json("ROVER", "pr_telemetry.switch_dest", 0.0);
+
+    printf("Unreal Update: brakes=%d, lights=%d, steering=%.2f, throttle=%.2f, switch=%d\n",
+           brakes, lights_on, steering, throttle, switch_dest);
 
     unsigned int time = backend->server_up_time;
     unsigned char buffer[12];
@@ -391,6 +392,8 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     if (!big_endian()) {
         // System is little-endian, convert to big-endian for UDP transmission
         reverse_bytes((unsigned char *)&time);
+        reverse_bytes((unsigned char *)&brakes);
+        reverse_bytes((unsigned char *)&lights_on);
         reverse_bytes((unsigned char *)&steering);
         reverse_bytes((unsigned char *)&throttle);
     }
