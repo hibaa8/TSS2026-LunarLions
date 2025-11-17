@@ -149,7 +149,7 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
         return false;
     }
     
-    // Extract component name I.E. "eva", "rover"
+    // Extract component name e.g. "eva", "rover"
     cJSON* component_name_json = cJSON_GetObjectItem(root, "component_name");
     if (!component_name_json || !cJSON_IsString(component_name_json)) {
         printf("Error: Missing component_name in file: %s\n", json_file_path);

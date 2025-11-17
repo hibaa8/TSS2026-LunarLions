@@ -1,6 +1,6 @@
 # TSS 2026
 
-NASA Spacesuit User Interface Technologies for Students ([NASA SUITS](https://www.nasa.gov/learning-resources/spacesuit-user-interface-technologies-for-students/)) is a design challenge in which college students from across the country help design user interface solutions for future spaceflight needs.
+NASA Spacesuit User Interface Technologies for Students ([SUITS](https://www.nasa.gov/learning-resources/spacesuit-user-interface-technologies-for-students/)) is a design challenge in which college students from across the country help design user interface solutions for future spaceflight needs.
 The following is a web interface for the SUITS telemetry stream server designed and developed for the challenge.
 
 <div style="display: flex; flex-direction: row; width: fit-content; gap: 10px;">
@@ -19,12 +19,20 @@ The following is a web interface for the SUITS telemetry stream server designed 
 - <a href="#dust-simulator">DUST Simulator</a>
 - <a href="#development">Development</a>
 - <a href="#testing">Testing</a>
+- <a href="#test-week">JSC Test Week</a>
+- <a href="#questions">Questions</a>
 
 ### What is TSS?
 
 TSS stands for telemetry stream server. It is the centralized server for sending and recieving data for the challenge. All data from the lunar simulator DUST is sent to TSS, and any commands to control the pressurized rover, or fetch data will be sent to TSS. The following document will detail how you can run your own instance of the server and begin developing your software and hardware.
 
-### Placeholder
+### Helpful Links
+- [Mission Description](https://www.nasa.gov/wp-content/uploads/2025/09/fy26-suits-mission-description.pdf?emrc=345f62?emrc=345f62)
+- <a href="/documents/acronym-list.pdf">Acronym List</a>
+- <a href="/documents/maps/">Rock Yard and DUST Maps</a>
+- <a>Rock Yard 3D Scans @TODO</a>
+- <a href="/documents/eva-telemetry-ranges.pdf">EVA Telemetry Ranges</a>
+- <a href="/documents/rover-telemetry-ranges.pdf">Rover Telemetry Ranges</a>
 
 ## Getting Started
 
@@ -32,17 +40,17 @@ TSS stands for telemetry stream server. It is the centralized server for sending
 1. Clone the repository:
 
 `
-git clone https://github.com/SUITS-Techteam/TSS-2025.git
+git clone https://github.com/SUITS-Techteam/TSS2026.git
 `
 
 2. Navigate into the root of the repository on your terminal of choice
 
-3. To build the TSS Server, run:
+3. To build the server, run:
 
 `
 ./build.bat` **NOTE:** If running on Windows, you will have to setup [WSL](https://learn.microsoft.com/en-us/windows/wsl/about) and install GCC. If you don't, several errors will be displayed when trying to build the server.
 
-4. To run the TSS Server, run:
+4. To run the server, run:
 
 `
 ./server.exe
@@ -62,7 +70,7 @@ Listening to UDP Socket...
 Backend and simulation engine initialized successfully
 ```
 
-5. Type the IP address printed in the first output for "Launching Server at IP: xxx.xx.xxx.xx:14141". This will open the website for the TSS server.
+5. Type the IP address printed in the first output for "Launching Server at IP: xxx.xx.xxx.xx:14141". This will open the website for the server.
 
 6. From this website, you can interact with the server. This is where you can monitor the state of the simulation, verify the display of your system, and virtually interact with the EVA devices like you will be doing in May.
 
@@ -72,7 +80,7 @@ Backend and simulation engine initialized successfully
 The devices listed below are physical devices that will be used during test week to create a realistic scenario for both the EVA and rover teams. The sensor data listed below will be synced with the telemetry server and can be fetched for use within your interface.
 
 ### UIA
-The umbilical interface assembly (UIA) is a component used at the beginning of an EVA to transfer power and fluids to the suit. A picture of the UIA you will be using during test week can be found [here](test)
+The umbilical interface assembly (UIA) is a component used at the beginning of an EVA to transfer power and fluids to the suit. A picture of the UIA you will be using during test week can be found <a href="/documents/peripherals/uia.jpeg">here</a>
 
 | Sensor       | Value True | Value False | Description                        |
 | ------------ | ---------- | ----------- | ---------------------------------- |
@@ -88,7 +96,7 @@ The umbilical interface assembly (UIA) is a component used at the beginning of a
 | DEPRESS PUMP | ON         | OFF         | Pressurizes both EVA suits         |
 
 ### DCU
-The display and control unit (DCU) used for this challenge is a component that allows the user to control various settings of their suit's operation during an EVA. For example, if scrubber A's CO2 storage fills up, you could flip a switch on the DCU to flush it while switching to scubber B. A picture of the DCU you will be using during test week can be found [here](test)
+The display and control unit (DCU) used for this challenge is a component that allows the user to control various settings of their suit's operation during an EVA. For example, if scrubber A's CO2 storage fills up, you could flip a switch on the DCU to flush it while switching to scubber B. A picture of the DCU you will be using during test week can be found <a href="/documents/peripherals/dcu.jpeg">here</a>
 
 
 | Sensor  | Value True | Value False     | Description                                                                                           |
@@ -103,7 +111,9 @@ The display and control unit (DCU) used for this challenge is a component that a
 ## DUST Simulator
 [DUST](https://software.nasa.gov/software/MSC-27522-1) (Digital Lunar Exploration Sites Unreal Simulation Tool) is a 3D visualization of the Lunar South Pole built in Unreal Engine. Since we can not use a physical rover to drive around in during test week, you will use this software developed by NASA to simulate a pressurized rover.
 
-### Requesting Access
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuIr5SKbI0wAnx7oZtd-NU6vZQUSAVcgLzlg&s"/>
+
+### Requesting access
 After being selected as a team to participate in the rover segment of the NASA SUITS challenge, your team lead will be contacted via email with additional instructions to request access to the software. Please note that if your team was selected for the EVA segment of the challenge, you will not need to use this software.
 
 ### Connecting to the simulator
@@ -112,45 +122,72 @@ After opening the simulator on a Windows PC, a screen prompting you to enter an 
 ### Controls
 During the challenge, you will be expected to issue commands to control the rover via TSS (see <a href="#rover-commanding">rover commanding</a>). However for debug purposes, we have included several keyboard shortcuts that can be ran in the simulator to control the rover, reset the position, etc.
 
-| Keyboard Shortcut | Action |
+| Keyboard Shortcut | Description |
 | -------------- | ---------
 Cmd + R | Reset the rover's position back to the starting base
 
 ## Development
 The telemetry server is an important part of the challenge as it will serve as the main way to communicate with the DUST lunar simulator for the rover team and fetch telemetry for both the EVA and rover teams. You'll take this telemetry data and use it within the respective interfaces that you are designing and developing ahead of test week. This section will outline how to connect to the data stream, data formats, and other helpful information for development.
 
-### UDP Socket communication
+### UDP socket communication
 
-To create a more realistic scenario, we are requiring students to request and send commands over the [user datagram protocol](https://www.cloudflare.com/learning/ddos/glossary/user-datagram-protocol-udp/) (UDP) instead of over a typical HTTPS connection. For both fetching data and issuing actions and commands, you will use a specified command number, more details can be found below. Please note that all requests should be formatted in [big endian](https://www.geeksforgeeks.org/dsa/little-and-big-endian-mystery/) format.
+To create a more realistic scenario, we require that you request and send commands over the [user datagram protocol](https://www.cloudflare.com/learning/ddos/glossary/user-datagram-protocol-udp/) (UDP) instead of a HTTPS connection. For fetching data and issuing commands, you will use a specified command number, more details can be found below. Please note that all requests should be formatted in [big endian](https://www.geeksforgeeks.org/dsa/little-and-big-endian-mystery/) format.
 
-| Timestamp (unit32) | Command number (uint32) |
-| ------------------ | ----------------------- |
-| 4 bytes            | 4 bytes                 |
+The request packet should contain two different integers, the first is a UNIX timestamp, and the second is a command number. If you are requesting to issue a command (e.g. changing the throttle on the rover), then you will use an additional 4 bytes to set a new value for that field.
 
-The timestamp is a UNIX timestamp, and the command numbers will be covered below. The socket will respond with a message of the following format. The command number will be the same one you sent, and the output data will be ___ @TODO
+| Timestamp (unit32) | Command number (uint32) | Input Data (float) |
+| ------------------ | ----------------------- | ------------------ |
+| 4 bytes            | 4 bytes                 | 4 bytes (optional)           |
+
+The server will always send a UDP packet to acknowledge a request or change. If you are sending a packet to change a value (e.g. the throttle on the rover), then you will recieve a 4 byte response where a successful change will be indicated as true (01000000) and false as (00000000). If requesting a JSON file (command numbers 0, 1, and 2), then the UDP response will be variable based on the JSON file length. You can convert these bytes back to JSON for use within your interfaces.
 
 | Timestamp (unit32) | Command number (uint32) | Output Data |
 | ------------------ | ----------------------- | ---------------------- |
 | 4 bytes            | 4 bytes                 | variable bytes                |
 
-
-
-Here's a list of get commands you can send to the socket. They are related to the json files in `frontend/data`, and will be listed as such.
+Here's a list of get commands you can send to the socket. They are related to the JSON files in `frontend/data`, and will be listed as such.
 | Command number | Referenced .json file|
 | -------------- | ---------
-0 | [EVA.json](/data/EVA.json)
-1 | [ROVER.json](/data/ROVER.json)
+0 | [ROVER.json](/data/ROVER.json)
+1 | [EVA.json](/data/EVA.json)
 2 | [LTV.json](/data/LTV.json)
 
 Here is an example packet you can could send to fetch the ROVER.json file:
 
 ```
-0000 0000 0000 (fill this in)
+Timestamp: 1763414183 -> bytes: 691b90a7
+Command: 0 -> bytes: 00000000
+
+Full packet bytes: 691b90a700000000
+Response bytes: 6041a0c26f7400007b0a092274656c656d65747279223a097b0 (+742 more bytes, decode the bytes as JSON)
 ```
-            
+
+### Rover controls
+
+Controlling the rover is done through the same socket connection, and follows the same packet format with the addition of those final four bytes as mentioned above for issuing a new value for a specific field.
+
+| Command number | Command  | Data input       |
+| -------------- | -------- | ---------------- |
+| 1107           | Brakes   | float: 0 or 1    |
+| 1109           | Throttle | float: -100 (reverse), 100 |
+| 1110           | Steering | float: -1.0, 1.0 |
+| 1106           | Lights   | float: 0 or 1    |
+(@TODO add the other commands)
+
+Here is an example UDP packet to increase the rover to half throttle (50.0).
+
+```
+Timestamp: 1763412577 -> bytes: 691b8a61
+Command: 1109 (Throttle) -> bytes: 00000455
+Value: 50.0 -> bytes: 42480000
+
+Full packet: 691b8a610000045542480000
+Response packet: 01000000 (true)
+```
+
 ### Rover LIDAR
 
-The pressurized rover in the DUST simulation has 13 'LIDAR' sensors. Each of these sensors are points that shoot out a ray 10 meters in a direction.The value of each sensor will be the distance in centimeters the ray took to hit something, or -1 if it didn't hit anything. The return data of the 172 command above will actually be a list of 13 float values instead of the normal 1 float. Here is a description of each sensor in order:
+The pressurized rover in the DUST simulation has 13 'LIDAR' sensors. Each of these sensors are points that shoot out a ray 10 meters in a direction. The value of each sensor will be the distance in centimeters the ray took to hit an object, or -1 if it didn't hit anything.
 
 | Sensor index | Sensor Coordinates                 | Sensor location description   | Sensor Orientation                                |
 | ------------ | ----------------------------------------- | ----------------------------- | ------------------------------------------------- |
@@ -168,28 +205,6 @@ The pressurized rover in the DUST simulation has 13 'LIDAR' sensors. Each of the
 | 11           | (X=-180.000000,Y=60.000000,Z=15.000000)   | Rear right of vehicle frame   | Vehicle backwards                                 |
 | 12           | (X=-135.000000,Y=160.000000,Z=15.000000)  | Hub of back right wheel       | Yawed 40 degrees right (CCW) of vehicle backwards |
 
-### Rover Commanding
-
-Commanding the rover is done through the same socket connection, using the following command format:
-
-| Timestamp (unit32) | Command number (uint32) | Input Data (float) |
-| ------------------ | ----------------------- | ------------------ |
-| 4 bytes            | 4 bytes                 | 4 bytes            |
-
-| Command number | Command  | Data input       |
-| -------------- | -------- | ---------------- |
-| 1107           | Brakes   | float: 0 or 1    |
-| 1109           | Throttle | float: -100 (reverse), 100 |
-| 1110           | Steering | float: -1.0, 1.0 |
-| 1106           | Lights   | float: 0 or 1    |
-(@TODO add the other commands)
-
-Here is an example UDP packet to increase the rover to full throttle (100).
-
-```
-0000 ____ (finish)
-```
-
 ## Testing
 
 It is incredibly important to test your hardware and software ahead of test week in May. The interface for TSS is intended to allow you to debug certain parts of your design in the absence of the physical <a href="#peripheral-devices">peripheral devices</a>. In the web interface, you'll note sections for both the UIA and DCU, with switches you can flip. These can be enabled and disables to test your systems and note how they can impact telemetry values.
@@ -199,3 +214,23 @@ We have created various scripts to support testing and simulate real world value
 
 - Simulated position values: `python simulate_position.py <tss_server_address>`
 - @TODO add more
+
+## JSC Test Week
+![](https://www.nasa.gov/wp-content/uploads/2023/02/jsc2025e046380.jpg?w=1200)
+*24-25 SUITS group photo at the rock yard located at JSC*
+
+Test week at The Lyndon B. Johnson Space Center is the culmination of your teams effort and a chance to test and highlight your work to NASA team members. During the week, you should expect two sessions to showcase your work in a complete scenario. They will be spaced apart on separate days to allow additional time for fixing any issues that arise during your first session.
+
+### What is the rock yard?
+The rock yard is a physical location on-site at Johnson Space Center where your work will be tested. This is the same location used for several ongoing projects at NASA to validate equipment for lunar rovers and other devices. We have provided 3D scans of the rock yard which can be found [here](@TODO), they might be useful for development, or just to see the environment that testing will take place in.
+
+### What to expect for testing
+During test week, we will be hosting a official instance of TSS. This will be deployed on a local network and you will connect to it via a network address. Provided that you are connected to the same Wi-Fi network as the server, you should be able to connect and issue commands in the exact same way. You should expect and plan that the network address for the server will differ from your development instances, so we suggest making it easy to change in your interface or code.
+
+Teams will be assigned a specfic time slot, and will test their work in that order. A typical test session will accomodate both a rover and a EVA team, alotting the rover team 20 minutes to test their work, and then the EVA team 20 minutes of testing. A detailed timeline/procedure of what will be tested can be found <a href="/documents/suits-procedure-timeline.pdf">here</a>
+
+## Questions
+
+If this README or the additional documents provided in the <a href="/documents/">documents folder</a> are not enough to answer a specific question, please reach the SUITS tech team at nasa-suits@mail.nasa.gov.
+
+If there are any notable bugs with the TSS server blocking development, we welcome you to create a new issue within the GitHub repository.

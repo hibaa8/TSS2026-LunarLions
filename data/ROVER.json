@@ -6,7 +6,7 @@
 		"lights_on":	false,
 		"brakes":	false,
 		"fan_pri":	false,
-		"throttle":	0,
+		"throttle":	50,
 		"steering":	0,
 		"current_pos_x":	0,
 		"current_pos_y":	0,

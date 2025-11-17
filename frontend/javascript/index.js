@@ -25,7 +25,7 @@ function onload() {
  * In the html, there is a data-path attribute on the elements that basically registers that field as needing to be updated with data from the server
  * The path specifies where in the JSON data the value can be found, e.g. "eva.telemetry.eva1.temperature" or "rover.pr_telemetry.battery_voltage"
  * 
- * Note: this is a bit of a hodgepodge to mantain backwards compatibility with the old system I.E. timers, boolean switches, etc
+ * Note: this is a bit of a hodgepodge to mantain backwards compatibility with the old system e.g. timers, boolean switches, etc
  */
 async function fetchData() {
   let evaData, roverData, ltvData;

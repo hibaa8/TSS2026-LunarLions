@@ -127,18 +127,8 @@ int main(int argc, char *argv[]) {
                     continue;
                 }
 
-                // Build response: [time:4][command:4][json_data:variable]
-                memcpy(response_buffer, &backend->server_up_time, 4);
-                memcpy(response_buffer + 4, &command, 4);
+                // Prepare response packet with JSON data content
                 memcpy(response_buffer + 8, json_data, json_len + 1);
-
-                // Always send UDP responses in big-endian format
-                // Convert from host byte order to network (big-endian) byte order
-                if (!big_endian()) {
-                    // System is little-endian, convert to big-endian for UDP transmission
-                    reverse_bytes(response_buffer);     // timestamp
-                    reverse_bytes(response_buffer + 4); // command/data length
-                }
 
                 // Send response
                 int bytes_sent =
@@ -150,7 +140,15 @@ int main(int argc, char *argv[]) {
                 drop_udp_client(&udp_clients, client);
                 free(response_buffer);
             } else if (command < 3000) {  // POST requests (1000-2999)
-                handle_udp_post_request(command, (unsigned char *)data, backend);
+                bool result = handle_udp_post_request(command, (unsigned char *)data, backend);
+
+                // Send status of POST request back to client with just boolean response flag
+                unsigned char response_buffer[4];
+                unsigned int status = result ? 1 : 0;
+                memcpy(response_buffer, &status, 4);
+                sendto(udp_socket, response_buffer, sizeof(response_buffer), 0,
+                       (struct sockaddr *)&client->udp_addr, client->address_length);
+
                 drop_udp_client(&udp_clients, client);
             } else if (command == 3000) {  // Unreal Engine registration (DUST simulation)
 
@@ -168,7 +166,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        // Send periodic telemetry updates to Unreal Engine
+        // Send periodic telemetry updates to Unreal Engine to sync TSS rover control values with the simulation
         if (unreal) {
             double time_end = get_wall_clock(&profile_context);
             double time_diff = time_end - time_begin;

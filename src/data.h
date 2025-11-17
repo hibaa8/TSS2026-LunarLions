@@ -29,7 +29,6 @@ struct backend_data_t {
     sim_engine_t* sim_engine;
 };
 
-
 // Backend Lifecycle Functions
 struct backend_data_t* init_backend();
 void increment_simulation(struct backend_data_t* backend);
@@ -37,7 +36,7 @@ void cleanup_backend(struct backend_data_t*  backend);
 
 // UDP Request Handlers
 void handle_udp_get_request(unsigned int command, unsigned char* data, struct backend_data_t* backend);
-void handle_udp_post_request(unsigned int command, unsigned char* data, struct backend_data_t* backend);
+bool handle_udp_post_request(unsigned int command, unsigned char* data, struct backend_data_t* backend);
 
 // Data management
 void update_json_file(const char* filename, const char* section, const char* field_path, char* new_value);
@@ -59,7 +58,7 @@ float extract_float_value(unsigned char* data);
 
 // UDP command to JSON path mapping table
 static const udp_command_mapping_t udp_command_mappings[] = {
-    // ROVER commands
+    // ROVER commands (sent from the DUST Unreal Engine simulation over UDP)
     {1103, "rover.pr_telemetry.ac_heating", "bool"},
     {1104, "rover.pr_telemetry.ac_cooling", "bool"},
     {1105, "rover.pr_telemetry.co2_scrubber", "bool"},
@@ -82,7 +81,7 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1126, "rover.pr_telemetry.dust_wiper", "bool"}, // @TODO I think we can remove this command, it is not being used
     {1130, "rover.pr_telemetry.lidar", "float"}, // Note: lidar is float array @TODO need to update how I handle this command number
 
-    // UIA commands
+    // UIA commands (sent from the peripheral device over UDP)
     {2001, "eva.uia.eva1_power", "bool"},
     {2002, "eva.uia.eva1_oxy", "bool"},
     {2003, "eva.uia.eva1_water_supply", "bool"},
@@ -94,7 +93,7 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {2009, "eva.uia.oxy_vent", "bool"},
     {2010, "eva.uia.depress", "bool"},
 
-    // DCU commands
+    // DCU commands (sent from the peripheral device over UDP)
     {2011, "eva.dcu.eva1.batt", "bool"},
     {2012, "eva.dcu.eva1.oxy", "bool"},
     {2013, "eva.dcu.eva1.comm", "bool"},

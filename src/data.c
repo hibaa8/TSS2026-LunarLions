@@ -105,15 +105,19 @@ void cleanup_backend(struct backend_data_t *backend) {
 void handle_udp_get_request(unsigned int command, unsigned char* data, struct backend_data_t* backend) {
     // Handle different GET requests
     switch (command) {
-        case 1: // ROVER TELEMETRY
+        case 0: // ROVER telemetry
             printf("Getting ROVER telemetry data.\n");
             send_json_file("ROVER", data);
             break;
-
-        case 2: // EVA TELEMETRY (full consolidated file)
+        case 1: // EVA telemetry
             printf("Getting EVA telemetry data.\n");
             send_json_file("EVA", data);
             break;
+        case 2: // LTV data
+            printf("Getting LTV telemetry data.\n");
+            send_json_file("LTV", data);
+            break;
+
 
         default:
             printf("Invalid GET command: %u\n", command);
@@ -127,8 +131,10 @@ void handle_udp_get_request(unsigned int command, unsigned char* data, struct ba
  * @param command Command identifier for the POST request
  * @param data Request buffer containing data to update
  * @param backend Backend data structure containing all telemetry and simulation engines
+ * 
+ * @return true if the update was successful, false otherwise
  */
-void handle_udp_post_request(unsigned int command, unsigned char* data, struct backend_data_t* backend) {
+bool handle_udp_post_request(unsigned int command, unsigned char* data, struct backend_data_t* backend) {
     // Find the mapping for this command
     const udp_command_mapping_t* mapping = NULL;
     for (int i = 0; udp_command_mappings[i].path != NULL; i++) {
@@ -140,7 +146,7 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
 
     if (!mapping) {
         printf("Invalid UDP POST command: %u\n", command);
-        return;
+        return false;
     }
 
     // Special case for handling LIDAR updates since this is a array of floats
@@ -179,6 +185,8 @@ void handle_udp_post_request(unsigned int command, unsigned char* data, struct b
     printf("Processing UDP command %u: %s = %s\n", command, mapping->path, value_str);
 
     bool result = html_form_json_update(request_content, backend);
+
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -531,7 +539,7 @@ void sync_simulation_to_json(struct backend_data_t* backend) {
 }
 
 /**
- * Updates a resource based on a route-style request (e.g., "eva.error.fan_error=true") from a HTML form submission
+ * Updates a field in a JSON file based on a route-style request (for example, "eva.error.fan_error=true") from a HTML form submission
  * The request content is parsed and matched to the appropriate JSON file and field.
  * 
  * @example request_content: "eva.error.fan_error=true" -> EVA.json, section "error", field "fan_error", value true
@@ -558,7 +566,7 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
             char* param_name = param;
             char* param_value = equals_pos + 1;
 
-            // route parameter I.E. "eva.error.fan_error"
+            // route parameter e.g. "eva.error.fan_error"
             route = param_name;
             value = param_value;
             break;  // Take the first parameter as the route

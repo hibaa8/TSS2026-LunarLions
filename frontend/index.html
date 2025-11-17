@@ -447,7 +447,7 @@
                             </div>
                             <div class="card-subtitle">
                                 <span class="subtitle">
-                                    LTV ERROR SIMULATION
+                                    LTV ERRORS
                                 </span>
                             </div>
                             <div class="card-body">
@@ -584,12 +584,12 @@
                                     </div>
                                     <div class="telemetry-label">
                                         <span class="telemetry-data">
-
+                                            Time Since Last Ping
                                         </span>
                                     </div>
                                     <div class="telemetry-value">
-                                        <span class="telemetry-data">
-
+                                        <span class="telemetry-data" data-path="ltv.signal.time_since_last_ping" data-units="s">
+                                            ------
                                         </span>
                                     </div>
                                 </div>
@@ -888,10 +888,14 @@
 
                         <!------------------------------------------ EVA 1 Section ------------------------------------------>
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header" style="justify-content: space-between;">
                                 <span class="card-title">
                                     EVA 1
                                 </span>
+
+                                <a class="btn-video" onclick="alert('You will be able to access a live video feed for EVA 1 from a network address during test week in May. This is a good option to include in your interface design!')">
+                                 Live Video
+                                </a>
                             </div>
 
 
