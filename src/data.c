@@ -148,15 +148,7 @@ bool handle_udp_post_request(unsigned int command, unsigned char* data, struct b
         printf("Invalid UDP POST command: %u\n", command);
         return false;
     }
-
-    // Special case for handling LIDAR updates since this is a array of floats
-    if (mapping->command == 1130) {
-        // @TODO Handle LIDAR data update
-        float lidar_data[10];
-        memcpy(lidar_data, data, sizeof(lidar_data));
-        //update_lidar_data(lidar_data, backend);
-    }
-
+    
     // Extract value from UDP data
     char value_str[32];
 
@@ -166,6 +158,10 @@ bool handle_udp_post_request(unsigned int command, unsigned char* data, struct b
         memcpy(&bool_float, data, 4);
         bool value = bool_float != 0.0f;
         strcpy(value_str, value ? "true" : "false");
+    } else if (mapping->data_type == "array<float>") {
+        // Special case for array<float> type (like LIDAR), copies as an array of floats 
+        float lidar_data[10];
+        memcpy(lidar_data, data, sizeof(lidar_data));
     } else {
         // Other commands extract float value from packet format
         if (strcmp(mapping->data_type, "bool") == 0) {

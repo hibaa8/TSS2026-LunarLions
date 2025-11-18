@@ -79,7 +79,7 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1124, "rover.pr_telemetry.fan_pri", "bool"},
     {1125, "rover.pr_telemetry.internal_lights_on", "bool"},
     {1126, "rover.pr_telemetry.dust_wiper", "bool"}, // @TODO I think we can remove this command, it is not being used
-    {1130, "rover.pr_telemetry.lidar", "float"}, // Note: lidar is float array @TODO need to update how I handle this command number
+    {1130, "rover.pr_telemetry.lidar", "array<float>"}, // Note: lidar is float array @TODO need to update how I handle this command number
 
     // UIA commands (sent from the peripheral device over UDP)
     {2001, "eva.uia.eva1_power", "bool"},
