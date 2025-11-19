@@ -1,19 +1,19 @@
 {
-  "location": {
-    "last_known_x": 0,
-    "last_known_y": 0,
-    "last_known_speed": 0,
-    "last_known_heading": 0
-  },
-  "signal": {
-    "strength": 100,
-    "pings_left": 10,
-    "time_since_last_ping": 0
-  },
-  "errors": {
-    "fuse_error": false,
-    "comms_error": false,
-    "power_error": false,
-    "guidance_error": false
-  }
+	"location":	{
+		"last_known_x":	0,
+		"last_known_y":	0,
+		"last_known_speed":	0,
+		"last_known_heading":	0
+	},
+	"signal":	{
+		"strength":	100,
+		"pings_left":	10,
+		"time_since_last_ping":	0
+	},
+	"errors":	{
+		"fuse_error":	false,
+		"comms_error":	false,
+		"power_error":	false,
+		"guidance_error":	false
+	}
 }

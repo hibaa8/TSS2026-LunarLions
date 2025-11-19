@@ -4,5 +4,4 @@
 *.lib
 *.exp
 server
-
-documents/C-src.md
+venv

@@ -372,15 +372,14 @@ bool sim_algo_validate_dependent_value_params(cJSON* params) {
  * Supports basic arithmetic operations (+, -, *, /) with field name substitution.
  * Example: "heart_rate * 33.22114 - 2212.8225"
  * 
+ * NOTE: Currently this does not support parentheses or proper order of operations. The formulas are evaluted purely from left to right.
+ * 
  * @param formula String containing the mathematical formula to evaluate
  * @param engine Pointer to the simulation engine for field value lookup
  * @return Calculated result of the formula evaluation
  */
 float sim_algo_evaluate_formula(const char* formula, sim_engine_t* engine) {
     if (!formula || !engine) return 0.0f;
-    
-    // Simple formula evaluator - supports basic math with field references
-    // Format: "field_name * constant + constant" or "field_name * constant - constant"
     
     char* formula_copy = strdup(formula);
     char* token;

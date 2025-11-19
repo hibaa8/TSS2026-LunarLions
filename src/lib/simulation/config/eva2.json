@@ -92,13 +92,13 @@
     "fan_pri_rpm": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "30000.0 - suit_pressure_co2 * 100000.0",
+      "formula": "30000.0 - suit_pressure_co2 * 10000.0",
       "depends_on": ["suit_pressure_co2"]
     },
     "fan_sec_rpm": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "30000.0 - suit_pressure_co2 * 100000.0",
+      "formula": "30000.0 - suit_pressure_co2 * 10000.0",
       "depends_on": ["suit_pressure_co2"]
     },
     "helmet_pressure_co2": {

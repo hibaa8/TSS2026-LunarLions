@@ -48,7 +48,7 @@ TSS stands for telemetry stream server. It is the centralized server for sending
 4. To build the server, run:
 
 `
-./build.bat` **NOTE:** If running on Windows, you will have to setup [WSL](https://learn.microsoft.com/en-us/windows/wsl/about) and install GCC. If you don't, several errors will be displayed when trying to build the server.
+./build.bat` **NOTE:** TSS only runs on UNIX based operating systems. If running on Windows, you will have to setup [WSL](https://learn.microsoft.com/en-us/windows/wsl/about) and install GCC. If you don't, several errors will be displayed when trying to build the server.
 
 5. To start the server, run:
 
@@ -76,12 +76,11 @@ Backend and simulation engine initialized successfully
 
 The devices listed below are physical devices that will be used during test week to create a realistic scenario for both the EVA and rover teams. The sensor data listed below will be synced with the telemetry server and can be fetched for use within your interface.
 
-<img src="documents/peripherals/dcu.jpeg" style="height: 300px"/>
-<img src="documents/peripherals/uia.jpeg" style="height: 300px"/>
-
 ### UIA
 
 The umbilical interface assembly (UIA) is a component used at the beginning of an EVA to transfer power and fluids to the suit.
+
+<img src="documents/peripherals/uia.jpeg" style="height: 300px"/>
 
 | Sensor       | Value True | Value False | Description                        |
 | ------------ | ---------- | ----------- | ---------------------------------- |
@@ -99,6 +98,8 @@ The umbilical interface assembly (UIA) is a component used at the beginning of a
 ### DCU
 
 The display and control unit (DCU) used for this challenge is a component that allows the user to control various settings of their suit's operation during an EVA. For example, if scrubber A's CO2 storage fills up, you could flip a switch on the DCU to flush it while switching to scrubber B.
+
+<img src="documents/peripherals/dcu.jpeg" style="height: 300px"/>
 
 | Sensor  | Value True | Value False     | Description                                                                                           |
 | ------- | ---------- | --------------- | ----------------------------------------------------------------------------------------------------- |

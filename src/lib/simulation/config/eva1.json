@@ -91,15 +91,17 @@
     },
     "fan_pri_rpm": {
       "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "30000.0 - suit_pressure_co2 * 100000.0",
-      "depends_on": ["suit_pressure_co2"]
+      "algorithm": "sine_wave",
+      "base_value": 30000.0,
+      "amplitude": 3.0,
+      "frequency": 0.003
     },
     "fan_sec_rpm": {
       "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "30000.0 - suit_pressure_co2 * 100000.0",
-      "depends_on": ["suit_pressure_co2"]
+      "algorithm": "sine_wave",
+      "base_value": 30000.0,
+      "amplitude": 3.0,
+      "frequency": 0.0025
     },
     "helmet_pressure_co2": {
       "type": "float",
