@@ -47,15 +47,15 @@ The frontend is built with a minimal interface and reusable styling. All of the 
 
 The primary color scheme is:
 
-- <span style="color: #000000ff">█</span> Black (background): `#000000ff`
-- <span style="color: #06212cff">█</span> Blue (title card background): `#06212cff`
-- <span style="color: #3889abff">█</span> Light Blue (borders): `#3889abff`
-- <span style="color: #28ae5f">█</span> Green (buttons): `#28ae5f`
-- <span style="color: #2d2d2d">█</span> Dark Gray (buttons): `#2d2d2d`
-- <span style="color: #8e8e8eff">█</span> Light Gray (borders and switches): `#8e8e8eff`
+- Black (background): `#000000ff`
+- Blue (title card background): `#06212cff`
+- Light Blue (borders): `#3889abff`
+- Green (buttons): `#28ae5f`
+- Dark Gray (buttons): `#2d2d2d`
+- Light Gray (borders and switches): `#8e8e8eff`
 
 ### Data syncing
-Throughout the infrastructure, you'll note that we primarily use UDP sockets to communicate back and forth to make data changes and issue commands. The frontend is the one section of the tech stack that have opted to still use HTTPS for data fetching. The server still serves the JSON files over HTTPS, and can be fetched with a relative URL such as: `/data/ROVER.json`.
+Throughout the infrastructure, you'll note that we primarily use UDP sockets to communicate back and forth to make data changes and issue commands. The frontend is the one section of the tech stack that we have opted to still use HTTPS for data fetching. The server still serves the JSON files over HTTPS, and can be fetched with a relative URL such as: `/data/ROVER.json`.
 
 The frontend JavaScript fetches the three JSON files: `ROVER.json`, `EVA.json`, and `LTV.json` every second. A snippet of that code is referenced here:
 
@@ -94,10 +94,10 @@ The data path, in this instance `eva.telemetry.eva1.scrubber_a_co2_storage`, dir
 
 Here is a snippet from the <a href="../frontend/index.js">index.js</a> file that quickly identifies all of the frontend elements that need to be updated with new telemetry values.
 ```js
-  const elements = document.querySelectorAll("[data-path]");
-  elements.forEach((el) => {
-    // Process fetching the correct field from the JSON file and updating the HTML element's value
-  });
+const elements = document.querySelectorAll("[data-path]");
+elements.forEach((el) => {
+  // Process fetching the correct field from the JSON file and updating the HTML element's value
+});
 ```
 
 ## Server Development
@@ -198,7 +198,4 @@ Instead of hardcoding every field that we wanted to simulate, we opted to create
 
 ## Peripheral Devices
 
-<img src="../documents/peripherals/uia.jpeg" style="height: 300px"/>
-<img src="../documents/peripherals/dcu.jpeg" style="height: 300px"/>
-
-The peripheral devices used during test week communicate with TSS over the UDP protocol. The code for these devices are not available publicly.
+The peripheral devices used during test week communicate with TSS over the UDP protocol. The code for these devices are not available publicly.   

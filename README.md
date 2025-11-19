@@ -1,7 +1,6 @@
 # TSS 2026
 
-NASA Spacesuit User Interface Technologies for Students ([SUITS](https://www.nasa.gov/learning-resources/spacesuit-user-interface-technologies-for-students/)) is a design challenge in which college students from across the country help design user interface solutions for future spaceflight needs.
-The following is a web interface for the SUITS telemetry stream server designed and developed for the challenge.
+NASA Spacesuit User Interface Technologies for Students ([SUITS](https://www.nasa.gov/learning-resources/spacesuit-user-interface-technologies-for-students/)) is a design challenge in which college students from across the country help design user interface solutions for future spaceflight needs. The following is a web interface for the SUITS telemetry stream server designed and developed for the challenge.
 
 <div style="display: flex; flex-direction: row; width: fit-content; gap: 10px;">
     <img src="https://www.nasa.gov/wp-content/uploads/2023/02/52112919543-3eff64ea32-k.jpg" alt="Image of a person wearing glasses with an augmented display at night" height="300px"/>
@@ -13,7 +12,7 @@ The following is a web interface for the SUITS telemetry stream server designed 
 
 ## Introduction
 
-TSS stands for telemetry stream server. It is the centralized server for sending and receiving data for the challenge. All data from the lunar simulator DUST is sent to TSS, and any commands to control the pressurized rover, or fetch data will be sent to TSS. The following document will detail how you can run your own instance of the server and begin developing your software and hardware.
+TSS stands for telemetry stream server. It is the centralized server for sending and receiving data for the challenge. All data from the lunar simulator is sent to TSS, and any commands to control the pressurized rover, or fetch data will be sent to TSS. The following document will detail how you can run your own instance of the server and begin developing your software and hardware.
 
 ### Navigation
 
@@ -126,7 +125,7 @@ After opening the simulator on a Windows PC, a screen prompting you to enter an 
 
 ### Controls
 
-During the challenge, you will be expected to issue commands to control the rover via TSS (see <a href="#rover-controls">rover commanding</a>). However for debug purposes, we have included several keyboard shortcuts that can be ran in the simulator to control the rover, reset the position, etc.
+During the challenge, you will be expected to issue commands to control the rover via TSS (see <a href="#rover-controls">rover commanding</a>). However for debugging purposes, we have included several keyboard shortcuts that can be ran in the simulator to control the rover, reset the position, etc.
 
 | Keyboard Shortcut | Description                                          |
 | ----------------- | ---------------------------------------------------- |
@@ -146,7 +145,7 @@ The request packet should contain two different integers, the first is a UNIX ti
 | ------------------ | ----------------------- | ------------------ |
 | 4 bytes            | 4 bytes                 | 4 bytes (optional) |
 
-The server will always send a UDP packet to acknowledge a request or change. If you are sending a packet to change a value (e.g. the throttle on the rover), then you will recieve a 4 byte response where a successful change will be indicated as true `(01000000)` and false as `(00000000)`. If requesting a JSON file (command numbers 0, 1, and 2), then the UDP response will be variable based on the JSON file length. You can convert these bytes back to JSON for use within your interfaces.
+The server will always respond back with a UDP packet to acknowledge a request or change. If you are sending a packet to change a value (e.g. the throttle on the rover), then you will recieve a 4 byte response where a successful change will be indicated as true `(01000000)` and false as `(00000000)`. If requesting a JSON file (command numbers 0, 1, and 2), then the UDP response will be variable based on the JSON file length. You can convert these bytes back to JSON for use within your interfaces.
 
 | Timestamp (unit32) | Command number (uint32) | Output Data    |
 | ------------------ | ----------------------- | -------------- |

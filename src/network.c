@@ -494,7 +494,7 @@ void serve_resource(struct client_info_t *client, const char *path) {
         if (client) send_400(client);
         return;
     }
-    
+
     if (strcmp(path, "/") == 0) {
         path = "/index.html";
     }
@@ -511,7 +511,7 @@ void serve_resource(struct client_info_t *client, const char *path) {
     }
 
     char full_path[128];
-    
+
     // Check if the request is for data files
     if (strncmp(path, "/data/", 6) == 0) {
         // Serve from root data directory, strip the leading slash

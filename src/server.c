@@ -14,6 +14,11 @@ int main(int argc, char *argv[]) {
     // Setup high precision timing
     clock_setup(&profile_context);
 
+    // Ignore SIGPIPE signal on Unix-like systems to prevent crashes on broken pipes, this was caused before by constantly refreshing the webpage
+    #if !defined(_WIN32)
+        signal(SIGPIPE, SIG_IGN);
+    #endif
+
     // Windows specific initialization
     #if defined(_WIN32)
         WSADATA d;
