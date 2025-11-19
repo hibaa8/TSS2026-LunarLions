@@ -1,0 +1,1013 @@
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  src: url("../fonts/geist-mono.woff2") format("woff2");
+}
+
+:root {
+  --dark-grey: #2d2d2d;
+  --darker-grey: #1a1a1a;
+  --grey: #404040;
+  --light-grey: #8e8e8eff;
+  --black: #000000;
+  --white: #ffffff;
+  --red: #ff0000;
+  --light-red: #ff5050;
+  --yellow: #ffc700;
+  --green: #28ae5f;
+  --light-green: #28ae5f;
+  --blue: #0064ff;
+  --sharp-blue: #3889abff;
+  --light-blue: #06212cff;
+  --dark-blue: #001628;
+  font-family: "Geist Mono", "Courier New", Consolas, monospace;
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  html {
+    font-size: 8px;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1439px) {
+  html {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 1440px) and (max-width: 1879px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1880px) and (max-width: 2159px) {
+  html {
+    font-size: 20px;
+  }
+}
+
+@media (min-width: 2160px) {
+  html {
+    font-size: 24px;
+  }
+}
+
+body {
+  background-color: var(--black);
+  margin: 0;
+}
+
+/**************************************************************** Nav Bar CSS ****************************************************************/
+nav {
+  margin: 0.5rem;
+  padding: 0;
+  border: 3px solid var(--sharp-blue);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-top {
+  padding: 0.5rem;
+  padding-bottom: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+#nav-clock {
+  font-size: 1rem;
+  margin-left: 0.25rem;
+  color: var(--light-grey);
+}
+
+.nav-description {
+  padding: 0 0.5rem 0.5rem 0.5rem;
+  color: var(--light-grey);
+}
+
+.nav-description p {
+  color: var(--light-grey);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  margin: 0;
+  text-align: left;
+  display: inline;
+}
+
+.nav-description a {
+  color: var(--sharp-blue);
+  font-size: 0.75rem;
+  text-decoration: underline;
+  display: inline;
+  margin: 0 0.25rem;
+}
+
+.nav-description a:hover {
+  color: var(--white);
+}
+
+.nav-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-right: 0.5rem;
+  margin-left: 0.2rem;
+}
+
+.nav-title {
+  color: var(--white);
+  margin-right: 1rem;
+  font-size: 1.5rem;
+  text-decoration: none;
+  font-weight: bold;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  white-space: nowrap;
+}
+
+.nav-subtitle {
+  color: var(--yellow);
+  margin-right: 1rem;
+  font-size: 1rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-status {
+  color: var(--white);
+  margin-right: 1rem;
+  font-size: 0.8rem;
+  text-decoration: none;
+  font-weight: normal;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  white-space: nowrap;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+}
+
+.nav-list {
+  font-size: 1.35rem;
+  flex-direction: row;
+  display: flex;
+  list-style: none;
+  margin: 0;
+}
+
+.nav-item {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.navBarListItem:hover {
+  color: var(--yellow);
+  transition-duration: 1s;
+}
+
+.room-select {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.room-select label {
+  color: var(--white);
+  font-size: 1rem;
+  margin-right: 0.5rem;
+  white-space: nowrap;
+}
+
+.room-select select {
+  background-color: var(--light-blue);
+  color: var(--white);
+  border: 0px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.room-select select option {
+  background-color: var(--dark-grey);
+  color: var(--white);
+}
+
+.page-content {
+  padding: 0rem;
+  margin: 0.5rem;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  flex-direction: row;
+  height: calc(100vh - 4rem);
+  width: calc(100vw - 1.75rem);
+}
+
+/* Main Page Data Components - Shared across spec, dcu, and uia pages */
+.main-container {
+  width: 100%;
+  margin: 0;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  flex-direction: row;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.col-container {
+  width: 100%;
+  height: 25%;
+  margin: 0rem;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  flex-direction: column;
+}
+
+.row-container {
+  width: 100%;
+  height: 25%;
+  margin: 0rem;
+  gap: 1rem;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  flex-direction: row;
+}
+
+.column {
+  width: 50%;
+  margin: 0rem;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  flex-direction: column;
+}
+
+.card {
+  padding: 0;
+  margin: 0rem;
+  border: 3px solid var(--sharp-blue);
+  border-bottom: none;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.card-header {
+  font-size: 1.25rem;
+  margin: 0;
+  padding: 0.5rem;
+  background-color: var(--light-blue);
+  border-bottom: 3px solid var(--sharp-blue);
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.card-title {
+  color: var(--white);
+  text-decoration: none;
+  white-space: nowrap;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Info icon and tooltip styles */
+.info-icon {
+  cursor: help;
+  color: var(--light-grey);
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.info-icon:hover {
+  color: var(--white);
+}
+
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--dark-grey);
+  color: var(--white);
+  text-align: left;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-left: 12px;
+  z-index: 1000;
+  width: 300px;
+  max-width: 300px;
+  font-size: 0.875rem;
+  font-weight: normal;
+  line-height: 1.4;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid var(--sharp-blue);
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent var(--dark-grey) transparent transparent;
+}
+
+.info-icon:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.card-subtitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  margin: 0.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.subtitle {
+  color: var(--light-grey) !important;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.card-body {
+  width: 100%;
+  margin: 0.5rem;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  flex-direction: row;
+}
+
+.card-content {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+/* Switch Components - Shared across multiple pages */
+.switch {
+  width: 2.95rem;
+  height: 1.25rem;
+  margin-left: 0rem;
+  margin-right: 0.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0rem;
+  height: 0rem;
+}
+
+.slider {
+  background-color: var(--light-grey);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: 0.3s;
+  position: absolute;
+  cursor: pointer;
+}
+
+.slider:before {
+  height: 1rem;
+  width: 1.25rem;
+  left: 0.15rem;
+  bottom: 0.12rem;
+  background-color: var(--white);
+  transition: 0.3s;
+  position: absolute;
+  content: "";
+}
+
+.slider.round {
+}
+
+.slider.round:before {
+}
+
+/* Default switch behavior - green when on */
+input:checked + .slider {
+  background-color: var(--light-green);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 0.1rem var(--light-green);
+}
+
+/* Switch variants for different contexts */
+.switch.error-switch input:checked + .slider {
+  background-color: var(--red);
+}
+
+.switch.error-switch input:focus + .slider {
+  box-shadow: 0 0 0.1rem var(--red);
+}
+
+input:checked + .slider:before {
+  transform: translateX(1.45rem);
+}
+
+/* State Info Components - Shared across spec, dcu, and uia pages */
+.info-container {
+  width: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.info-title {
+  color: var(--white);
+  font-size: 1rem;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.info-text {
+  color: var(--white);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.sensor-container {
+  position: relative;
+  display: flex;
+  align-items: start;
+  flex-wrap: nowrap;
+  justify-content: start;
+}
+
+.sensor {
+  background-color: var(--light-grey);
+  border: 2px solid var(--dark-grey);
+  height: 1rem;
+  width: 1rem;
+}
+
+/* Telemetry State Components - Shared styles */
+.telemetry-label {
+  width: 65%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.telemetry-value {
+  width: 35%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.telemetry-title {
+  color: var(--white);
+  font-size: 1rem;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.telemetry-data {
+  color: var(--white);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* Data Name/Data Container Pattern - Shared across multiple pages */
+.data-label {
+  width: 65%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.data-value {
+  width: 35%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.label {
+  color: var(--white);
+  font-size: 1rem;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.value {
+  color: var(--white);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* DCU-specific layout styles */
+.dcu-control-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.dcu-switch-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dcu-control-label {
+  display: flex;
+  align-items: center;
+  min-width: 4rem;
+}
+
+.dcu-label-left,
+.dcu-label-right {
+  color: var(--white);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+/**************** Sidebar CSS ****************/
+.sidebar {
+  padding: 1rem;
+  margin: 0;
+  background-color: var(--darker-grey);
+  border: 3px solid var(--sharp-blue);
+  width: 20%;
+  height: 100%;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  flex-direction: column;
+}
+
+.sidebar-title {
+  color: var(--white);
+  font-size: 1.5rem;
+  text-decoration: none;
+  white-space: nowrap;
+  align-self: flex-start;
+}
+
+.sidebar-item {
+  font-size: 0.75rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  margin-top: 0.5rem;
+  background-color: var(--darker-grey);
+  border: 2px solid var(--sharp-blue);
+  width: 95%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.sidebar-item:hover {
+  background-color: var(--grey);
+  transition: 1s;
+}
+
+.sidebar-light {
+  width: 15%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.status-light {
+  background-color: var(--light-grey);
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.sidebar-name {
+  width: 45%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.sidebar-text {
+  color: var(--white);
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-weight: bold;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sidebar-num {
+  width: 25%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+/**************** Button CSS ****************/
+.btn-round,
+.prButton {
+  background-color: var(--light-grey);
+  border: 2px solid var(--dark-grey);
+  height: 1rem;
+  width: 1rem;
+  cursor: pointer;
+}
+
+.btn-round:hover,
+.prButton:hover {
+  background-color: var(--grey);
+  transition: 0.3s;
+}
+
+.btn-round:active {
+  background-color: var(--white);
+}
+
+.prButton {
+  background-color: var(--white);
+}
+
+.prButton:hover {
+  background-color: var(--grey);
+}
+
+.prButton:active {
+  background-color: var(--light-green);
+}
+
+.btn-start {
+  height: 2rem;
+  width: 6.5rem;
+  color: var(--white);
+  font-size: 0.9rem;
+  font-family: inherit;
+  margin-right: 0.5rem;
+  background-color: var(--green);
+  opacity: 0.75;
+  border: 2px solid #28e470ff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-video {
+  height: 1.5rem;
+  width: 6rem;
+  color: var(--white);
+  font-size: 0.8rem;
+  font-family: inherit;
+  background-color: var(--dark-grey);
+  border: 2px solid #5a5a5a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-stop {
+  height: 2rem;
+  width: 6.5rem;
+  color: var(--white);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--dark-grey);
+  opacity: 0.75;
+  border: 2px solid #5a5a5a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-ping {
+  height: 2rem;
+  width: 6.5rem;
+  color: var(--white);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--green);
+  opacity: 1;
+  border: 2px solid #28e470ff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-start:hover {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.btn-stop:hover {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.btn-ping:hover {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.btn-start:disabled,
+.btn-stop:disabled,
+.btn-ping:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-start:disabled:hover,
+.btn-stop:disabled:hover,
+.btn-ping:disabled:hover {
+  opacity: 0.3;
+}
+
+.btn-start svg,
+.btn-stop svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  fill: currentColor;
+}
+
+.btn-ping svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  fill: white;
+}
+
+.btn-station {
+  padding: 0.4rem 0.8rem;
+  color: var(--white);
+  font-size: 0.7rem;
+  background-color: var(--light-blue);
+  border: 1px solid var(--white);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn-station:hover {
+  background-color: var(--light-grey);
+  transition: background-color 0.3s;
+}
+
+.btn-container {
+  width: 35%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+/**************** Switch Components ****************/
+.switch-label {
+  width: 60%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.switch-text {
+  color: var(--white);
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.switch-container {
+  width: 35%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+/**************** Stations CSS ****************/
+.station-rectangle {
+  margin: 0;
+  width: 100%;
+  height: 3rem;
+  background-color: var(--dark-blue);
+  border-bottom: 2px solid var(--sharp-blue);
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.station-rectangle:first-child {
+  border-top: 2px solid var(--sharp-blue);
+}
+
+.station-name-section {
+  width: 25%;
+  height: 100%;
+  background-color: var(--light-blue);
+  border-right: 2px solid var(--sharp-blue);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.station-timer-section {
+  width: 25%;
+  height: 100%;
+  position: relative;
+  border-right: 2px solid var(--sharp-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.station-status-section {
+  width: 25%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.station-button-section {
+  width: 25%;
+  height: 100%;
+  border-left: 2px solid var(--sharp-blue);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.station-text {
+  color: var(--white);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.station-timer-text {
+  color: var(--white);
+  font-size: 1rem;
+  white-space: nowrap;
+  font-family: monospace;
+}
+
+.station-status-text {
+  color: var(--white);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+/* Legacy styles for backward compatibility */
+.station-name {
+  margin: 0.5rem;
+  width: 15%;
+  height: 1.5rem;
+  background-color: var(--light-grey);
+  border: 2px solid var(--sharp-blue);
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.station-status {
+  width: 20%;
+  margin: 0.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.status-text {
+  color: var(--white);
+  font-size: 1.15rem;
+  white-space: nowrap;
+}
+
+.station-timer {
+  width: 10%;
+  margin: 0.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+  display: none;
+}
+
+.timer-text {
+  color: var(--white);
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.station-btn {
+  width: 20%;
+  margin: 0.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: center;
+  display: none;
+}
+
+/**************** Rover CSS ****************/
+.roverFeed {
+  max-width: 20rem;
+  max-height: 20rem;
+  margin: 0.5rem;
+  display: block;
+  border-style: solid;
+  border-color: var(--white);
+}

@@ -175,6 +175,119 @@ sim_value_t sim_algo_dependent_value(sim_field_t* field, float current_time, sim
     return result;
 }
 
+/**
+ * External value algorithm for fetching values from data JSON files.
+ * Reads the specified field from data/{file_path}.
+ *
+ * @param field Pointer to the field containing algorithm parameters
+ * @param current_time Current simulation time (unused for external values)
+ * @param engine Pointer to the simulation engine
+ * @return Value fetched from external JSON file
+ */
+sim_value_t sim_algo_external_value(sim_field_t* field, float current_time, sim_engine_t* engine) {
+    sim_value_t result = {0};
+
+    if (!field || !field->params || !engine) return result;
+
+    // Get parameters
+    cJSON* file_path_param = cJSON_GetObjectItem(field->params, "file_path");
+    cJSON* field_path_param = cJSON_GetObjectItem(field->params, "field_path");
+
+    if (!file_path_param || !cJSON_IsString(file_path_param)) {
+        printf("Warning: No file_path specified for external_value field %s\n", field->field_name);
+        return result;
+    }
+
+    if (!field_path_param || !cJSON_IsString(field_path_param)) {
+        printf("Warning: No field_path specified for external_value field %s\n", field->field_name);
+        return result;
+    }
+
+    const char* file_path = cJSON_GetStringValue(file_path_param);
+    const char* field_path = cJSON_GetStringValue(field_path_param);
+
+    // Construct full file path: data/{file_path}
+    char full_path[512];
+    snprintf(full_path, sizeof(full_path), "data/%s", file_path);
+
+    // Read and parse JSON file
+    FILE* file = fopen(full_path, "r");
+    if (!file) {
+        printf("Warning: Cannot open external data file: %s\n", full_path);
+        return result;
+    }
+
+    // Get file size and read content
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    char* json_string = malloc(file_size + 1);
+    if (!json_string) {
+        fclose(file);
+        return result;
+    }
+
+    fread(json_string, 1, file_size, file);
+    json_string[file_size] = '\0';
+    fclose(file);
+
+    // Parse JSON
+    cJSON* root = cJSON_Parse(json_string);
+    free(json_string);
+
+    if (!root) {
+        printf("Warning: Invalid JSON in external data file: %s\n", full_path);
+        return result;
+    }
+
+    // Navigate through field path using dot notation (e.g., "telemetry.eva1.temperature")
+    cJSON* current_obj = root;
+    char* path_copy = strdup(field_path);
+    char* token = strtok(path_copy, ".");
+
+    while (token && current_obj) {
+        current_obj = cJSON_GetObjectItem(current_obj, token);
+        token = strtok(NULL, ".");
+    }
+
+    // Extract value and convert to appropriate type
+    if (current_obj) {
+        if (cJSON_IsNumber(current_obj)) {
+            double value = cJSON_GetNumberValue(current_obj);
+
+            switch (field->type) {
+                case SIM_TYPE_FLOAT:
+                    result.f = (float)value;
+                    break;
+                case SIM_TYPE_INT:
+                    result.i = (int)round(value);
+                    break;
+            }
+        } else if (cJSON_IsBool(current_obj)) {
+            // Convert boolean to number (true = 1.0, false = 0.0)
+            double value = cJSON_IsTrue(current_obj) ? 1.0 : 0.0;
+
+            switch (field->type) {
+                case SIM_TYPE_FLOAT:
+                    result.f = (float)value;
+                    break;
+                case SIM_TYPE_INT:
+                    result.i = (int)value;
+                    break;
+            }
+        } else {
+            printf("Warning: Field '%s' in %s is not a number or boolean\n", field_path, full_path);
+        }
+    } else {
+        printf("Warning: Could not find field '%s' in %s\n", field_path, full_path);
+    }
+
+    free(path_copy);
+    cJSON_Delete(root);
+    return result;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 //                          Algorithm Validation
 ///////////////////////////////////////////////////////////////////////////////////
@@ -259,15 +372,14 @@ bool sim_algo_validate_dependent_value_params(cJSON* params) {
  * Supports basic arithmetic operations (+, -, *, /) with field name substitution.
  * Example: "heart_rate * 33.22114 - 2212.8225"
  * 
+ * NOTE: Currently this does not support parentheses or proper order of operations. The formulas are evaluted purely from left to right.
+ * 
  * @param formula String containing the mathematical formula to evaluate
  * @param engine Pointer to the simulation engine for field value lookup
  * @return Calculated result of the formula evaluation
  */
 float sim_algo_evaluate_formula(const char* formula, sim_engine_t* engine) {
     if (!formula || !engine) return 0.0f;
-    
-    // Simple formula evaluator - supports basic math with field references
-    // Format: "field_name * constant + constant" or "field_name * constant - constant"
     
     char* formula_copy = strdup(formula);
     char* token;
@@ -344,6 +456,8 @@ sim_algorithm_type_t sim_algo_parse_type_string(const char* algo_string) {
         return SIM_ALGO_LINEAR_GROWTH;
     } else if (strcmp(algo_string, "dependent_value") == 0) {
         return SIM_ALGO_DEPENDENT_VALUE;
+    } else if (strcmp(algo_string, "external_value") == 0) {
+        return SIM_ALGO_EXTERNAL_VALUE;
     }
     
     return SIM_ALGO_SINE_WAVE;  // Default algorithm
@@ -366,6 +480,8 @@ const char* sim_algo_type_to_string(sim_algorithm_type_t type) {
             return "linear_growth";
         case SIM_ALGO_DEPENDENT_VALUE:
             return "dependent_value";
+        case SIM_ALGO_EXTERNAL_VALUE:
+            return "external_value";
         default:
             return "unknown";
     }

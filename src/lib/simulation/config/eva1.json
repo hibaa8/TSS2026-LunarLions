@@ -1,0 +1,161 @@
+{
+  "component_name": "eva1",
+  "fields": {
+    "battery_level": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 100,
+      "end_value": 20,
+      "duration_seconds": 1350
+    },
+    "oxy_pri_storage": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 100,
+      "end_value": 15,
+      "duration_seconds": 1650
+    },
+    "oxy_sec_storage": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 100,
+      "end_value": 15,
+      "duration_seconds": 1650
+    },
+    "oxy_pri_pressure": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "oxy_pri_storage * 30.0",
+      "depends_on": ["oxy_pri_storage"]
+    },
+    "oxy_sec_pressure": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "oxy_sec_storage * 30.0",
+      "depends_on": ["oxy_sec_storage"]
+    },
+    "oxy_time_left": {
+      "type": "int",
+      "algorithm": "dependent_value",
+      "formula": "(oxy_pri_storage + oxy_sec_storage) * 6.2",
+      "depends_on": ["oxy_pri_storage", "oxy_sec_storage"]
+    },
+    "heart_rate": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "90.0 + (temperature - 70.0) * 0.2",
+      "depends_on": ["temperature"]
+    },
+    "oxy_consumption": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "0.08 + (heart_rate - 70.0) * 0.0008",
+      "depends_on": ["heart_rate"]
+    },
+    "co2_production": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "0.08 + (heart_rate - 70.0) * 0.0008",
+      "depends_on": ["heart_rate"]
+    },
+    "suit_pressure_oxy": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 4.0,
+      "amplitude": 0.08,
+      "frequency": 0.012
+    },
+    "suit_pressure_co2": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 0.05,
+      "amplitude": 0.04,
+      "frequency": 0.01
+    },
+    "suit_pressure_other": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 0,
+      "end_value": 0,
+      "duration_seconds": 900
+    },
+    "suit_pressure_total": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "suit_pressure_oxy + suit_pressure_co2 + suit_pressure_other",
+      "depends_on": [
+        "suit_pressure_oxy",
+        "suit_pressure_co2",
+        "suit_pressure_other"
+      ]
+    },
+    "fan_pri_rpm": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 30000.0,
+      "amplitude": 3.0,
+      "frequency": 0.003
+    },
+    "fan_sec_rpm": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 30000.0,
+      "amplitude": 3.0,
+      "frequency": 0.0025
+    },
+    "helmet_pressure_co2": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "suit_pressure_co2 * 1.5",
+      "depends_on": ["suit_pressure_co2"]
+    },
+    "scrubber_a_co2_storage": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 30,
+      "amplitude": 30,
+      "frequency": 0.003
+    },
+    "scrubber_b_co2_storage": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 30,
+      "amplitude": 30,
+      "frequency": 0.003,
+      "phase_offset": 3.14159
+    },
+    "temperature": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 70,
+      "amplitude": 20,
+      "frequency": 0.018
+    },
+    "coolant_storage": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "100.0",
+      "depends_on": []
+    },
+    "coolant_gas_pressure": {
+      "type": "float",
+      "algorithm": "dependent_value",
+      "formula": "max(0, (temperature - 50.0) * 10.0)",
+      "depends_on": ["temperature"]
+    },
+    "coolant_liquid_pressure": {
+      "type": "float",
+      "algorithm": "sine_wave",
+      "base_value": 500,
+      "amplitude": 2,
+      "frequency": 0.015
+    },
+    "eva_elapsed_time": {
+      "type": "float",
+      "algorithm": "linear_growth",
+      "start_value": 0,
+      "end_value": 1350,
+      "duration_seconds": 1350.0
+    }
+  }
+}

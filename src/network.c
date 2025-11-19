@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 /**
  * Initializes high-precision timing for the given platform.
@@ -12,33 +13,33 @@
  * and uptime clock on macOS for accurate time measurements.
  */
 void clock_setup(struct profile_context_t *ptContext) {
-#ifdef _WIN32
-    static LARGE_INTEGER perf_freq;
-    QueryPerformanceFrequency(&perf_freq);
-    ptContext->pInternal = &perf_freq;
+    #ifdef _WIN32
+        static LARGE_INTEGER perf_freq;
+        QueryPerformanceFrequency(&perf_freq);
+        ptContext->pInternal = &perf_freq;
 
-#elif defined(__APPLE__)
-    ptContext->pInternal = NULL;
+    #elif defined(__APPLE__)
+        ptContext->pInternal = NULL;
 
-#else  // Linux
-    static struct timespec ts;
-    static double dPerFrequency = 0;
+    #else  // Linux
+        static struct timespec ts;
+        static double dPerFrequency = 0;
 
-    if (dPerFrequency == 0) {  // Ensure it's initialized only once
-        if (clock_getres(CLOCK_MONOTONIC, &ts) != 0) {
-            fprintf(stderr, "clock_getres() failed\n");
-            exit(1);
+        if (dPerFrequency == 0) {  // Ensure it's initialized only once
+            if (clock_getres(CLOCK_MONOTONIC, &ts) != 0) {
+                fprintf(stderr, "clock_getres() failed\n");
+                exit(1);
+            }
+            double total_nsec = (double)ts.tv_nsec + (double)ts.tv_sec * 1e9;
+            if (total_nsec == 0) {
+                fprintf(stderr, "Invalid clock resolution (division by zero)\n");
+                exit(1);
+            }
+            dPerFrequency = 1e9 / total_nsec;
         }
-        double total_nsec = (double)ts.tv_nsec + (double)ts.tv_sec * 1e9;
-        if (total_nsec == 0) {
-            fprintf(stderr, "Invalid clock resolution (division by zero)\n");
-            exit(1);
-        }
-        dPerFrequency = 1e9 / total_nsec;
-    }
 
-    ptContext->pInternal = &dPerFrequency;
-#endif
+        ptContext->pInternal = &dPerFrequency;
+    #endif
 }
 
 
@@ -55,7 +56,7 @@ void get_ip_address(char *hostname_out) {
     }
     
     memset(hostname_out, 0, 16);
-    strcpy(hostname_out, "127.0.0.1");
+    strcpy(hostname_out, "127.0.0.1"); // set default to localhost
 
 #if defined(_WIN32)
     PIP_ADAPTER_INFO pAdapterInfo;
@@ -160,8 +161,6 @@ const char *get_content_type(const char *path) {
             return "application/json";
         if (strcmp(last_dot, ".png") == 0)
             return "image/png";
-        if (strcmp(last_dot, ".pdf") == 0)
-            return "application/pdf";
         if (strcmp(last_dot, ".svg") == 0)
             return "image/svg+xml";
         if (strcmp(last_dot, ".txt") == 0)
@@ -495,7 +494,7 @@ void serve_resource(struct client_info_t *client, const char *path) {
         if (client) send_400(client);
         return;
     }
-    
+
     if (strcmp(path, "/") == 0) {
         path = "/index.html";
     }
@@ -512,7 +511,7 @@ void serve_resource(struct client_info_t *client, const char *path) {
     }
 
     char full_path[128];
-    
+
     // Check if the request is for data files
     if (strncmp(path, "/data/", 6) == 0) {
         // Serve from root data directory, strip the leading slash
