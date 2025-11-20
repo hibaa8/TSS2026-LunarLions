@@ -59,8 +59,8 @@ float extract_float_value(unsigned char* data);
 // UDP command to JSON path mapping table
 static const udp_command_mapping_t udp_command_mappings[] = {
     // ROVER commands (sent from the DUST Unreal Engine simulation over UDP)
-    {1103, "rover.pr_telemetry.ac_heating", "bool"},
-    {1104, "rover.pr_telemetry.ac_cooling", "bool"},
+    {1103, "rover.pr_telemetry.cabin_heating", "bool"},
+    {1104, "rover.pr_telemetry.cabin_cooling", "bool"},
     {1105, "rover.pr_telemetry.co2_scrubber", "bool"},
     {1106, "rover.pr_telemetry.lights_on", "bool"},
     {1107, "rover.pr_telemetry.brakes", "bool"},
@@ -76,10 +76,10 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1117, "rover.pr_telemetry.distance_traveled", "float"},
     {1118, "rover.pr_telemetry.speed", "float"},
     {1119, "rover.pr_telemetry.surface_incline", "float"},
-    {1124, "rover.pr_telemetry.fan_pri", "bool"},
+    {1124, "rover.pr_telemetry.fan_pri_rpm", "bool"}, // @TODO can get rid of this?
     {1125, "rover.pr_telemetry.internal_lights_on", "bool"},
     {1126, "rover.pr_telemetry.dust_wiper", "bool"}, // @TODO I think we can remove this command, it is not being used
-    {1130, "rover.pr_telemetry.lidar", "array<float>"}, // Note: lidar is float array @TODO need to update how I handle this command number
+    {1130, "rover.pr_telemetry.lidar", "array<float>"}, // NOTE: lidar is float array, this data type is handled specially in the UDP handler
 
     // UIA commands (sent from the peripheral device over UDP)
     {2001, "eva.uia.eva1_power", "bool"},

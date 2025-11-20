@@ -2,17 +2,11 @@
 
 NASA Spacesuit User Interface Technologies for Students ([SUITS](https://www.nasa.gov/learning-resources/spacesuit-user-interface-technologies-for-students/)) is a design challenge in which college students from across the country help design user interface solutions for future spaceflight needs. The following is a web interface for the SUITS telemetry stream server designed and developed for the challenge.
 
-<div style="display: flex; flex-direction: row; width: fit-content; gap: 10px;">
-    <img src="https://www.nasa.gov/wp-content/uploads/2023/02/52112919543-3eff64ea32-k.jpg" alt="Image of a person wearing glasses with an augmented display at night" height="300px"/>
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-        <img src="https://www.nasa.gov/wp-content/uploads/2023/01/1.png" height="140px"/>
-        <img src="https://www.nasa.gov/wp-content/uploads/2023/02/jsc2023e029847-small.jpg" height="140px"/>
-    </div>
-</div>
+<img src="frontend/images/suits-introduction.png"/>
 
 ## Introduction
 
-TSS stands for telemetry stream server. It is the centralized server for sending and receiving data for the challenge. All data from the lunar simulator is sent to TSS, and any commands to control the pressurized rover, or fetch data will be sent to TSS. The following document will detail how you can run your own instance of the server and begin developing your software and hardware.
+TSS (telemetry stream server) is the centralized server for sending and receiving data for the challenge. All data from the lunar simulator is sent to TSS, and any commands to control the pressurized rover, or fetch data will be sent to TSS. The following document will detail how you can run your own instance of the server and begin developing your software and hardware.
 
 ### Navigation
 
@@ -223,7 +217,6 @@ It is incredibly important to test your hardware and software ahead of test week
 We have created various scripts to support testing and simulate real world values ahead of test week.
 
 - Simulated position values: `python simulate_position.py <tss_server_address>`
-- @TODO add more
 
 ## JSC Test Week
 
@@ -238,7 +231,9 @@ The rock yard is a physical location on-site at Johnson Space Center where your 
 
 ### What to expect for testing
 
-During test week, we will be hosting a official instance of TSS. This will be deployed on a local network and you will connect to it via a network address. Provided that you are connected to the same Wi-Fi network as the server, you should be able to connect and issue commands in the exact same way. You should expect and plan that the network address for the server will differ from your development instances, so we suggest making it easy to change in your interface or code.
+<img src="frontend/images/suits-test-week.png">
+
+During test week, we will be hosting an official instance of TSS. This will be deployed on a local network and you will connect to it via a network address. Provided that you are connected to the same Wi-Fi network as the server, you should be able to connect and issue commands in the exact same way. You should expect and plan that the network address for the server will differ from your development instances, so we suggest making it easy to change in your interface or code.
 
 Teams will be assigned a specific time slot, and will test their work in that order. A typical test session will accommodate both a rover and a EVA team, allotting the rover team 20 minutes to test their work, and then the EVA team 20 minutes of testing. A detailed timeline/procedure of what will be tested can be found <a href="/documents/suits-procedure-timeline.pdf">here</a>
 
@@ -246,6 +241,6 @@ Teams will be assigned a specific time slot, and will test their work in that or
 
 If this README or the additional documents provided in the <a href="/documents/">documents folder</a> are not enough to answer a specific question, please reach the SUITS tech team at nasa-suits@mail.nasa.gov.
 
-If there are any notable bugs with the TSS server blocking development, we welcome you to create a new issue within the GitHub repository.
+If there are any notable bugs with TSS blocking development, we welcome you to create a new issue within the GitHub repository.
 
 If you have reached the very end of this document and still want to learn more about how TSS works, feel free to read the more technical documentation located in the `src` folder: <a href="/src/README.md">TSS Development Documentation</a>

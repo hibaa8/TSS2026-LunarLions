@@ -627,7 +627,7 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
                     sim_engine_start_component(backend->sim_engine, "rover");
                     printf("Started rover simulation\n");
                 } else {
-                    sim_engine_reset_component(backend->sim_engine, "rover");
+                    sim_engine_reset_component(backend->sim_engine, "rover", update_json_file);
                     printf("Reset rover simulation\n");
                 }
             }
@@ -640,8 +640,8 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
                     sim_engine_start_component(backend->sim_engine, "eva2");
                     printf("Started EVA simulation\n");
                 } else {
-                    sim_engine_reset_component(backend->sim_engine, "eva1");
-                    sim_engine_reset_component(backend->sim_engine, "eva2");
+                    sim_engine_reset_component(backend->sim_engine, "eva1", update_json_file);
+                    sim_engine_reset_component(backend->sim_engine, "eva2", update_json_file);
                     reset_eva_station_timing();
                     printf("Reset EVA simulation\n");
                 }
@@ -673,7 +673,7 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
                     sim_engine_start_component(backend->sim_engine, "rover");
                     printf("Started rover simulation\n");
                 } else {
-                    sim_engine_reset_component(backend->sim_engine, "rover");
+                    sim_engine_reset_component(backend->sim_engine, "rover", update_json_file);
                     printf("Reset rover simulation\n");
                 }
             }

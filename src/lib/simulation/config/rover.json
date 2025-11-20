@@ -1,107 +1,124 @@
 {
   "component_name": "rover",
   "fields": {
-    "ac_heating": {
+    "cabin_heating": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.ac_heating"
+      "field_path": "pr_telemetry.cabin_heating",
+      "reset_value": false
     },
-    "ac_cooling": {
+    "cabin_cooling": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.ac_cooling"
+      "field_path": "pr_telemetry.cabin_cooling",
+      "reset_value": false
     },
     "co2_scrubber": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.co2_scrubber"
+      "field_path": "pr_telemetry.co2_scrubber",
+      "reset_value": false
     },
     "lights_on": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.lights_on"
+      "field_path": "pr_telemetry.lights_on",
+      "reset_value": false
     },
     "brakes": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.brakes"
+      "field_path": "pr_telemetry.brakes",
+      "reset_value": false
     },
     "throttle": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.throttle"
+      "field_path": "pr_telemetry.throttle",
+      "reset_value": 0
     },
     "steering": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.steering"
+      "field_path": "pr_telemetry.steering",
+      "reset_value": 0
     },
     "current_pos_x": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.current_pos_x"
+      "field_path": "pr_telemetry.current_pos_x",
+      "reset_value": 0
     },
     "current_pos_y": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.current_pos_y"
+      "field_path": "pr_telemetry.current_pos_y",
+      "reset_value": 0
     },
     "current_pos_alt": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.current_pos_alt"
+      "field_path": "pr_telemetry.current_pos_alt",
+      "reset_value": 0
     },
     "heading": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.heading"
+      "field_path": "pr_telemetry.heading",
+      "reset_value": 0
     },
     "pitch": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.pitch"
+      "field_path": "pr_telemetry.pitch",
+      "reset_value": 0
     },
     "roll": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.roll"
+      "field_path": "pr_telemetry.roll",
+      "reset_value": 0
     },
     "distance_traveled": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.distance_traveled"
+      "field_path": "pr_telemetry.distance_traveled",
+      "reset_value": 0
     },
     "speed": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.speed"
+      "field_path": "pr_telemetry.speed",
+      "reset_value": 0
     },
     "light_indicator": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.light_indicator"
+      "field_path": "pr_telemetry.light_indicator",
+      "reset_value": 0
     },
     "surface_incline": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.surface_incline"
+      "field_path": "pr_telemetry.surface_incline",
+      "reset_value": 0
     },
     "oxygen_tank": {
       "type": "float",
@@ -116,14 +133,14 @@
       "formula": "oxygen_tank * 30.0",
       "depends_on": ["oxygen_tank"]
     },
-    "ac_fan_pri": {
+    "fan_pri_rpm": {
       "type": "float",
       "algorithm": "sine_wave",
       "base_value": 30000.0,
       "amplitude": 3.0,
       "frequency": 0.003
     },
-    "ac_fan_sec": {
+    "fan_sec_rpm": {
       "type": "float",
       "algorithm": "sine_wave",
       "base_value": 30000.0,
@@ -140,15 +157,20 @@
     "cabin_temperature": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "external_temp * 0.15 + light_indicator * 8.0 + ac_heating * 15.0 - ac_cooling * 10.0 + 20.0",
-      "depends_on": ["external_temp", "light_indicator", "ac_heating", "ac_cooling"]
+      "formula": "external_temp * 0.15 + light_indicator * 8.0 + cabin_heating * 15.0 - cabin_cooling * 10.0 + 20.0",
+      "depends_on": [
+        "external_temp",
+        "light_indicator",
+        "cabin_heating",
+        "cabin_cooling"
+      ]
     },
     "battery_level": {
       "type": "float",
       "algorithm": "linear_decay",
       "start_value": 100.0,
       "end_value": 5.0,
-      "duration_seconds": 1350.0
+      "duration_seconds": 1200.0
     },
     "external_temp": {
       "type": "float",
@@ -157,31 +179,25 @@
       "amplitude": 10.0,
       "frequency": 0.0008
     },
-    "pr_coolant_tank": {
+    "coolant_level": {
       "type": "float",
       "algorithm": "dependent_value",
       "formula": "100.0",
       "depends_on": []
     },
-    "pr_coolant_pressure": {
+    "coolant_pressure": {
       "type": "float",
       "algorithm": "sine_wave",
       "base_value": 500.0,
       "amplitude": 2.0,
       "frequency": 0.01
     },
-    "fan_pri": {
-      "type": "float",
-      "algorithm": "external_value",
-      "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.fan_pri"
-    },
     "rover_sim_elapsed_time": {
       "type": "float",
       "algorithm": "linear_growth",
       "start_value": 0,
-      "end_value": 1350,
-      "duration_seconds": 1350.0
+      "end_value": 100000,
+      "duration_seconds": 100000.0
     }
   }
 }

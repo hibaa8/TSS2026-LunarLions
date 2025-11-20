@@ -515,11 +515,14 @@ void sim_engine_stop_component(sim_engine_t* engine, const char* component_name)
 
 /**
  * Resets all fields of a specific component to their initial state and stops the component.
+ * For external value fields with reset_value, calls the provided update_json function to update the data file.
  *
  * @param engine Pointer to the simulation engine
  * @param component_name Name of the component to reset (e.g., "rover", "eva1", "eva2")
+ * @param update_json Function pointer to update JSON files (e.g., update_json_file from data.c)
  */
-void sim_engine_reset_component(sim_engine_t* engine, const char* component_name) {
+void sim_engine_reset_component(sim_engine_t* engine, const char* component_name,
+                               void (*update_json)(const char*, const char*, const char*, char*)) {
     if (!engine || !engine->initialized || !component_name) return;
 
     // Find and stop the component
@@ -576,7 +579,55 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
                     break;
                 }
                 case SIM_ALGO_EXTERNAL_VALUE: {
-                    // Will be calculated during first update
+                    // Check if reset_value is defined and update the file if callback is provided
+                    cJSON* reset_value = cJSON_GetObjectItem(field->params, "reset_value");
+                    if (reset_value && update_json) {
+                        cJSON* file_path_param = cJSON_GetObjectItem(field->params, "file_path");
+                        cJSON* field_path_param = cJSON_GetObjectItem(field->params, "field_path");
+
+                        if (file_path_param && cJSON_IsString(file_path_param) &&
+                            field_path_param && cJSON_IsString(field_path_param)) {
+
+                            const char* file_path = cJSON_GetStringValue(file_path_param);
+                            const char* full_field_path = cJSON_GetStringValue(field_path_param);
+
+                            // Extract filename without extension (e.g., "ROVER.json" -> "ROVER")
+                            char filename[64];
+                            const char* ext = strrchr(file_path, '.');
+                            if (ext) {
+                                int len = ext - file_path;
+                                strncpy(filename, file_path, len);
+                                filename[len] = '\0';
+                            } else {
+                                strncpy(filename, file_path, sizeof(filename) - 1);
+                            }
+
+                            // Extract section and field name from full_field_path (e.g., "pr_telemetry.throttle")
+                            char field_path_copy[256];
+                            strncpy(field_path_copy, full_field_path, sizeof(field_path_copy) - 1);
+                            char* section = strtok(field_path_copy, ".");
+                            char* field_name = strtok(NULL, ".");
+
+                            if (section && field_name) {
+                                // Convert reset_value to string
+                                char value_str[256];
+                                if (cJSON_IsBool(reset_value)) {
+                                    snprintf(value_str, sizeof(value_str), "%s",
+                                           reset_value->type == cJSON_True ? "true" : "false");
+                                } else if (cJSON_IsNumber(reset_value)) {
+                                    snprintf(value_str, sizeof(value_str), "%g", reset_value->valuedouble);
+                                } else if (cJSON_IsString(reset_value)) {
+                                    snprintf(value_str, sizeof(value_str), "%s", reset_value->valuestring);
+                                } else {
+                                    field->current_value.f = 0.0f;
+                                    break;
+                                }
+
+                                // Call the update_json callback
+                                update_json(filename, section, field_name, value_str);
+                            }
+                        }
+                    }
                     field->current_value.f = 0.0f;
                     break;
                 }

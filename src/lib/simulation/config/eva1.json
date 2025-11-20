@@ -155,7 +155,8 @@
       "algorithm": "linear_growth",
       "start_value": 0,
       "end_value": 1350,
-      "duration_seconds": 1350.0
+      "duration_seconds": 1350.0,
+      "reset_value": 0
     }
   }
 }

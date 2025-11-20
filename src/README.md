@@ -1,8 +1,9 @@
 # TSS Development Documentation
+
 This document is intended to provide an overview of the current telemetry stream server repository, allowing new developers or interested students to understand the structure and how to make changes/contribute to the telemetry stream server.
 
 ![](/documents/tss-structure.png)
-*NASA SUITS block diagram of all peripherals and software*
+_NASA SUITS block diagram of all peripherals and software_
 
 ## Introduction
 
@@ -24,6 +25,7 @@ In the previous SUITS iteration, we added a new segment to the challenge to high
 TSS now acts as a hub for communications with both teams and external assets, with all communications being proxied through the server. For example, if a team wants to control the pressurized rover in DUST, they will issue a command over UDP to the server, TSS will then send a response confirming the change and then relay that change to the DUST instance to change the throttle value of the rover. Proxying all of these requests allows us to maintain a level of consistency across the entire peripheral stack. Please reference the block diagram above to get a better idea of how these devices communicate with each other.
 
 ### Structure
+
 The project is separated into several folders:
 
 - `/data`: contains the JSON files that are read/written to for telemetry storage
@@ -35,7 +37,7 @@ The project is separated into several folders:
 ## Frontend Development
 
 ![Image of the user interface of the main page of TSS](../frontend/images/tss-main-page.png)
-*Primary interface for interacting with TSS*
+_Primary interface for interacting with TSS_
 
 The frontend for TSS was developed in an extremely simple stack using HTML, CSS, and JavaScript. Through several iterations of the server, we have opted to keep the majority of the backend written in C. This meant that using more modern languages or libraries (e.g. React) would significantly complicate the development of the frontend.
 
@@ -55,6 +57,7 @@ The primary color scheme is:
 - Light Gray (borders and switches): `#8e8e8eff`
 
 ### Data syncing
+
 Throughout the infrastructure, you'll note that we primarily use UDP sockets to communicate back and forth to make data changes and issue commands. The frontend is the one section of the tech stack that we have opted to still use HTTPS for data fetching. The server still serves the JSON files over HTTPS, and can be fetched with a relative URL such as: `/data/ROVER.json`.
 
 The frontend JavaScript fetches the three JSON files: `ROVER.json`, `EVA.json`, and `LTV.json` every second. A snippet of that code is referenced here:
@@ -62,9 +65,9 @@ The frontend JavaScript fetches the three JSON files: `ROVER.json`, `EVA.json`, 
 ```js
 // Fetch fresh data from the backend every one second
 setInterval(() => {
-    fetchData();
-    updateClock();
-    updateConnectionStatus();
+  fetchData();
+  updateClock();
+  updateConnectionStatus();
 }, 1000);
 ```
 
@@ -72,9 +75,13 @@ After fetching the data from the backend, we still need to take the fresh data a
 
 ```html
 <div class="telemetry-value">
-    <span class="telemetry-data" data-path="eva.telemetry.eva1.scrubber_a_co2_storage" data-units="%">
-        ------
-     </span>
+  <span
+    class="telemetry-data"
+    data-path="eva.telemetry.eva1.scrubber_a_co2_storage"
+    data-units="%"
+  >
+    ------
+  </span>
 </div>
 ```
 
@@ -84,15 +91,16 @@ The data path, in this instance `eva.telemetry.eva1.scrubber_a_co2_storage`, dir
 
 ```json
 {
-    "telemetry": {
-        "eva1" : {
-            "scrubber_a_co2_storage": "new value!"
-        }
+  "telemetry": {
+    "eva1": {
+      "scrubber_a_co2_storage": "new value!"
     }
+  }
 }
 ```
 
 Here is a snippet from the <a href="../frontend/index.js">index.js</a> file that quickly identifies all of the frontend elements that need to be updated with new telemetry values.
+
 ```js
 const elements = document.querySelectorAll("[data-path]");
 elements.forEach((el) => {
@@ -104,13 +112,13 @@ elements.forEach((el) => {
 
 ### UDP sockets
 
-The server was converted to communicate primarily over the UDP protocol for the 24-25 challenge, after having bad experiences with several teams sending a high number of HTTP requests that brought the small server hosted on the local network down during test week. Moving to the UDP protocol helped remedy those issues and created an additional unique challenge for teams to develop with a networking protocol that they don't typically encounter. 
+The server was converted to communicate primarily over the UDP protocol for the 24-25 challenge, after having bad experiences with several teams sending a high number of HTTP requests that brought the small server hosted on the local network down during test week. Moving to the UDP protocol helped remedy those issues and created an additional unique challenge for teams to develop with a networking protocol that they don't typically encounter.
 
 The user datagram protocol is connectionless, which means that it can be much faster than TCP but can also be less reliable since there is no confirmation of delivery. The diagram below illustrates how the UDP protocol is used in C. If you are interested in learning more, I highly recommend this article by Cloudflare: [Everything you ever wanted to know about UDP sockets but were afraid to ask](https://blog.cloudflare.com/everything-you-ever-wanted-to-know-about-udp-sockets-but-were-afraid-to-ask-part-1/).
 
 ![](https://www.cs.dartmouth.edu/~campbell/cs60/UDPsockets.jpg)
 
-*Image Credit: <a href="https://www.cs.dartmouth.edu/~campbell/cs60/socketprogramming.html">Dartmouth Computer Science</a>*
+_Image Credit: <a href="https://www.cs.dartmouth.edu/~campbell/cs60/socketprogramming.html">Dartmouth Computer Science</a>_
 
 ### Server structure
 
@@ -166,19 +174,24 @@ Instead of hardcoding every field that we wanted to simulate, we opted to create
 {
   "component_name": "rover",
   "fields": {
-    "ac_heating": {
+    "cabin_heating": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.ac_heating"
+      "field_path": "pr_telemetry.cabin_heating"
     },
     "cabin_temperature": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "external_temp * 0.15 + light_indicator * 8.0 + ac_heating * 15.0 - ac_cooling * 10.0 + 20.0",
-      "depends_on": ["external_temp", "light_indicator", "ac_heating", "ac_cooling"]
+      "formula": "external_temp * 0.15 + light_indicator * 8.0 + cabin_heating * 15.0 - cabin_cooling * 10.0 + 20.0",
+      "depends_on": [
+        "external_temp",
+        "light_indicator",
+        "cabin_heating",
+        "cabin_cooling"
+      ]
     },
-    "pr_coolant_pressure": {
+    "coolant_pressure": {
       "type": "float",
       "algorithm": "sine_wave",
       "base_value": 500.0,
@@ -198,4 +211,4 @@ Instead of hardcoding every field that we wanted to simulate, we opted to create
 
 ## Peripheral Devices
 
-The peripheral devices used during test week communicate with TSS over the UDP protocol. The code for these devices are not available publicly.   
+The peripheral devices used during test week communicate with TSS over the UDP protocol. The code for these devices are not available publicly.
