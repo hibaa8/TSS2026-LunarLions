@@ -34,12 +34,6 @@
       "formula": "oxy_sec_storage * 30.0",
       "depends_on": ["oxy_sec_storage"]
     },
-    "oxy_time_left": {
-      "type": "int",
-      "algorithm": "dependent_value",
-      "formula": "(oxy_pri_storage + oxy_sec_storage) * 6.2",
-      "depends_on": ["oxy_pri_storage", "oxy_sec_storage"]
-    },
     "heart_rate": {
       "type": "float",
       "algorithm": "dependent_value",

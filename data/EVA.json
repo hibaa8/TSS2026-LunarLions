@@ -6,14 +6,13 @@
 			"oxy_sec_storage":	100,
 			"oxy_pri_pressure":	0,
 			"oxy_sec_pressure":	0,
-			"oxy_time_left":	0,
 			"suit_pressure_oxy":	4,
 			"suit_pressure_co2":	0.05000000074505806,
 			"suit_pressure_other":	0,
 			"suit_pressure_total":	0,
+			"helmet_pressure_co2":	0,
 			"fan_pri_rpm":	30000,
 			"fan_sec_rpm":	30000,
-			"helmet_pressure_co2":	0,
 			"scrubber_a_co2_storage":	30,
 			"scrubber_b_co2_storage":	30,
 			"temperature":	70,
@@ -23,19 +22,7 @@
 			"heart_rate":	0,
 			"oxy_consumption":	0,
 			"co2_production":	0,
-			"eva_elapsed_time":	0,
-			"eva1_power":	0,
-			"eva1_oxy":	0,
-			"eva1_water_supply":	0,
-			"eva1_water_waste":	0,
-			"oxy_vent":	0,
-			"depress":	0,
-			"dcu_batt":	0,
-			"dcu_oxy":	0,
-			"dcu_comm":	0,
-			"dcu_fan":	0,
-			"dcu_pump":	0,
-			"dcu_co2":	0
+			"eva_elapsed_time":	0
 		},
 		"eva2":	{
 			"battery_level":	100,
@@ -43,14 +30,13 @@
 			"oxy_sec_storage":	100,
 			"oxy_pri_pressure":	0,
 			"oxy_sec_pressure":	0,
-			"oxy_time_left":	0,
 			"suit_pressure_oxy":	4,
 			"suit_pressure_co2":	0.05000000074505806,
 			"suit_pressure_other":	0,
 			"suit_pressure_total":	0,
+			"helmet_pressure_co2":	0,
 			"fan_pri_rpm":	0,
 			"fan_sec_rpm":	0,
-			"helmet_pressure_co2":	0,
 			"scrubber_a_co2_storage":	30,
 			"scrubber_b_co2_storage":	30,
 			"temperature":	70,
@@ -66,9 +52,9 @@
 	"status":	{
 		"started":	false,
 		"uia":	{
-			"started":	true,
+			"started":	false,
 			"completed":	false,
-			"time":	985
+			"time":	0
 		},
 		"dcu":	{
 			"started":	false,
@@ -93,10 +79,10 @@
 		}
 	},
 	"error":	{
-		"fan_error":	true,
-		"oxy_error":	true,
-		"power_error":	true,
-		"pump_error":	true
+		"fan_error":	false,
+		"oxy_error":	false,
+		"power_error":	false,
+		"pump_error":	false
 	},
 	"imu":	{
 		"eva1":	{

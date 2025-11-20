@@ -106,9 +106,10 @@ The display and control unit (DCU) used for this challenge is a component that a
 
 ## DUST Simulation
 
+<img src="frontend/images/dust-rover-photo.png" style="height: 300px"/>
+
 [DUST](https://software.nasa.gov/software/MSC-27522-1) (Digital Lunar Exploration Sites Unreal Simulation Tool) is a 3D visualization of the Lunar South Pole built in Unreal Engine. Since we can not use a physical rover to drive around in during test week, you will use this software developed by NASA to simulate a pressurized rover.
 
-<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuIr5SKbI0wAnx7oZtd-NU6vZQUSAVcgLzlg&s"/>
 
 ### Requesting access
 
@@ -116,15 +117,19 @@ After being selected as a team to participate in the rover segment of the NASA S
 
 ### Connecting to the simulator
 
-After opening the simulator on a Windows PC, a screen prompting you to enter an IP address should show up. This is prompting you to enter the website address for the TSS server, which is used to communicate back and forth with the simulator. You will want to setup the server on the same laptop or via a local network.
+
+<img src="frontend/images/dust-onboarding.png" style="height: 300px"/>
+
+After opening the simulator on a Windows PC, a screen prompting you to enter an IP address will show up. This is prompting you to enter the website address for the TSS server, which is used to communicate back and forth with the simulator. Type in the network address without the port. For example, if your instance of TSS is running on `172.20.182.43:14141`, then you will type in `172.20.182.43`. Note that you will want the server to be running on the same network or computer as the device running DUST so that they can commmunciate with each other.
 
 ### Controls
 
-During the challenge, you will be expected to issue commands to control the rover via TSS (see <a href="#rover-controls">rover commanding</a>). However for debugging purposes, we have included several keyboard shortcuts that can be ran in the simulator to control the rover, reset the position, etc.
+During the challenge, you will be expected to issue commands to control the rover via TSS (see <a href="#rover-controls">rover commanding</a>). However for debugging purposes, we have included a couple keyboard shortcuts that can be ran in the simulator to control the rover, reset the position, etc.
 
 | Keyboard Shortcut | Description                                          |
 | ----------------- | ---------------------------------------------------- |
-| Cmd + R           | Reset the rover's position back to the starting base |
+| Ctrl + R | Reset the rover's position back to the starting base |
+| Ctrl + G | Debug mode, use the up and down arrow keys to control throttle, left and right to control steering
 
 ## Development
 

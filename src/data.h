@@ -67,8 +67,8 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1108, "rover.pr_telemetry.in_sunlight", "bool"}, // @TODO replace with Piper's new light indicator field
     {1109, "rover.pr_telemetry.throttle", "float"},
     {1110, "rover.pr_telemetry.steering", "float"},
-    {1111, "rover.pr_telemetry.current_pos_x", "float"},
-    {1112, "rover.pr_telemetry.current_pos_y", "float"},
+    {1111, "rover.pr_telemetry.rover_pos_x", "float"},
+    {1112, "rover.pr_telemetry.rover_pos_y", "float"},
     {1113, "rover.pr_telemetry.current_pos_alt", "float"},
     {1114, "rover.pr_telemetry.heading", "float"},
     {1115, "rover.pr_telemetry.pitch", "float"},
