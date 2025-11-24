@@ -1,1 +1,0 @@
-Add info about how to use these scripts
