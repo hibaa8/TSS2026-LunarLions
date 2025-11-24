@@ -64,11 +64,11 @@
       "field_path": "pr_telemetry.rover_pos_y",
       "reset_value": 0
     },
-    "current_pos_alt": {
+    "rover_pos_z": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.current_pos_alt",
+      "field_path": "pr_telemetry.rover_pos_z",
       "reset_value": 0
     },
     "heading": {
@@ -106,11 +106,11 @@
       "field_path": "pr_telemetry.speed",
       "reset_value": 0
     },
-    "light_indicator": {
+    "sunlight": {
       "type": "float",
       "algorithm": "external_value",
       "file_path": "ROVER.json",
-      "field_path": "pr_telemetry.light_indicator",
+      "field_path": "pr_telemetry.sunlight",
       "reset_value": 0
     },
     "surface_incline": {
@@ -157,10 +157,10 @@
     "cabin_temperature": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "external_temp * 0.15 + light_indicator * 8.0 + cabin_heating * 15.0 - cabin_cooling * 10.0 + 20.0",
+      "formula": "external_temp * 0.15 + sunlight * 8.0 + cabin_heating * 15.0 - cabin_cooling * 10.0 + 20.0",
       "depends_on": [
         "external_temp",
-        "light_indicator",
+        "sunlight",
         "cabin_heating",
         "cabin_cooling"
       ]

@@ -183,10 +183,10 @@ Instead of hardcoding every field that we wanted to simulate, we opted to create
     "cabin_temperature": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "external_temp * 0.15 + light_indicator * 8.0 + cabin_heating * 15.0 - cabin_cooling * 10.0 + 20.0",
+      "formula": "external_temp * 0.15 + sunlight * 8.0 + cabin_heating * 15.0 - cabin_cooling * 10.0 + 20.0",
       "depends_on": [
         "external_temp",
-        "light_indicator",
+        "sunlight",
         "cabin_heating",
         "cabin_cooling"
       ]

@@ -53,7 +53,14 @@
 		"started":	false
 	},
 	"dcu":	{
-		"eva1":	false,
+		"eva1":	{
+			"batt":	false,
+			"oxy":	false,
+			"comm":	false,
+			"fan":	false,
+			"pump":	false,
+			"co2":	false
+		},
 		"eva2":	{
 			"batt":	false,
 			"oxy":	false,

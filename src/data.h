@@ -63,23 +63,26 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1104, "rover.pr_telemetry.cabin_cooling", "bool"},
     {1105, "rover.pr_telemetry.co2_scrubber", "bool"},
     {1106, "rover.pr_telemetry.lights_on", "bool"}, // @TODO check if this will take 0 and 1 as inputs as well as true or false
+
     {1107, "rover.pr_telemetry.brakes", "bool"},
-    {1108, "rover.pr_telemetry.in_sunlight", "bool"}, // @TODO replace with Piper's new light indicator field
     {1109, "rover.pr_telemetry.throttle", "float"},
     {1110, "rover.pr_telemetry.steering", "float"},
     {1111, "rover.pr_telemetry.rover_pos_x", "float"},
     {1112, "rover.pr_telemetry.rover_pos_y", "float"},
-    {1113, "rover.pr_telemetry.current_pos_alt", "float"},
+    {1113, "rover.pr_telemetry.rover_pos_z", "float"},
     {1114, "rover.pr_telemetry.heading", "float"},
     {1115, "rover.pr_telemetry.pitch", "float"},
     {1116, "rover.pr_telemetry.roll", "float"},
     {1117, "rover.pr_telemetry.distance_traveled", "float"},
     {1118, "rover.pr_telemetry.speed", "float"},
     {1119, "rover.pr_telemetry.surface_incline", "float"},
-    {1124, "rover.pr_telemetry.fan_pri_rpm", "bool"}, // @TODO can get rid of this?
-    {1125, "rover.pr_telemetry.internal_lights_on", "bool"},
-    {1126, "rover.pr_telemetry.dust_wiper", "bool"}, // @TODO I think we can remove this command, it is not being used
+
+    // 1128 long
+    // 1129 lat
+    //1132 distance to ltv
+
     {1130, "rover.pr_telemetry.lidar", "array<float>"}, // NOTE: lidar is float array, this data type is handled specially in the UDP handler
+    {1131, "rover.pr_telemetry.sunlight", "float"},
 
     // UIA commands (sent from the peripheral device over UDP)
     {2001, "eva.uia.eva1_power", "bool"},
