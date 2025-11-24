@@ -243,9 +243,10 @@ It is incredibly important to test your hardware and software ahead of test week
 
 ### Scripts
 
-We have created various scripts to support testing and simulate real world values ahead of test week.
+We have created various scripts to support testing and simulate real world values ahead of test week. Please run the following commands below in the <a href="/scripts/">scripts</a> folder.
 
 - Simulate position values: `python simulate_position.py <tss_server_address>`
+- Reset all telemetry data: `./reset_data.bat`
 
 ## JSC Test Week
 
