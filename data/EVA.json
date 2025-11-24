@@ -50,22 +50,7 @@
 		}
 	},
 	"status":	{
-		"started":	false,
-		"uia":	{
-			"started":	false,
-			"completed":	false,
-			"time":	0
-		},
-		"dcu":	{
-			"started":	false,
-			"completed":	false,
-			"time":	0
-		},
-		"ltv":	{
-			"started":	false,
-			"completed":	false,
-			"time":	0
-		}
+		"started":	false
 	},
 	"dcu":	{
 		"eva1":	false,
