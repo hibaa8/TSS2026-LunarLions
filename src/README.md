@@ -198,7 +198,7 @@ Instead of hardcoding every field that we wanted to simulate, we opted to create
       "amplitude": 2.0,
       "frequency": 0.01
     },
-    "rover_sim_elapsed_time": {
+    "rover_elapsed_time": {
       "type": "float",
       "algorithm": "linear_growth",
       "start_value": 0,

@@ -77,9 +77,7 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1118, "rover.pr_telemetry.speed", "float"},
     {1119, "rover.pr_telemetry.surface_incline", "float"},
 
-    // 1128 long
-    // 1129 lat
-    //1132 distance to ltv
+    //1132 signal strength
 
     {1130, "rover.pr_telemetry.lidar", "array<float>"}, // NOTE: lidar is float array, this data type is handled specially in the UDP handler
     {1131, "rover.pr_telemetry.sunlight", "float"},
