@@ -465,11 +465,12 @@ input:checked + .slider:before {
 }
 
 /* Button hover and disabled states */
-.btn-start:hover,
-.btn-stop:hover,
-.btn-ping:hover {
+.btn-start:hover:not(:disabled),
+.btn-stop:hover:not(:disabled),
+.btn-ping:hover:not(:disabled) {
   opacity: 1;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s, transform 0.15s ease-out;
+  transform: scale(0.98);
 }
 
 .btn-start:disabled,
