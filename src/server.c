@@ -381,7 +381,7 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     int lights_on = (int)get_field_from_json("ROVER", "pr_telemetry.lights_on", 0.0);
     float steering = (float)get_field_from_json("ROVER", "pr_telemetry.steering", 0.0);
     float throttle = (float)get_field_from_json("ROVER", "pr_telemetry.throttle", 0.0);
-    float ping = (float)get_field_from_json("LTV", "signal.ping_requested", 0.0);
+    int ping = (int)get_field_from_json("LTV", "signal.ping_requested", 0.0);
 
     //printf("Unreal Update: brakes=%d, lights=%d, steering=%.2f, throttle=%.2f\n",
            //brakes, lights_on, steering, throttle);
@@ -399,7 +399,7 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
         reverse_bytes((unsigned char *)&lights_on);
         reverse_bytes((unsigned char *)&steering);
         reverse_bytes((unsigned char *)&throttle);
-        reverse_bytes((unsigned char *)&ping);
+        // ping is a boolean (0 or 1) and doesn't need endian conversion
     }
 
     // Send brakes command
@@ -438,17 +438,17 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     memcpy(buffer + 8, &throttle, 4);
     sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
-    // Send ping command
-    command = TSS_TO_UNREAL_PING_COMMAND;
-    if (!big_endian())
-        reverse_bytes((unsigned char *)&command);
-    memcpy(buffer, &time, 4);
-    memcpy(buffer + 4, &command, 4);
-    memcpy(buffer + 8, &ping, 4);
-    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+    // Send ping to DUST only if it is true, then reset it and decrement pings left
+    if (ping == true) {
+        // Send ping command
+        command = TSS_TO_UNREAL_PING_COMMAND;
+        if (!big_endian())
+            reverse_bytes((unsigned char *)&command);
+        memcpy(buffer, &time, 4);
+        memcpy(buffer + 4, &command, 4);
+        memcpy(buffer + 8, &ping, 4);
+        sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
-    // Reset ping_requested flag in JSON after sending ping command, deincrement pings left by one, update time since last ping
-    if (ping > 0.5f) {
         printf("Ping requested, sending Unreal ping command\n");
         update_json_file("LTV", "signal", "ping_requested", "0");
 
@@ -463,7 +463,5 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
         char time_since_last_ping[32];
         snprintf(time_since_last_ping, sizeof(time_since_last_ping), "%.0f", current_time - pings_left);
         update_json_file("LTV", "signal", "time_since_last_ping", time_since_last_ping);
-    } else {
-        printf("No ping requested, skipping Unreal ping command\n");
     }
 }
