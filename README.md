@@ -23,7 +23,7 @@ TSS (telemetry stream server) is the centralized server for sending and receivin
 - [Mission Description](https://www.nasa.gov/wp-content/uploads/2025/09/fy26-suits-mission-description.pdf?emrc=345f62?emrc=345f62)
 - <a href="/documents/acronym-list.pdf">Acronym List</a>
 - <a href="/documents/maps/">Rock Yard and DUST Maps</a>
-- <a>Rock Yard 3D Scans @TODO</a>
+- <a href="/documents/3d-scans/">Rock Yard 3D Scans</a>
 - <a href="/documents/eva-telemetry-ranges.pdf">EVA Telemetry Ranges</a>
 - <a href="/documents/rover-telemetry-ranges.pdf">Rover Telemetry Ranges</a>
 
@@ -257,7 +257,7 @@ Test week at The Lyndon B. Johnson Space Center is the culmination of your teams
 
 ### What is the rock yard?
 
-The rock yard is a physical location on-site at Johnson Space Center where your work will be tested. This is the same location used for several ongoing projects at NASA to validate equipment for lunar rovers and other devices. We have provided 3D scans of the rock yard which can be found [here](@TODO), they might be useful for development, or just to see the environment that testing will take place in.
+The rock yard is a physical location on-site at Johnson Space Center where your work will be tested. This is the same location used for several ongoing projects at NASA to validate equipment for lunar rovers and other devices. We have provided 3D scans of the rock yard which can be found [here](/documents/3d-scans), they might be useful for development, or just to see the environment that testing will take place in.
 
 ### What to expect for testing
 
