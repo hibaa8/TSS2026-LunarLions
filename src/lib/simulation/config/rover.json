@@ -213,13 +213,6 @@
       "field_path": "signal.pings_left",
       "reset_value": 10
     },
-    "time_since_last_ping": {
-      "type": "float",
-      "algorithm": "external_value",
-      "file_path": "LTV.json",
-      "field_path": "signal.time_since_last_ping",
-      "reset_value": 0
-    },
     "ping_requested": {
       "type": "float",
       "algorithm": "external_value",

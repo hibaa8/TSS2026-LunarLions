@@ -1,5 +1,6 @@
 // GLOBAL VARIABLES
 let connectionFails = 0; // number of consecutive connection failures, resets on successful fetch
+let dustConnected = false; // tracks DUST/Unreal Engine connection status
 
 /**
  * Called when the index.html page is loaded, sets up the periodic data fetching
@@ -11,7 +12,8 @@ function onload() {
   setInterval(() => {
     fetchData();
     updateClock();
-    updateConnectionStatus();
+    updateTelemetryStatus();
+    updateDustStatus();
   }, 1000);
 
   // Set up event listeners for switches and buttons
@@ -59,6 +61,7 @@ async function fetchData() {
     ]);
 
     connectionFails = 0;
+    dustConnected = roverData?.pr_telemetry?.dust_connected || false;
   } catch (error) {
     console.error('Fatal error fetching data:', error);
     connectionFails++;
@@ -274,14 +277,26 @@ function updateClock() {
 }
 
 /**
- * Updates the connection status indicator in the navigation bar
+ * Updates the telemetry status indicator in the navigation bar
  */
-function updateConnectionStatus() {
-  const statusElement = document.getElementById("connection-status");
+function updateTelemetryStatus() {
+  const statusElement = document.getElementById("telemetry-status");
   if (statusElement) {
     const isConnected = (connectionFails <= 2);
-    const statusText = isConnected ? "Connected" : "Disconnected";
+    const statusText = isConnected ? "Telemetry Connected" : "Telemetry Disconnected";
     statusElement.innerHTML = `● ${statusText}`;
     statusElement.style.color = isConnected ? "#28ae5f" : "#d82121ff";
+  }
+}
+
+/**
+ * Updates the DUST connection status indicator in the navigation bar
+ */
+function updateDustStatus() {
+  const statusElement = document.getElementById("dust-status");
+  if (statusElement) {
+    const statusText = dustConnected ? "DUST Connected" : "DUST Disconnected";
+    statusElement.innerHTML = `● ${statusText}`;
+    statusElement.style.color = dustConnected ? "#28ae5f" : "#3889abff";
   }
 }

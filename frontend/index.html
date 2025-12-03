@@ -22,8 +22,11 @@
             <span id="nav-clock" class="nav-title">
                 00:00:00
             </span>
-            <span id="connection-status" class="nav-status" style="margin-left: auto;">
-                ● Connecting
+            <span id="telemetry-status" class="nav-status" style="margin-left: auto;">
+                ● Telemetry Connecting
+            </span>
+            <span id="dust-status" class="nav-status">
+                ● DUST Connecting
             </span>
         </div>
         <div class="nav-description">
@@ -533,7 +536,7 @@
                                 <div class="card-content">
                                     <div class="telemetry-label">
                                         <span class="telemetry-data">
-                                            Signal Strength
+                                            Signal Strength (RSSI)
                                         </span>
                                     </div>
                                     <div class="telemetry-value">
@@ -543,12 +546,10 @@
                                     </div>
                                     <div class="telemetry-label">
                                         <span class="telemetry-data">
-                                            Time Since Last Ping
                                         </span>
                                     </div>
                                     <div class="telemetry-value">
-                                        <span class="telemetry-data" data-path="ltv.signal.time_since_last_ping" data-units="s">
-                                            ------
+                                        <span class="telemetry-data">
                                         </span>
                                     </div>
                                 </div>

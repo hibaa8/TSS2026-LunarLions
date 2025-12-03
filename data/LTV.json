@@ -1,13 +1,11 @@
 {
 	"location":	{
 		"last_known_x":	-10002.26,
-		"last_known_y":	-5665.5,
-		"last_known_speed":	10
+		"last_known_y":	-5665.5
 	},
 	"signal":	{
 		"strength":	0,
 		"pings_left":	10,
-		"time_since_last_ping":	0,
 		"ping_requested":	false
 	},
 	"errors":	{

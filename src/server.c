@@ -161,6 +161,7 @@ int main(int argc, char *argv[]) {
                 unreal_addr = client->udp_addr;
                 unreal_addr_len = client->address_length;
                 unreal = true;
+                update_json_file("ROVER", "pr_telemetry", "dust_connected", "true");
 
                 printf("Unreal address set to %s:%d\n", inet_ntoa(client->udp_addr.sin_addr),
                        ntohs(client->udp_addr.sin_port));
@@ -383,15 +384,10 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     float throttle = (float)get_field_from_json("ROVER", "pr_telemetry.throttle", 0.0);
     int ping = (int)get_field_from_json("LTV", "signal.ping_requested", 0.0);
 
-    //printf("Unreal Update: brakes=%d, lights=%d, steering=%.2f, throttle=%.2f\n",
-           //brakes, lights_on, steering, throttle);
-
     unsigned int time = backend->server_up_time;
     unsigned char buffer[12];
 
-    // Convert endianness if needed
-    // Always send UDP packets in big-endian format
-    // Convert from host byte order to network (big-endian) byte order
+    // Convert packets to send in Big-Endian format
     if (!big_endian()) {
         // System is little-endian, convert to big-endian for UDP transmission
         reverse_bytes((unsigned char *)&time);
@@ -409,7 +405,10 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     memcpy(buffer, &time, 4);
     memcpy(buffer + 4, &command, 4);
     memcpy(buffer + 8, &brakes, 4);
-    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+    if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) < 0) {
+        update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
+        return;
+    }
 
     // Send lights command
     command = TSS_TO_UNREAL_LIGHTS_COMMAND;
@@ -418,7 +417,10 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     memcpy(buffer, &time, 4);
     memcpy(buffer + 4, &command, 4);
     memcpy(buffer + 8, &lights_on, 4);
-    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+    if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) < 0) {
+        update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
+        return;
+    }
 
     // Send steering command
     command = TSS_TO_UNREAL_STEERING_COMMAND;
@@ -427,7 +429,10 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     memcpy(buffer, &time, 4);
     memcpy(buffer + 4, &command, 4);
     memcpy(buffer + 8, &steering, 4);
-    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+    if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) < 0) {
+        update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
+        return;
+    }
 
     // Send throttle command
     command = TSS_TO_UNREAL_THROTTLE_COMMAND;
@@ -436,7 +441,10 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     memcpy(buffer, &time, 4);
     memcpy(buffer + 4, &command, 4);
     memcpy(buffer + 8, &throttle, 4);
-    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+    if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) < 0) {
+        update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
+        return;
+    }
 
     // Send ping to DUST only if it is true, then reset it and decrement pings left
     if (ping == true) {
@@ -447,7 +455,10 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
         memcpy(buffer, &time, 4);
         memcpy(buffer + 4, &command, 4);
         memcpy(buffer + 8, &ping, 4);
-        sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+        if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) < 0) {
+            update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
+            return;
+        }
 
         printf("Ping requested, sending Unreal ping command\n");
         update_json_file("LTV", "signal", "ping_requested", "0");
@@ -458,10 +469,5 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
             snprintf(new_pings_left, sizeof(new_pings_left), "%.0f", pings_left - 1.0);
             update_json_file("LTV", "signal", "pings_left", new_pings_left);
         }
-
-        double current_time = (double)backend->server_up_time / 1000.0;
-        char time_since_last_ping[32];
-        snprintf(time_since_last_ping, sizeof(time_since_last_ping), "%.0f", current_time - pings_left);
-        update_json_file("LTV", "signal", "time_since_last_ping", time_since_last_ping);
     }
 }

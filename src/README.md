@@ -2,7 +2,7 @@
 
 This document is intended to provide an overview of the current telemetry stream server repository, allowing new developers or interested students to understand the structure and how to make changes/contribute to the telemetry stream server.
 
-![](/documents/tss-structure.png)
+![](/frontend/images/tss-structure.png)
 _NASA SUITS block diagram of all peripherals and software_
 
 ## Introduction
