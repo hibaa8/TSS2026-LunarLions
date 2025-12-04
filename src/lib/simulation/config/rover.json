@@ -219,6 +219,13 @@
       "file_path": "LTV.json",
       "field_path": "signal.ping_requested",
       "reset_value": false
+    },
+    "dust_connected": {
+      "type": "float",
+      "algorithm": "external_value",
+      "file_path": "ROVER.json",
+      "field_path": "pr_telemetry.dust_connected",
+      "reset_value": false
     }
   }
 }

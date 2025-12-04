@@ -1,6 +1,7 @@
 #include "server.h"
 
 struct profile_context_t profile_context;
+static bool debug_mode = false;
 
 // Static function declarations
 static bool continue_server(void);
@@ -10,6 +11,15 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
                           struct backend_data_t *backend);
 
 int main(int argc, char *argv[]) {
+
+    // Check for debug mode argument
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--debug") == 0) {
+            debug_mode = true;
+            printf("Debug mode enabled\n");
+            break;
+        }
+    }
 
     // Setup high precision timing
     clock_setup(&profile_context);
@@ -45,6 +55,7 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in unreal_addr;
     socklen_t unreal_addr_len;
     bool unreal = false;
+    double last_dust_message_time = 0.0;
 
     server = create_tcp_socket(hostname, port);
     udp_socket = create_udp_socket(hostname, port);
@@ -114,10 +125,20 @@ int main(int argc, char *argv[]) {
 
             get_contents(client->udp_request, &time, &command, data, received_bytes);
 
+            if (debug_mode) {
+                printf("Processing UDP command %u\n", command);
+            }
+
             // Process UDP command based on command range
-            if (command < 1000) {  // GET requests
+            if (command < 1000) {  // GET & DUST requests
                 unsigned char *response_buffer;
                 int buffer_size = 0;
+
+                // Check if command is standard DUST Unreal request (throttle), if so, update last message time
+                // Note, throttle should be updated every second, if not, then we'll know that DUST is disconnected
+                if (command == 1109) {
+                    last_dust_message_time = get_wall_clock(&profile_context);
+                }
 
                 // Allocate buffer for JSON response (8 bytes header + JSON data)
                 char json_data[4096] = {0};  // Buffer for JSON content
@@ -144,7 +165,7 @@ int main(int argc, char *argv[]) {
                 // UDP requests are one-off, so drop client after the response
                 drop_udp_client(&udp_clients, client);
                 free(response_buffer);
-            } else if (command < 3000) {  // POST requests (1000-2999)
+            } else if (command < 3000) {  // POST requests, primarily the TSS peripherals (1000-2999)
                 bool result = handle_udp_post_request(command, (unsigned char *)data, backend);
 
                 // Send status of POST request back to client with just boolean response flag
@@ -161,7 +182,7 @@ int main(int argc, char *argv[]) {
                 unreal_addr = client->udp_addr;
                 unreal_addr_len = client->address_length;
                 unreal = true;
-                update_json_file("ROVER", "pr_telemetry", "dust_connected", "true");
+                last_dust_message_time = get_wall_clock(&profile_context);
 
                 printf("Unreal address set to %s:%d\n", inet_ntoa(client->udp_addr.sin_addr),
                        ntohs(client->udp_addr.sin_port));
@@ -180,6 +201,16 @@ int main(int argc, char *argv[]) {
             if (time_diff > UNREAL_UPDATE_INTERVAL_SEC) {
                 tss_to_unreal(udp_socket, unreal_addr, unreal_addr_len, backend);
                 time_begin = time_end;
+            }
+
+            // Check if DUST is still connected based on last message received
+            double time_since_last_message = time_end - last_dust_message_time;
+            if (time_since_last_message > 3.0) { // timeout after 3 seconds
+                update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
+                printf("Lost connection to DUST Unreal simulation with time: %.2f\n", time_since_last_message);
+            } else {
+                update_json_file("ROVER", "pr_telemetry", "dust_connected", "true");
+                printf("DUST Unreal simulation is connected with time: %.2f\n", time_since_last_message);
             }
         }
 
@@ -405,10 +436,7 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     memcpy(buffer, &time, 4);
     memcpy(buffer + 4, &command, 4);
     memcpy(buffer + 8, &brakes, 4);
-    if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) < 0) {
-        update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
-        return;
-    }
+    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
     // Send lights command
     command = TSS_TO_UNREAL_LIGHTS_COMMAND;
@@ -417,10 +445,7 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     memcpy(buffer, &time, 4);
     memcpy(buffer + 4, &command, 4);
     memcpy(buffer + 8, &lights_on, 4);
-    if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) < 0) {
-        update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
-        return;
-    }
+    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
     // Send steering command
     command = TSS_TO_UNREAL_STEERING_COMMAND;
@@ -429,10 +454,8 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     memcpy(buffer, &time, 4);
     memcpy(buffer + 4, &command, 4);
     memcpy(buffer + 8, &steering, 4);
-    if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) < 0) {
-        update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
-        return;
-    }
+    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+
 
     // Send throttle command
     command = TSS_TO_UNREAL_THROTTLE_COMMAND;
@@ -441,10 +464,7 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     memcpy(buffer, &time, 4);
     memcpy(buffer + 4, &command, 4);
     memcpy(buffer + 8, &throttle, 4);
-    if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) < 0) {
-        update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
-        return;
-    }
+    sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
     // Send ping to DUST only if it is true, then reset it and decrement pings left
     if (ping == true) {
@@ -455,10 +475,7 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
         memcpy(buffer, &time, 4);
         memcpy(buffer + 4, &command, 4);
         memcpy(buffer + 8, &ping, 4);
-        if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) < 0) {
-            update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
-            return;
-        }
+        sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
         printf("Ping requested, sending Unreal ping command\n");
         update_json_file("LTV", "signal", "ping_requested", "0");

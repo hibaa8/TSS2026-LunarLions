@@ -15,7 +15,7 @@ TSS (telemetry stream server) is the centralized server for sending and receivin
 - <a href="#dust-simulation">DUST Simulation</a>
 - <a href="#development">Development</a>
 - <a href="#testing">Testing</a>
-- <a href="#jsc-test-weekk">JSC Test Week</a>
+- <a href="#jsc-test-week">JSC Test Week</a>
 - <a href="#questions">Questions</a>
 
 ### Helpful Links
@@ -158,7 +158,7 @@ These are the commands you can send to the server to fetch the telemetry data as
 | 1              | [EVA.json](/data/EVA.json)     |
 | 2              | [LTV.json](/data/LTV.json)     |
 
-When fetching data, we reccomend doing so in one second intervals. Telemetry data is calculated and updated in one second increments, so increasing the request rate in your programs will not make any difference.
+When fetching data, we recommend doing so in one second intervals. Telemetry data is calculated and updated in one second increments, so increasing the request rate in your programs will not make any difference.
 
 Here is an example packet you can could send to fetch the ROVER.json file:
 
@@ -199,6 +199,29 @@ Value: 50.0 -> bytes: 42480000
 Full packet: 691b8a610000045542480000
 Response packet: 01000000 (true)
 ```
+
+### LTV Pinging
+
+As the mission description outlines, the teams selected for the PR segment of the challenge will be attempting to find a missing lunar terrain vehicle (LTV) based on a last known location and beacon signal. After arriving at the last known location, the team will then execute a search procedure while using the beacon to narrow in on the LTV's actual location. To issue a new ping, you will send a UDP packet to TSS in the same format as previous examples:
+
+| Command number | Command  | Data input                 |
+| -------------- | -------- | -------------------------- |
+| 2050          | LTV Ping | boolean: true            |
+
+Instead of recieving a packet back with the signal strength, you can fetch the updated value from the LTV.json file via a UDP command (see example <a href="#udp-socket-communication">here</a>). For testing purposes, this can also be executed directly from within the TSS interface by pressing the "PING" button in the LTV Control section.
+
+<img src="frontend/images/ping-example.png" style="height: 250px"/>
+
+Now that you have a RSSI (recieved signal strength) value, you will want to convert it into a general determination of how close you are to the LTV's location. You can use the provided table below for a general idea of your distance to the LTV, although we suggest fine tuning this based on your own testing ahead of test week.
+
+| RSSI Range | Distance Range  | Explanation                |
+| -------------- | -------- | -------------------------- |
+| 0 to -30 dBm          | WIP meters | Strong         |
+| -30 to -67 dBm          | WIP meters | Moderate         |
+| -67 to -80 dBm          | WIP meters | Weak         |
+| -80-90 dBm          | WIP meters | Very Weak         |
+
+Note for the scenario that both the LTV antenna and PR antenna are circularly polarized. As such, the RSSI should not be used as an indicator of the correct direction/heading, but moreso as a indication of distance to the missing LTV.
 
 ### Rover LIDAR
 
@@ -265,7 +288,7 @@ The rock yard is a physical location on-site at Johnson Space Center where your 
 
 During test week, we will be hosting an official instance of TSS. This will be deployed on a local network and you will connect to it via a network address. Provided that you are connected to the same Wi-Fi network as the server, you should be able to connect and issue commands in the exact same way. You should expect and plan that the network address for the server will differ from your development instances, so we suggest making it easy to change in your interface or code.
 
-Teams will be assigned a specific time slot, and will test their work in that order. A typical test session will accommodate both a rover and a EVA team. Within a 45 minute test window, each team will have 10 minutes of setup and clean up, alotting 25 minutes to test their work. A detailed timeline/procedure of what will be tested can be found <a href="/documents/suits-procedure-timeline.pdf">here</a>
+Teams will be assigned a specific time slot, and will test their work in that order. A typical test session will accommodate both a rover and a EVA team. Within a 45 minute test window, each team will have 5 minutes of setup and clean up, allotting 25 minutes to test their work, and a 10 minute buffer. A detailed timeline/procedure of what will be tested can be found <a href="/documents/suits-procedure-timeline.pdf">here</a>
 
 ## Questions
 
