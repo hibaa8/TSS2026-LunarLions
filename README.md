@@ -150,7 +150,7 @@ The server will always respond back with a UDP packet to acknowledge a request o
 | -------------- |
 | Variable # of bytes |
 
-These are the commands you can send to the server to fetch the telemetry data as JSON files. They directly correspond to the JSON files in `frontend/data`, and will be listed as such. Please note that the response from the UDP socket will be in byte format and you will need to convert it back to a human readable JSON format.
+These are the commands you can send to the server to fetch the telemetry data as JSON files. They directly correspond to the JSON files in `/data` folder in the root directory, and will be listed as such. Please note that the response from the UDP socket will be in byte format and you will need to convert it back to a human readable JSON format for processing.
 
 | Command number | Referenced .json file          |
 | -------------- | ------------------------------ |
@@ -176,18 +176,18 @@ Controlling the rover is done through the same socket connection, and follows th
 
 | Command number | Command  | Data input                 |
 | -------------- | -------- | -------------------------- |
-| 1107           | Brakes   | float: 0 or 1              |
-| 1109           | Throttle | float: -100 (reverse), 100 |
+| 1107           | Brakes   | float: 0.0 or 1.0             |
+| 1109           | Throttle | float: -100.0 (reverse), 100.0 |
 | 1110           | Steering | float: -1.0, 1.0           |
 
 In addition, the below commands can be used to turn on the headlights and trigger interior changes like turning a fan on to modify the simulated telemetry values and bring them back into normal operating ranges (see <a href="/documents/rover-telemetry-ranges.pdf">rover telemetry ranges</a>)
 
 | Command number | Command  | Data input                 |
 | -------------- | -------- | -------------------------- |
-| 1103           | Cabin Heating | float: 0 or 1              |
-| 1104           | Cabin Cooling | float: 0 or 1              |
-| 1105           | CO2 Scrubber | float: 0 or 1              |
-| 1106           | Headlights | float: 0 or 1              |
+| 1103           | Cabin Heating | float: 0.0 or 1.0              |
+| 1104           | Cabin Cooling | float: 0.0 or 1.0              |
+| 1105           | CO2 Scrubber | float: 0.0 or 1.0             |
+| 1106           | Headlights | float: 0.0 or 1.0           |
 
 Here is an example UDP packet to increase the rover to half throttle (50.0).
 
@@ -202,11 +202,11 @@ Response packet: 01000000 (true)
 
 ### LTV Pinging
 
-As the mission description outlines, the teams selected for the PR segment of the challenge will be attempting to find a missing lunar terrain vehicle (LTV) based on a last known location and beacon signal. After arriving at the last known location, the team will then execute a search procedure while using the beacon to narrow in on the LTV's actual location. To issue a new ping, you will send a UDP packet to TSS in the same format as previous examples:
+As the mission description outlines, the teams selected for the PR segment of the challenge will be attempting to find a missing lunar terrain vehicle (LTV) based on a last known location and beacon signal. Within the DUST simulator, the LTV's location will be randomized every time you restart the application, based a uniform distance from the last known location defined in TSS. After arriving at the last known location, the team will then execute a search procedure while using the beacon to narrow in on the LTV's actual location. To issue a new ping, you will send a UDP packet to TSS in the same format as previous examples:
 
 | Command number | Command  | Data input                 |
 | -------------- | -------- | -------------------------- |
-| 2050          | LTV Ping | boolean: true            |
+| 2050          | LTV Ping | float: 1.0            |
 
 Instead of recieving a packet back with the signal strength, you can fetch the updated value from the LTV.json file via a UDP command (see example <a href="#udp-socket-communication">here</a>). For testing purposes, this can also be executed directly from within the TSS interface by pressing the "PING" button in the LTV Control section.
 
@@ -214,18 +214,18 @@ Instead of recieving a packet back with the signal strength, you can fetch the u
 
 Now that you have a RSSI (recieved signal strength) value, you will want to convert it into a general determination of how close you are to the LTV's location. You can use the provided table below for a general idea of your distance to the LTV, although we suggest fine tuning this based on your own testing ahead of test week.
 
-| RSSI Range | Distance Range  | Explanation                |
+| RSSI Range | Distance Range (estimated)  | Explanation                |
 | -------------- | -------- | -------------------------- |
-| 0 to -30 dBm          | WIP meters | Strong         |
-| -30 to -67 dBm          | WIP meters | Moderate         |
-| -67 to -80 dBm          | WIP meters | Weak         |
-| -80-90 dBm          | WIP meters | Very Weak         |
+| 0 to -30 dBm          | 0-100 meters | Strong         |
+| -30 to -67 dBm          | 100-462 meters | Moderate         |
+| -67 to -80 dBm          | 462-1200 meters | Weak         |
+| -80-90 dBm          | 1200+ meters | Very Weak         |
 
 Note for the scenario that both the LTV antenna and PR antenna are circularly polarized. As such, the RSSI should not be used as an indicator of the correct direction/heading, but moreso as a indication of distance to the missing LTV.
 
 ### Rover LIDAR
 
-The pressurized rover in the DUST simulation has 13 'LIDAR' sensors. Each of these sensors are points that shoot out a ray 10 meters in a direction. The value of each sensor will be the distance in centimeters the ray took to hit an object, or -1 if it didn't hit anything. It is recommended to use these values to support implementations of autonomous driving. We recognize that 13 singular LIDAR points is less than ideal, but believe that it is sufficient to demonstrate autonomous capabilities in most scenarios for the test week.
+The pressurized rover in the DUST simulation has 13 'LIDAR' sensors. Each of these sensors are points that shoot out a ray 10 meters in a direction. The value of each sensor will be the distance in centimeters the ray took to hit an object, or -1 if it didn't hit anything. It is recommended to use these values to support implementations of autonomous driving. We recognize that 13 singular points is less than ideal, but believe that it is sufficient to demonstrate autonomous capabilities in most scenarios for the test week.
 
 | Sensor index | Sensor Coordinates                        | Sensor location description   | Sensor Orientation                                |
 | ------------ | ----------------------------------------- | ----------------------------- | ------------------------------------------------- |

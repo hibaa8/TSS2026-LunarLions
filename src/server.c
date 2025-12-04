@@ -165,6 +165,17 @@ int main(int argc, char *argv[]) {
                 // UDP requests are one-off, so drop client after the response
                 drop_udp_client(&udp_clients, client);
                 free(response_buffer);
+            } else if (command == 1130) { // LIDAR
+                // Handle LIDAR data separately due to larger packet size (array of floats instead of single float value)
+                float lidar_data[LIDAR_NUM_POINTS];
+
+                // Fetch all bytes after the timestamp and command (bytes 8 onward) and save that as the float array
+                memcpy(lidar_data, client->udp_request + 8, sizeof(lidar_data));
+
+                // Update ROVER JSON with new LiDAR data
+                update_json_file("ROVER", "pr_telemetry", "lidar", (char *)lidar_data);
+
+                drop_udp_client(&udp_clients, client);
             } else if (command < 3000) {  // POST requests, primarily the TSS peripherals (1000-2999)
                 bool result = handle_udp_post_request(command, (unsigned char *)data, backend);
 

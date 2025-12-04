@@ -58,6 +58,7 @@ float extract_float_value(unsigned char* data);
 
 // UDP command to JSON path mapping table
 // NOTE: see server.h for command definitions to send to DUST Unreal Engine simulation
+// NOTE: most of these commands have been reused from the TSS 2025 project to help support backwards compatibility. In the future, it may be reccomended to standardize these.
 static const udp_command_mapping_t udp_command_mappings[] = {
     // ROVER commands (sent from the DUST Unreal Engine simulation over UDP)
     {1103, "rover.pr_telemetry.cabin_heating", "bool"},
@@ -78,7 +79,7 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1118, "rover.pr_telemetry.speed", "float"},
     {1119, "rover.pr_telemetry.surface_incline", "float"},
 
-    {1130, "rover.pr_telemetry.lidar", "array<float>"}, // NOTE: lidar is float array, this data type is handled specially in the UDP handler
+    {1130, "rover.pr_telemetry.lidar", "array<float>"}, // LiDAR is float array, this data type is handled separately in server.c
     {1131, "rover.pr_telemetry.sunlight", "float"},
     {1132, "ltv.signal.strength", "float"},
 

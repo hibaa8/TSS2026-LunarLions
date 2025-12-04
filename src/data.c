@@ -158,10 +158,6 @@ bool handle_udp_post_request(unsigned int command, unsigned char* data, struct b
         memcpy(&bool_float, data, 4);
         bool value = bool_float != 0.0f;
         strcpy(value_str, value ? "true" : "false");
-    } else if (mapping->data_type == "array<float>") {
-        // Special case for array<float> type (like LIDAR), copies as an array of floats 
-        float lidar_data[10];
-        memcpy(lidar_data, data, sizeof(lidar_data));
     } else {
         // Other commands extract float value from packet format
         if (strcmp(mapping->data_type, "bool") == 0) {
@@ -271,6 +267,20 @@ void update_json_file(const char* filename, const char* section, const char* fie
         new_json_value = cJSON_CreateTrue();
     } else if (strcmp(new_value, "false") == 0) {
         new_json_value = cJSON_CreateFalse();
+    } else if (new_value[0] == '[') { // check if starts with bracket `[` for array (LiDAR)
+        // Parse as array of floats
+        cJSON* array = cJSON_CreateArray();
+        char* value_copy = strdup(new_value);
+        char* item = strtok(value_copy + 1, ",]");
+        
+        while (item != NULL) {
+            double num = strtod(item, NULL);
+            cJSON_AddItemToArray(array, cJSON_CreateNumber(num));
+            item = strtok(NULL, ",]");
+        }
+
+        free(value_copy);
+        new_json_value = array;
     } else {
         // Try to parse as number
         char* endptr;
@@ -538,6 +548,8 @@ void sync_simulation_to_json(struct backend_data_t* backend) {
  * Updates a field in a JSON file based on a route-style request (for example, "eva.error.fan_error=true") from a HTML form submission
  * The request content is parsed and matched to the appropriate JSON file and field.
  * 
+ * // @TODO look into this more
+ * 
  * @example request_content: "eva.error.fan_error=true" -> EVA.json, section "error", field "fan_error", value true
  * @param request_content String containing the route-based update request
  * @param backend Backend data structure
@@ -574,9 +586,6 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
         printf("Error: Invalid format, missing route or value in request: %s\n", request_content);
         return false;
     }
-
-    //printf("Processing route update: %s = %s\n", route, value);
-
 
     // Parse the route (split by dots)
     char route_copy[256];
