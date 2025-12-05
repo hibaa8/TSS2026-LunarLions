@@ -229,19 +229,23 @@ The pressurized rover in the DUST simulation has 13 'LIDAR' sensors. Each of the
 
 | Sensor index | Sensor Coordinates                        | Sensor location description   | Sensor Orientation                                |
 | ------------ | ----------------------------------------- | ----------------------------- | ------------------------------------------------- |
-| 0            | (X=170.000000,Y=-150.000000,Z=15.000000)  | Hub of the front left wheel   | Yawed 30 degrees left (CCW) of vehicle forward    |
-| 1            | (X=200.000000,Y=-40.000000,Z=20.000000)   | Front left of vehicle frame   | Yawed 20 degrees left (CCW) of vehicle forward    |
-| 2            | (X=200.000000,Y=0.000000,Z=20.000000)     | Front center of vehicle frame | Vehicle forward                                   |
-| 3            | (X=200.000000,Y=40.00000,Z=20.000000)     | Front right of vehicle frame  | Yawed 20 degrees right (CW) of vehicle forward    |
-| 4            | (X=170.000000,Y=150.000000,Z=15.000000)   | Hub of front right wheel      | Yawed 30 degrees right (CW) of vehicle forward    |
-| 5            | (X=200.000000,Y=-40.000000,Z=20.000000)   | Front left of vehicle frame   | Pitched 25 degrees down of vehicle forward        |
-| 6            | (X=200.000000,Y=40.000000,Z=20.000000)    | Front right of vehicle frame  | Pitched 25 degrees down of vehicle forward        |
-| 7            | (X=0.000000,Y=-100.000000,Z=-0.000000)    | Center Left of vehicle frame  | Pitched 20 degrees down of vehicle left           |
-| 8            | (X=0.000000,Y=100.000000,Z=-0.000000)     | Center Right of vehicle frame | Pitched 20 degrees down of vehicle right          |
-| 9            | (X=-135.000000,Y=-160.000000,Z=15.000000) | Hub of back left wheel        | Yawed 40 degrees left (CW) of vehicle backwards   |
-| 10           | (X=-180.000000,Y=-60.000000,Z=15.000000)  | Rear left of vehicle frame    | Vehicle backwards                                 |
-| 11           | (X=-180.000000,Y=60.000000,Z=15.000000)   | Rear right of vehicle frame   | Vehicle backwards                                 |
-| 12           | (X=-135.000000,Y=160.000000,Z=15.000000)  | Hub of back right wheel       | Yawed 40 degrees right (CCW) of vehicle backwards |
+| 0            | (X=250.000000,Y=245.000000,Z=50.000000)  | Hub of the front left wheel   | Yawed 30 degrees left (CCW) of vehicle forward    |
+| 1            | (X=325.000000,Y=75.000000,Z=130.000000)   | Front left of vehicle frame   | Yawed 20 degrees left (CCW) of vehicle forward, pitched down 20 degrees   |
+| 2            | (X=325.000000,Y=0.000000,Z=130.000000)     | Front center of vehicle frame | Vehicle forward                                   |
+| 3            | (X=325.000000,Y=-75.00000,Z=130.000000)     | Front right of vehicle frame  | Yawed 20 degrees right (CW) of vehicle forward, pitched down 20 degrees    |
+| 4            | (X=250.000000,Y=-245.000000,Z=50.000000)   | Hub of front right wheel      | Yawed 30 degrees right (CW) of vehicle forward    |
+| 5            | (X=325.000000,Y=75.000000,Z=130.000000)   | Front left of vehicle frame   | Pitched 25 degrees down of vehicle forward        |
+| 6            | (X=325.000000,Y=-75.000000,Z=130.000000)    | Front right of vehicle frame  | Pitched 25 degrees down of vehicle forward        |
+| 7            | (X=40.000000,Y=235.000000,Z=100.000000)    | Center Left of vehicle frame  | Pitched 20 degrees down of vehicle left           |
+| 8            | (X=40.000000,Y=-235.000000,Z=100.000000)     | Center Right of vehicle frame | Pitched 20 degrees down of vehicle right          |
+| 9            | (X=-215.000000,Y=270.000000,Z=70.000000) | Hub of back left wheel        | Yawed 40 degrees left (CW) of vehicle backwards   |
+| 10           | (X=-320.000000,Y=80.000000,Z=10.000000)  | Rear left of vehicle frame    | Vehicle backwards                                 |
+| 11           | (X=-320.000000,Y=-50.000000,Z=10.000000)   | Rear right of vehicle frame   | Vehicle backwards                                 |
+| 12           | (X=-215.000000,Y=-215.000000,Z=70.000000)  | Hub of back right wheel       | Yawed 40 degrees right (CCW) of vehicle backwards |
+| 13           | (X=325.000000,Y=75.000000,Z=130.000000)   | Front left of vehicle frame   | Yawed 20 degrees left (CCW) of vehicle forward, pitched down 10 degrees   |
+| 14           | (X=325.000000,Y=-75.00000,Z=130.000000)     | Front right of vehicle frame  | Yawed 20 degrees right (CW) of vehicle forward, pitched down 10 degrees    |
+| 15           | (X=250.000000,Y=245.000000,Z=50.000000)  | Hub of the front left wheel   | Yawed 15 degrees left (CCW) of vehicle forward    |
+| 16           | (X=250.000000,Y=-245.000000,Z=50.000000)   | Hub of front right wheel      | Yawed 15 degrees right (CW) of vehicle forward    |
 
 ### Maps
 
