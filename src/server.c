@@ -130,12 +130,6 @@ int main(int argc, char *argv[]) {
                 unsigned char *response_buffer;
                 int buffer_size = 0;
 
-                // Check if command is standard DUST Unreal request (throttle), if so, update last message time to zero
-                // Note, the PR pitch value (1116) should be updated every second, if not, then we'll know that DUST is disconnected
-                if (command == 1116) {
-                    last_dust_message_time = 0;
-                }
-
                 // Allocate buffer for JSON response (8 bytes header + JSON data)
                 char json_data[4096] = {0};  // Buffer for JSON content
                 handle_udp_get_request(command, (unsigned char *)json_data, backend);
@@ -192,7 +186,14 @@ int main(int argc, char *argv[]) {
                 update_json_file("ROVER", "pr_telemetry", "lidar", json_array);
 
                 drop_udp_client(&udp_clients, client);
-            } else if (command < 3000) {  // POST requests, primarily the TSS peripherals (1000-2999)
+            } else if (command < 3000) {  // POST requests, primarily the TSS peripherals and DUST simulator (1000-2999)
+
+                // Check if command is standard DUST Unreal request (throttle), if so, update last message time to zero
+                // Note, the PR pitch value (1116) should be updated every second, if not, then we'll know that DUST is disconnected
+                if (command == 1116) {
+                    last_dust_message_time = get_wall_clock(&profile_context);
+                }
+
                 bool result = handle_udp_post_request(command, (unsigned char *)data, backend);
 
                 // Send status of POST request back to client with just boolean response flag

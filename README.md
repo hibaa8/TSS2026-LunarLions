@@ -225,7 +225,7 @@ Note for the scenario that both the LTV antenna and PR antenna are circularly po
 
 ### Rover LIDAR
 
-The pressurized rover in the DUST simulation has 13 'LIDAR' sensors. Each of these sensors are points that shoot out a ray 10 meters in a direction. The value of each sensor will be the distance in centimeters the ray took to hit an object, or -1 if it didn't hit anything. It is recommended to use these values to support implementations of autonomous driving. We recognize that 13 singular points is less than ideal, but believe that it is sufficient to demonstrate autonomous capabilities in most scenarios for the test week.
+The pressurized rover in the DUST simulation has 17 'LIDAR' sensors. Each of these sensors are points that shoot out a ray 10 meters in a direction. The value of each sensor will be the distance in centimeters the ray took to hit an object, or -1 if it didn't hit anything. It is recommended to use these values to support implementations of autonomous driving. We recognize that 17 singular points is less than ideal, but believe that it is sufficient to demonstrate autonomous capabilities in most scenarios for the test week.
 
 | Sensor index | Sensor Coordinates                        | Sensor location description   | Sensor Orientation                                |
 | ------------ | ----------------------------------------- | ----------------------------- | ------------------------------------------------- |
