@@ -17,7 +17,7 @@
 		"speed":	0,
 		"sunlight":	0,
 		"surface_incline":	0,
-		"lidar":	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		"lidar":	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		"oxygen_tank":	100,
 		"oxygen_pressure":	0,
 		"fan_pri_rpm":	30000,
