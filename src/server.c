@@ -125,19 +125,15 @@ int main(int argc, char *argv[]) {
 
             get_contents(client->udp_request, &time, &command, data, received_bytes);
 
-            if (debug_mode) {
-                printf("Processing UDP command %u\n", command);
-            }
-
             // Process UDP command based on command range
             if (command < 1000) {  // GET & DUST requests
                 unsigned char *response_buffer;
                 int buffer_size = 0;
 
-                // Check if command is standard DUST Unreal request (throttle), if so, update last message time
-                // Note, throttle should be updated every second, if not, then we'll know that DUST is disconnected
-                if (command == 1109) {
-                    last_dust_message_time = get_wall_clock(&profile_context);
+                // Check if command is standard DUST Unreal request (throttle), if so, update last message time to zero
+                // Note, the PR pitch value (1116) should be updated every second, if not, then we'll know that DUST is disconnected
+                if (command == 1116) {
+                    last_dust_message_time = 0;
                 }
 
                 // Allocate buffer for JSON response (8 bytes header + JSON data)
@@ -172,8 +168,28 @@ int main(int argc, char *argv[]) {
                 // Fetch all bytes after the timestamp and command (bytes 8 onward) and save that as the float array
                 memcpy(lidar_data, client->udp_request + 8, sizeof(lidar_data));
 
+                // Convert from big-endian if on little-endian system
+                if (!big_endian()) {
+                    for (int i = 0; i < LIDAR_NUM_POINTS; i++) {
+                        reverse_bytes((unsigned char *)&lidar_data[i]);
+                    }
+                }
+
+                // Format as JSON array string: "[1.5,2.3,4.1,...]"
+                char json_array[512];
+                int offset = snprintf(json_array, sizeof(json_array), "[");
+                for (int i = 0; i < LIDAR_NUM_POINTS; i++) {
+                    if (i < LIDAR_NUM_POINTS - 1) {
+                        offset += snprintf(json_array + offset, sizeof(json_array) - offset, "%.2f,", lidar_data[i]);
+                    } else {
+                        offset += snprintf(json_array + offset, sizeof(json_array) - offset, "%.2f]", lidar_data[i]);
+                    }
+                }
+
+                printf("Received LIDAR data: %s\n", json_array);
+
                 // Update ROVER JSON with new LiDAR data
-                update_json_file("ROVER", "pr_telemetry", "lidar", (char *)lidar_data);
+                update_json_file("ROVER", "pr_telemetry", "lidar", json_array);
 
                 drop_udp_client(&udp_clients, client);
             } else if (command < 3000) {  // POST requests, primarily the TSS peripherals (1000-2999)

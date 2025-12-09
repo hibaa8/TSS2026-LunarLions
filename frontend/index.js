@@ -182,6 +182,16 @@ function setupEventListeners() {
 
       // For action buttons, directly update the status field
       if (action === "start") {
+        // Special handler to only allow pinging when the DUST sim is connected, @TODO see if this can be generalized later
+        if (path === "ltv.signal.ping_requested") {
+          if (!dustConnected) {
+            alert(
+              "DUST simulator is not connected. Please refer to TSS documentation for learning how to connect to the simulator."
+            );
+            return;
+          }
+        }
+
         // Start: set the field to true
         updateServerData(path, true);
       } else if (action === "reset") {

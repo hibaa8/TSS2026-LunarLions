@@ -219,7 +219,7 @@ void update_json_file(const char* filename, const char* section, const char* fie
     free(file_buffer);
 
     if (json == NULL) {
-        printf("Error: Failed to parse JSON from file %s.\n", file_path);
+        printf("Error: Failed to parse JSON from file %s., check data folder for existing files. Accidental edits to those files can be resolved with git checkout data\n", file_path);
         return;
     }
 
@@ -351,7 +351,7 @@ cJSON* get_json_file(const char* filename) {
     free(file_buffer);
 
     if (json == NULL) {
-        printf("Error: Failed to parse JSON from file %s.\n", file_path);
+        printf("Error: Failed to parse JSON from file %s., check data folder for existing files. Accidental edits to those files can be resolved with git checkout data\n", file_path);
         return NULL;
     }
 

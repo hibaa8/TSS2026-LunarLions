@@ -64,7 +64,7 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {1103, "rover.pr_telemetry.cabin_heating", "bool"},
     {1104, "rover.pr_telemetry.cabin_cooling", "bool"},
     {1105, "rover.pr_telemetry.co2_scrubber", "bool"},
-    {1106, "rover.pr_telemetry.lights_on", "bool"}, // @TODO check if this will take 0 and 1 as inputs as well as true or false
+    {1106, "rover.pr_telemetry.lights_on", "bool"},
 
     {1107, "rover.pr_telemetry.brakes", "bool"},
     {1109, "rover.pr_telemetry.throttle", "float"},

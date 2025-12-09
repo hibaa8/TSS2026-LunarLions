@@ -20,7 +20,7 @@
 // Server Configuration
 #define UNREAL_UPDATE_INTERVAL_SEC 0.02
 
-#define LIDAR_NUM_POINTS 13 // number of LiDAR points expected from the DUST sim to allocate in memory
+#define LIDAR_NUM_POINTS 17 // number of LiDAR points expected from the DUST sim to allocate in memory
 
 extern struct profile_context_t profile_context;
 
