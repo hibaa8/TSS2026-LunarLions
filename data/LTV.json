@@ -10,7 +10,7 @@
 	},
 	"errors":	{
 		"fuse_error":	false,
-		"comms_error":	true,
+		"comms_error":	false,
 		"power_error":	false,
 		"guidance_error":	false
 	}

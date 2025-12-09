@@ -14,7 +14,6 @@ function onload() {
     updateClock();
     updateTelemetryStatus();
     updateDustStatus();
-    updateLidarStatus();
   }, 1000);
 
   // Set up event listeners for switches and buttons
@@ -309,28 +308,5 @@ function updateDustStatus() {
     const statusText = dustConnected ? "DUST Connected" : "DUST Disconnected";
     statusElement.innerHTML = `● ${statusText}`;
     statusElement.style.color = dustConnected ? "#28ae5f" : "#3889abff";
-  }
-}
-
-/**
- * Checks if LIDAR data is a valid array and has at least one non-zero value
- */
-async function updateLidarStatus() {
-  const statusElement = document.getElementById("lidar-status");
-  if (!statusElement) return;
-
-  try {
-    const response = await fetch(`/data/ROVER.json`);
-    const roverData = await response.json();
-    const lidarData = roverData?.pr_telemetry?.lidar;
-
-    // Check if lidar is a valid array and has at least one non-zero value
-    const isLidarActive = Array.isArray(lidarData) && lidarData.some(value => value !== 0);
-
-    statusElement.innerHTML = `● LIDAR`;
-    statusElement.style.color = isLidarActive ? "#28ae5f" : "#3889abff";
-  } catch (error) {
-    statusElement.innerHTML = `● LIDAR`;
-    statusElement.style.color = "#3889abff";
   }
 }
