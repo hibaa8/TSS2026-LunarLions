@@ -450,8 +450,8 @@ void sync_simulation_to_json(struct backend_data_t* backend) {
     for (int i = 0; i < engine->total_field_count; i++) {
         sim_field_t* field = engine->update_order[i];
         if (field != NULL) {
-            double value = (field->type == SIM_TYPE_FLOAT) ? field->current_value.f : (double)field->current_value.i;
-            
+            double value = field->current_value.f;
+
             // Determine target section based on component name
             cJSON* target_section = NULL;
             if (strcmp(field->component_name, "eva1") == 0) {
@@ -518,7 +518,7 @@ void sync_simulation_to_json(struct backend_data_t* backend) {
                 continue;
             }
 
-            double value = (field->type == SIM_TYPE_FLOAT) ? field->current_value.f : (double)field->current_value.i;
+            double value = field->current_value.f;
 
             // Check if field already exists and replace it, otherwise add new
             cJSON* existing_field = cJSON_GetObjectItemCaseSensitive(pr_telemetry, field->field_name);

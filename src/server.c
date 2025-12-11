@@ -493,9 +493,7 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
         memcpy(buffer, &time, 4);
         memcpy(buffer + 4, &command, 4);
         memcpy(buffer + 8, &ping, 4);
-        if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) == -1) {
-            perror("sendto for ping command failed");
-        }
+        sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
         printf("Ping requested, sending Unreal ping command\n");
         update_json_file("LTV", "signal", "ping_requested", "0");

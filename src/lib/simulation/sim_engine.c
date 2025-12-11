@@ -204,20 +204,8 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
         
         field->algorithm = sim_algo_parse_type_string(cJSON_GetStringValue(algorithm));
         
-        // Parse type (default to float if not specified)
-        cJSON* type = cJSON_GetObjectItem(field_json, "type");
-        if (type && cJSON_IsString(type)) {
-            const char* type_str = cJSON_GetStringValue(type);
-            if (strcmp(type_str, "float") == 0) {
-                field->type = SIM_TYPE_FLOAT;
-            } else if (strcmp(type_str, "int") == 0) {
-                field->type = SIM_TYPE_INT;
-            } else {
-                field->type = SIM_TYPE_FLOAT;  // Default
-            }
-        } else {
-            field->type = SIM_TYPE_FLOAT;  // Default
-        }
+        // Parse type (always float)
+        field->type = SIM_TYPE_FLOAT;
         
         // Clone parameters for algorithm use
         field->params = cJSON_Duplicate(field_json, true);

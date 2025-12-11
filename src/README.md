@@ -166,6 +166,8 @@ The supported algorithms are:
 
 The first three are quite basic and used for extremely simple time based telemetry calculations. What makes this powerful is the use of the final two types of algorithms, which can be used to pull in external values (e.g. the location of an EVA which is a real world value and not simulated), and custom equations that are dependent on both simuilated values and external values.
 
+NOTE: currently, the simulation reads the custom algorithms in left to right format and does not support standard order of operations. This was a choice to simplify the parser since most of our algorithms are not complicated. In the future, the parser can be adapted to support more complex algorithms and simulations.
+
 ### Configuration
 
 Instead of hardcoding every field that we wanted to simulate, we opted to create a format that was easily configurable. This took the form of JSON files that live within a <a href="/src/lib/simulation/config">config folder</a> in the root of the simulation library folder. Each file is representative of a single "component" that you want to simulate; in our case that would be `rover`, `eva1`, and `eva2`. Below is an example of a config file with some of the supported algorithms mentioned above:

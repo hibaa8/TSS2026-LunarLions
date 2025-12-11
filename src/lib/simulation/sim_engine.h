@@ -20,8 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 typedef enum {
-    SIM_TYPE_FLOAT,
-    SIM_TYPE_INT
+    SIM_TYPE_FLOAT
 } sim_field_type_t;
 
 typedef enum {
@@ -34,7 +33,6 @@ typedef enum {
 
 typedef union {
     float f;
-    int i;
 } sim_value_t;
 
 typedef struct {

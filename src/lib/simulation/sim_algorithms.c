@@ -34,17 +34,9 @@ sim_value_t sim_algo_sine_wave(sim_field_t* field, float current_time) {
     // Calculate sine wave value
     float elapsed_time = current_time - field->start_time;
     float sine_value = base + amp * sinf((elapsed_time * freq) + phase);
-    
-    // Convert to appropriate type
-    switch (field->type) {
-        case SIM_TYPE_FLOAT:
-            result.f = sine_value;
-            break;
-        case SIM_TYPE_INT:
-            result.i = (int)roundf(sine_value);
-            break;
-    }
-    
+
+    result.f = sine_value;
+
     return result;
 }
 
@@ -80,17 +72,9 @@ sim_value_t sim_algo_linear_decay(sim_field_t* field, float current_time) {
     
     // Linear interpolation from start to end
     float current_value = start_val + (end_val - start_val) * progress;
-    
-    // Convert to appropriate type
-    switch (field->type) {
-        case SIM_TYPE_FLOAT:
-            result.f = current_value;
-            break;
-        case SIM_TYPE_INT:
-            result.i = (int)roundf(current_value);
-            break;
-    }
-    
+
+    result.f = current_value;
+
     return result;
 }
 
@@ -124,17 +108,9 @@ sim_value_t sim_algo_linear_growth(sim_field_t* field, float current_time) {
     if (current_value > max_val) {
         current_value = max_val;
     }
-    
-    // Convert to appropriate type
-    switch (field->type) {
-        case SIM_TYPE_FLOAT:
-            result.f = current_value;
-            break;
-        case SIM_TYPE_INT:
-            result.i = (int)roundf(current_value);
-            break;
-    }
-    
+
+    result.f = current_value;
+
     return result;
 }
 
@@ -161,17 +137,9 @@ sim_value_t sim_algo_dependent_value(sim_field_t* field, float current_time, sim
     
     const char* formula_str = cJSON_GetStringValue(formula);
     float calculated_value = sim_algo_evaluate_formula(formula_str, engine);
-    
-    // Convert to appropriate type
-    switch (field->type) {
-        case SIM_TYPE_FLOAT:
-            result.f = calculated_value;
-            break;
-        case SIM_TYPE_INT:
-            result.i = (int)roundf(calculated_value);
-            break;
-    }
-    
+
+    result.f = calculated_value;
+
     return result;
 }
 
@@ -251,31 +219,15 @@ sim_value_t sim_algo_external_value(sim_field_t* field, float current_time, sim_
         token = strtok(NULL, ".");
     }
 
-    // Extract value and convert to appropriate type
+    // Extract value
     if (current_obj) {
         if (cJSON_IsNumber(current_obj)) {
             double value = cJSON_GetNumberValue(current_obj);
-
-            switch (field->type) {
-                case SIM_TYPE_FLOAT:
-                    result.f = (float)value;
-                    break;
-                case SIM_TYPE_INT:
-                    result.i = (int)round(value);
-                    break;
-            }
+            result.f = (float)value;
         } else if (cJSON_IsBool(current_obj)) {
             // Convert boolean to number (true = 1.0, false = 0.0)
             double value = cJSON_IsTrue(current_obj) ? 1.0 : 0.0;
-
-            switch (field->type) {
-                case SIM_TYPE_FLOAT:
-                    result.f = (float)value;
-                    break;
-                case SIM_TYPE_INT:
-                    result.i = (int)value;
-                    break;
-            }
+            result.f = (float)value;
         } else {
             printf("Warning: Field '%s' in %s is not a number or boolean\n", field_path, full_path);
         }

@@ -26,7 +26,7 @@ function onload() {
  * Fetches the latest EVA and ROVER data and updates the DOM elements accordingly.
  * In the html, there is a data-path attribute on the elements that basically registers that field as needing to be updated with data from the server
  * The path specifies where in the JSON data the value can be found, e.g. "eva.telemetry.eva1.temperature" or "rover.pr_telemetry.battery_voltage"
- * 
+ *
  * Note: this is a bit of a hodgepodge to mantain backwards compatibility with the old system e.g. timers, boolean switches, etc
  */
 async function fetchData() {
@@ -41,29 +41,31 @@ async function fetchData() {
     const timeoutIds = [
       setTimeout(() => evaController.abort(), 2000),
       setTimeout(() => roverController.abort(), 2000),
-      setTimeout(() => ltvController.abort(), 2000)
+      setTimeout(() => ltvController.abort(), 2000),
     ];
 
     // Fetch EVA, ROVER, and LTV data simultaneously
     const [evaResponse, roverResponse, ltvResponse] = await Promise.all([
       fetch(`/data/EVA.json`, { signal: evaController.signal }),
       fetch(`/data/ROVER.json`, { signal: roverController.signal }),
-      fetch(`/data/LTV.json`, { signal: ltvController.signal })
+      fetch(`/data/LTV.json`, { signal: ltvController.signal }),
     ]);
 
     // Clear timeouts on successful response
-    timeoutIds.forEach(id => clearTimeout(id));
+    timeoutIds.forEach((id) => clearTimeout(id));
 
     [evaData, roverData, ltvData] = await Promise.all([
       evaResponse.json(),
       roverResponse.json(),
-      ltvResponse.json()
+      ltvResponse.json(),
     ]);
 
     connectionFails = 0;
-    dustConnected = roverData?.pr_telemetry?.dust_connected || false;
+    dustConnected =
+      (roverData?.pr_telemetry?.dust_connected && connectionFails <= 2) ||
+      false;
   } catch (error) {
-    console.error('Fatal error fetching data:', error);
+    console.error("Fatal error fetching data:", error);
     connectionFails++;
     return;
   }
@@ -150,9 +152,8 @@ async function updateServerData(path, value) {
       },
       body: params,
     });
-
   } catch (error) {
-    console.error('Fatal error updating server data:', error);
+    console.error("Fatal error updating server data:", error);
   }
 }
 
@@ -204,7 +205,6 @@ function setupEventListeners() {
       }
     });
   });
-
 }
 
 // HELPER FUNCTIONS
@@ -233,7 +233,9 @@ function formatTime(seconds) {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(
+    s
+  ).padStart(2, "0")}`;
 }
 
 /**
@@ -292,8 +294,10 @@ function updateClock() {
 function updateTelemetryStatus() {
   const statusElement = document.getElementById("telemetry-status");
   if (statusElement) {
-    const isConnected = (connectionFails <= 2);
-    const statusText = isConnected ? "Telemetry Connected" : "Telemetry Disconnected";
+    const isConnected = connectionFails <= 2;
+    const statusText = isConnected
+      ? "Telemetry Connected"
+      : "Telemetry Disconnected";
     statusElement.innerHTML = `● ${statusText}`;
     statusElement.style.color = isConnected ? "#28ae5f" : "#d82121ff";
   }
@@ -305,8 +309,8 @@ function updateTelemetryStatus() {
 function updateDustStatus() {
   const statusElement = document.getElementById("dust-status");
   if (statusElement) {
-    const statusText = (dustConnected && isConnected) ? "DUST Connected" : "DUST Disconnected"; // make sure that TSS is connected too to show that DUST is connected
+    const statusText = dustConnected ? "DUST Connected" : "DUST Disconnected"; // make sure that TSS is connected too to show that DUST is connected
     statusElement.innerHTML = `● ${statusText}`;
-    statusElement.style.color = (dustConnected && isConnected) ? "#28ae5f" : "#3889abff";
+    statusElement.style.color = dustConnected ? "#28ae5f" : "#3889abff";
   }
 }
