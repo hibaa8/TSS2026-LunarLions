@@ -125,6 +125,8 @@ int main(int argc, char *argv[]) {
 
             get_contents(client->udp_request, &time, &command, data, received_bytes);
 
+            // @TODO the code below could definitely be simplified further, although for the sake of clarity it's left as is for now
+
             // Process UDP command based on command range
             if (command < 1000) {  // GET & DUST requests
                 unsigned char *response_buffer;
@@ -192,6 +194,7 @@ int main(int argc, char *argv[]) {
                 // Note, the PR pitch value (1116) should be updated every second, if not, then we'll know that DUST is disconnected
                 if (command == 1116) {
                     last_dust_message_time = get_wall_clock(&profile_context);
+                    printf("Received DUST Unreal throttle command, updating last message time to %.2f\n", last_dust_message_time);
                 }
 
                 bool result = handle_udp_post_request(command, (unsigned char *)data, backend);
@@ -210,7 +213,6 @@ int main(int argc, char *argv[]) {
                 unreal_addr = client->udp_addr;
                 unreal_addr_len = client->address_length;
                 unreal = true;
-                last_dust_message_time = get_wall_clock(&profile_context);
 
                 printf("Unreal address set to %s:%d\n", inet_ntoa(client->udp_addr.sin_addr),
                        ntohs(client->udp_addr.sin_port));
@@ -235,10 +237,8 @@ int main(int argc, char *argv[]) {
             double time_since_last_message = time_end - last_dust_message_time;
             if (time_since_last_message > 3.0) { // timeout after 3 seconds
                 update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
-                printf("Lost connection to DUST Unreal simulation with time: %.2f\n", time_since_last_message);
             } else {
                 update_json_file("ROVER", "pr_telemetry", "dust_connected", "true");
-                printf("DUST Unreal simulation is connected with time: %.2f\n", time_since_last_message);
             }
         }
 
