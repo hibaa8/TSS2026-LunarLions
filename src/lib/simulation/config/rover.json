@@ -169,7 +169,7 @@
     "external_temp": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "-173.0 + sunlight * 300.0",
+      "formula": "-173.0 + sunlight * 3.0",
       "depends_on": ["sunlight"]
     },
     "coolant_storage": {

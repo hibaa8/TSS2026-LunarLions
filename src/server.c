@@ -206,9 +206,6 @@ int main(int argc, char *argv[]) {
                 unreal = true;
                 last_dust_message_time = get_wall_clock(&profile_context);
 
-                printf("Unreal address set to %s:%d\n", inet_ntoa(client->udp_addr.sin_addr),
-                       ntohs(client->udp_addr.sin_port));
-
                 drop_udp_client(&udp_clients, client);
             } else {  // Unknown command
                 drop_udp_client(&udp_clients, client);

@@ -170,7 +170,7 @@ The first three are quite basic and used for extremely simple time based telemet
 
 Instead of hardcoding every field that we wanted to simulate, we opted to create a format that was easily configurable. This took the form of JSON files that live within a <a href="/src/lib/simulation/config">config folder</a> in the root of the simulation library folder. Each file is representative of a single "component" that you want to simulate; in our case that would be `rover`, `eva1`, and `eva2`. Below is an example of a config file with some of the supported algorithms mentioned above:
 
-NOTE: For custom algorithms, to support order of operations with parentheses, the parser was implented with the expectation that everything would have a space in between it including parentheses. For example, you would write an equation like so: `( external_temp * 2 ) + 16`
+NOTE: For custom algorithms, to support order of operations with parentheses, the parser was implented with the expectation that everything would have a space in between it including parentheses. For example, you would write an equation like so: `( external_temp * 2 ) + 16
 
 ```json
 {
