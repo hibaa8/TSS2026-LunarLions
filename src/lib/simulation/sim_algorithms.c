@@ -320,74 +320,154 @@ bool sim_algo_validate_dependent_value_params(cJSON* params) {
 ///////////////////////////////////////////////////////////////////////////////////
 
 /**
+ * Returns operator precedence level for order of operations.
+ * Higher values indicate higher precedence.
+ *
+ * @param op Operator character (+, -, *, /)
+ * @return Precedence level (3 for * /, 2 for + -, 0 for others)
+ */
+static int get_precedence(char op) {
+    switch(op) {
+        case '*':
+        case '/':
+            return 3;
+        case '+':
+        case '-':
+            return 2;
+        default:
+            return 0;
+    }
+}
+
+/**
+ * Applies a binary operator to two operands
+ *
+ * @param op Operator character (+, -, *, /)
+ * @param a Left operand
+ * @param b Right operand
+ * @return Result of applying operator to operands
+ */
+static float apply_operator(char op, float a, float b) {
+    switch(op) {
+        case '+':
+            return a + b;
+        case '-':
+            return a - b;
+        case '*':
+            return a * b;
+        case '/':
+            return (b != 0.0f) ? a / b : 0.0f;
+        default:
+            return 0.0f;
+    }
+}
+
+/**
+ * Parses a token as either a numeric literal or field name lookup
+ *
+ * @param token Token string to parse
+ * @param engine Simulation engine for field value lookup
+ * @return Numeric value of token
+ */
+static float parse_token_value(const char* token, sim_engine_t* engine) {
+    if (isdigit(token[0]) || (token[0] == '-' && isdigit(token[1]))) {
+        return atof(token);
+    }
+    sim_value_t field_value = sim_engine_get_field_value(engine, token);
+    return field_value.f;
+}
+
+/**
  * Evaluates a mathematical formula string using current field values.
- * Supports basic arithmetic operations (+, -, *, /) with field name substitution.
- * Example: "heart_rate * 33.22114 - 2212.8225"
- * 
- * NOTE: Currently this does not support parentheses or proper order of operations. The formulas are evaluted purely from left to right.
- * 
+ * Supports arithmetic operations (+, -, *, /) and parentheses.
+ * Implements proper operator precedence (* / before + -) and parentheses grouping.
+ * Example: "90.0 + (temperature - 21.1) * 0.36"
+ *
  * @param formula String containing the mathematical formula to evaluate
  * @param engine Pointer to the simulation engine for field value lookup
  * @return Calculated result of the formula evaluation
  */
 float sim_algo_evaluate_formula(const char* formula, sim_engine_t* engine) {
     if (!formula || !engine) return 0.0f;
-    
+
+    // Stacks for two-stack algorithm
+    float value_stack[64];
+    int value_top = -1;
+
+    char op_stack[64];
+    int op_top = -1;
+
+    // Tokenize and process
     char* formula_copy = strdup(formula);
     char* token;
     char* rest = formula_copy;
-    
-    float result = 0.0f;
-    float current_value = 0.0f;
-    char operation = '+';
-    bool expecting_value = true;
-    
-    // Tokenize the formula
+
     while ((token = strtok_r(rest, " ", &rest))) {
-        if (expecting_value) {
-            // Check if token is a field name or a number
-            if (isdigit(token[0]) || (token[0] == '-' && isdigit(token[1]))) {
-                // It's a number
-                current_value = atof(token);
-            } else {
-                // It's a field name - look up its value
-                sim_value_t field_value = sim_engine_get_field_value(engine, token);
-                current_value = field_value.f;  // Assume float for formula calculations
-            }
-            
-            // Apply the operation
-            switch (operation) {
-                case '+':
-                    result += current_value;
-                    break;
-                case '-':
-                    result -= current_value;
-                    break;
-                case '*':
-                    result *= current_value;
-                    break;
-                case '/':
-                    if (current_value != 0.0f) {
-                        result /= current_value;
-                    }
-                    break;
-                default:
-                    result = current_value;
-                    break;
-            }
-            
-            expecting_value = false;
-        } else {
-            // Token should be an operator
-            if (strlen(token) == 1 && strchr("+-*/", token[0])) {
-                operation = token[0];
-                expecting_value = true;
-            }
+        // Skip commas
+        if (strcmp(token, ",") == 0) {
+            continue;
         }
+
+        // Handle opening parenthesis
+        if (token[0] == '(' && token[1] == '\0') {
+            op_stack[++op_top] = '(';
+            continue;
+        }
+
+        // Handle closing parenthesis
+        if (token[0] == ')' && token[1] == '\0') {
+            // Pop operators until '('
+            while (op_top >= 0 && op_stack[op_top] != '(') {
+                char op = op_stack[op_top--];
+                if (value_top < 1) break;  // Safety check
+                float b = value_stack[value_top--];
+                float a = value_stack[value_top--];
+                value_stack[++value_top] = apply_operator(op, a, b);
+            }
+
+            // Remove '(' from stack
+            if (op_top >= 0 && op_stack[op_top] == '(') {
+                op_top--;
+            }
+            continue;
+        }
+
+        // Handle operators
+        if (strlen(token) == 1 && strchr("+-*/", token[0])) {
+            char op = token[0];
+            int prec = get_precedence(op);
+
+            // Pop higher or equal precedence operators
+            while (op_top >= 0 && op_stack[op_top] != '(' &&
+                   get_precedence(op_stack[op_top]) >= prec) {
+                char prev_op = op_stack[op_top--];
+                if (value_top < 1) break;  // Safety check
+                float b = value_stack[value_top--];
+                float a = value_stack[value_top--];
+                value_stack[++value_top] = apply_operator(prev_op, a, b);
+            }
+
+            op_stack[++op_top] = op;
+            continue;
+        }
+
+        // Handle numbers and field names
+        float value = parse_token_value(token, engine);
+        value_stack[++value_top] = value;
     }
-    
+
+    // Pop remaining operators
+    while (op_top >= 0) {
+        char op = op_stack[op_top--];
+        if (op == '(') continue;  // Skip unmatched parens
+        if (value_top < 1) break;  // Safety check
+        float b = value_stack[value_top--];
+        float a = value_stack[value_top--];
+        value_stack[++value_top] = apply_operator(op, a, b);
+    }
+
     free(formula_copy);
-    return result;
+    return value_top >= 0 ? value_stack[value_top] : 0.0f;
 }
 
 /**

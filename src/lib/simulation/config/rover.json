@@ -125,7 +125,7 @@
       "algorithm": "linear_decay",
       "start_value": 100.0,
       "end_value": 20.0,
-      "duration_seconds": 675.0
+      "duration_seconds": 2000.0
     },
     "oxygen_pressure": {
       "type": "float",
@@ -157,27 +157,20 @@
     "cabin_temperature": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "external_temp * 0.15 + sunlight * 8.0 + cabin_heating * 15.0 - cabin_cooling * 10.0 + 20.0",
-      "depends_on": [
-        "external_temp",
-        "sunlight",
-        "cabin_heating",
-        "cabin_cooling"
-      ]
+      "formula": "external_temp * 0.15 + cabin_heating * 15.0 - cabin_cooling * 10.0 + 20.0",
+      "depends_on": ["external_temp", "cabin_heating", "cabin_cooling"]
     },
     "battery_level": {
       "type": "float",
-      "algorithm": "linear_decay",
-      "start_value": 100.0,
-      "end_value": 5.0,
-      "duration_seconds": 1200.0
+      "algorithm": "dependent_value",
+      "formula": "100.0 - rover_elapsed_time * ( 0.02857 + speed * 0.00508 )",
+      "depends_on": ["rover_elapsed_time", "speed"]
     },
     "external_temp": {
       "type": "float",
-      "algorithm": "sine_wave",
-      "base_value": -30.0,
-      "amplitude": 10.0,
-      "frequency": 0.0008
+      "algorithm": "dependent_value",
+      "formula": "-173.0 + sunlight * 300.0",
+      "depends_on": ["sunlight"]
     },
     "coolant_storage": {
       "type": "float",
@@ -189,15 +182,14 @@
       "type": "float",
       "algorithm": "sine_wave",
       "base_value": 500.0,
-      "amplitude": 2.0,
+      "amplitude": 1.0,
       "frequency": 0.01
     },
     "rover_elapsed_time": {
       "type": "float",
       "algorithm": "linear_growth",
       "start_value": 0,
-      "end_value": 100000,
-      "duration_seconds": 100000.0
+      "max_value": 100000.0
     },
     "signal_strength": {
       "type": "float",

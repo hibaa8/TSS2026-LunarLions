@@ -6,21 +6,21 @@
       "algorithm": "linear_decay",
       "start_value": 100,
       "end_value": 20,
-      "duration_seconds": 1500
+      "duration_seconds": 2000
     },
     "oxy_pri_storage": {
       "type": "float",
       "algorithm": "linear_decay",
       "start_value": 100,
-      "end_value": 15,
-      "duration_seconds": 1650
+      "end_value": 20,
+      "duration_seconds": 2500
     },
     "oxy_sec_storage": {
       "type": "float",
       "algorithm": "linear_decay",
       "start_value": 100,
-      "end_value": 15,
-      "duration_seconds": 1650
+      "end_value": 100,
+      "duration_seconds": 2500
     },
     "oxy_pri_pressure": {
       "type": "float",
@@ -37,19 +37,19 @@
     "heart_rate": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "90.0 + (temperature - 70.0) * 0.2",
+      "formula": "90.0 + ( temperature - 21.1 ) * 0.36",
       "depends_on": ["temperature"]
     },
     "oxy_consumption": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "0.08 + (heart_rate - 70.0) * 0.0008",
+      "formula": "0.08 + ( heart_rate - 70.0 ) * 0.0008",
       "depends_on": ["heart_rate"]
     },
     "co2_production": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "0.08 + (heart_rate - 70.0) * 0.0008",
+      "formula": "0.08 + ( heart_rate - 70.0 ) * 0.0008",
       "depends_on": ["heart_rate"]
     },
     "suit_pressure_oxy": {
@@ -121,8 +121,8 @@
     "temperature": {
       "type": "float",
       "algorithm": "sine_wave",
-      "base_value": 70,
-      "amplitude": 20,
+      "base_value": 21.1,
+      "amplitude": 5.1,
       "frequency": 0.018
     },
     "coolant_storage": {
@@ -134,8 +134,8 @@
     "coolant_gas_pressure": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "max(0, (temperature - 50.0) * 10.0)",
-      "depends_on": ["temperature"]
+      "formula": "0.0",
+      "depends_on": []
     },
     "coolant_liquid_pressure": {
       "type": "float",
