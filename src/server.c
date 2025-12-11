@@ -55,6 +55,7 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in unreal_addr;
     socklen_t unreal_addr_len;
     bool unreal = false;
+    double last_dust_message_time = 0.0;
 
     server = create_tcp_socket(hostname, port);
     udp_socket = create_udp_socket(hostname, port);
@@ -197,11 +198,13 @@ int main(int argc, char *argv[]) {
 
                 drop_udp_client(&udp_clients, client);
             } else if (command == 3000) {  // Unreal Engine registration (DUST simulation)
+                // This command number is sent every second, registering as a "heartbeat" for Unreal so we can display a connected status
 
                 // Set the Unreal Engine IP address so that can forward commands like brakes and throttle to the simulation
                 unreal_addr = client->udp_addr;
                 unreal_addr_len = client->address_length;
                 unreal = true;
+                last_dust_message_time = get_wall_clock(&profile_context);
 
                 printf("Unreal address set to %s:%d\n", inet_ntoa(client->udp_addr.sin_addr),
                        ntohs(client->udp_addr.sin_port));
@@ -220,6 +223,13 @@ int main(int argc, char *argv[]) {
             if (time_diff > UNREAL_UPDATE_INTERVAL_SEC) {
                 tss_to_unreal(udp_socket, unreal_addr, unreal_addr_len, backend);
                 time_begin = time_end;
+            }
+
+            double time_since_last_message = time_end - last_dust_message_time;
+            if (time_since_last_message > 3.0) { // timeout after 3 seconds
+                update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
+            } else {
+                update_json_file("ROVER", "pr_telemetry", "dust_connected", "true");
             }
         }
 

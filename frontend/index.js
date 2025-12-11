@@ -13,6 +13,7 @@ function onload() {
     fetchData();
     updateClock();
     updateTelemetryStatus();
+    updateDustStatus();
   }, 1000);
 
   // Set up event listeners for switches and buttons
@@ -295,5 +296,17 @@ function updateTelemetryStatus() {
     const statusText = isConnected ? "Telemetry Connected" : "Telemetry Disconnected";
     statusElement.innerHTML = `● ${statusText}`;
     statusElement.style.color = isConnected ? "#28ae5f" : "#d82121ff";
+  }
+}
+
+/**
+ * Updates the DUST connection status indicator in the navigation bar
+ */
+function updateDustStatus() {
+  const statusElement = document.getElementById("dust-status");
+  if (statusElement) {
+    const statusText = (dustConnected && isConnected) ? "DUST Connected" : "DUST Disconnected"; // make sure that TSS is connected too to show that DUST is connected
+    statusElement.innerHTML = `● ${statusText}`;
+    statusElement.style.color = (dustConnected && isConnected) ? "#28ae5f" : "#3889abff";
   }
 }
