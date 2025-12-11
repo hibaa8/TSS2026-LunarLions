@@ -174,7 +174,7 @@ bool handle_udp_post_request(unsigned int command, unsigned char* data, struct b
     sprintf(request_content, "%s=%s", mapping->path, value_str);
 
     // Reuse existing html_form_json_update function for all the JSON and simulation logic
-    printf("Processing UDP command %u: %s = %s\n", command, mapping->path, value_str);
+    //printf("Processing UDP command %u: %s = %s\n", command, mapping->path, value_str);
 
     bool result = html_form_json_update(request_content, backend);
 

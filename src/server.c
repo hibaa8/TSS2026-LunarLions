@@ -55,7 +55,6 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in unreal_addr;
     socklen_t unreal_addr_len;
     bool unreal = false;
-    double last_dust_message_time = 0.0;
 
     server = create_tcp_socket(hostname, port);
     udp_socket = create_udp_socket(hostname, port);
@@ -182,21 +181,11 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                printf("Received LIDAR data: %s\n", json_array);
-
                 // Update ROVER JSON with new LiDAR data
                 update_json_file("ROVER", "pr_telemetry", "lidar", json_array);
 
                 drop_udp_client(&udp_clients, client);
             } else if (command < 3000) {  // POST requests, primarily the TSS peripherals and DUST simulator (1000-2999)
-
-                // Check if command is standard DUST Unreal request (throttle), if so, update last message time to zero
-                // Note, the PR pitch value (1116) should be updated every second, if not, then we'll know that DUST is disconnected
-                if (command == 1116) {
-                    last_dust_message_time = get_wall_clock(&profile_context);
-                    printf("Received DUST Unreal throttle command, updating last message time to %.2f\n", last_dust_message_time);
-                }
-
                 bool result = handle_udp_post_request(command, (unsigned char *)data, backend);
 
                 // Send status of POST request back to client with just boolean response flag
@@ -231,14 +220,6 @@ int main(int argc, char *argv[]) {
             if (time_diff > UNREAL_UPDATE_INTERVAL_SEC) {
                 tss_to_unreal(udp_socket, unreal_addr, unreal_addr_len, backend);
                 time_begin = time_end;
-            }
-
-            // Check if DUST is still connected based on last message received
-            double time_since_last_message = time_end - last_dust_message_time;
-            if (time_since_last_message > 3.0) { // timeout after 3 seconds
-                update_json_file("ROVER", "pr_telemetry", "dust_connected", "false");
-            } else {
-                update_json_file("ROVER", "pr_telemetry", "dust_connected", "true");
             }
         }
 
@@ -484,7 +465,6 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     memcpy(buffer + 8, &steering, 4);
     sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
 
-
     // Send throttle command
     command = TSS_TO_UNREAL_THROTTLE_COMMAND;
     if (!big_endian())
@@ -503,7 +483,9 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
         memcpy(buffer, &time, 4);
         memcpy(buffer + 4, &command, 4);
         memcpy(buffer + 8, &ping, 4);
-        sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len);
+        if (sendto(socket, buffer, sizeof(buffer), 0, (struct sockaddr *)&address, len) == -1) {
+            perror("sendto for ping command failed");
+        }
 
         printf("Ping requested, sending Unreal ping command\n");
         update_json_file("LTV", "signal", "ping_requested", "0");
