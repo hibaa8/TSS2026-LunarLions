@@ -30,18 +30,22 @@ TSS (telemetry stream server) is the centralized server for sending and receivin
 ## Getting Started
 
 1. Clone the repository:
-
-`git clone https://github.com/SUITS-Techteam/TSS2026.git`
+```
+git clone https://github.com/SUITS-Techteam/TSS2026.git
+```
 
 2. Navigate into the root of the repository on your terminal of choice
 
 3. Allow the build script to be ran as an executable:
-
-`chmod +x ./build.bat`
+```
+chmod +x ./build.bat
+```
 
 4. To build the server, run:
-
-`./build.bat` **NOTE:** TSS only runs on UNIX based operating systems. If running on Windows, you will have to setup [WSL](https://learn.microsoft.com/en-us/windows/wsl/about) and install GCC. If you don't, several errors will be displayed when trying to build the server.
+```
+./build.bat
+``` 
+**NOTE:** TSS only runs on UNIX based operating systems. If running on Windows, you will have to setup [WSL](https://learn.microsoft.com/en-us/windows/wsl/about) and **MUST** [install GCC](https://code.visualstudio.com/docs/cpp/config-wsl#:~:text=From%20the%20WSL%20command%20prompt%2C%20first%20run). If you don't, several errors will be displayed when trying to build the server.
 
 5. To start the server, run:
 
