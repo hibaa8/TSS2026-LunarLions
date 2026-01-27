@@ -48,8 +48,9 @@ chmod +x ./build.bat
 **NOTE:** TSS only runs on UNIX based operating systems. If running on Windows, you will have to setup [WSL](https://learn.microsoft.com/en-us/windows/wsl/about) and **MUST** [install GCC](https://code.visualstudio.com/docs/cpp/config-wsl#:~:text=From%20the%20WSL%20command%20prompt%2C%20first%20run). If you don't, several errors will be displayed when trying to build the server.
 
 5. To start the server, run:
-
-`./server.exe`
+```
+./server.exe
+```
 
 You should see the following lines in your terminal appear:
 
@@ -65,7 +66,7 @@ Listening to UDP Socket...
 Backend and simulation engine initialized successfully
 ```
 
-6. Type the IP address printed in the first output for "Launching Server at IP: xxx.xx.xxx.xx:14141". This will open the website for the server. From this website, you can interact with the server. This is where you can monitor the state of the simulation, verify the display of your system, and virtually interact with the EVA devices like you will be using during test week.
+6. Type the IP address printed in the first output for `Launching Server at IP: xxx.xx.xxx.xx:14141`. This will open the website for the server. From this website, you can interact with the server. This is where you can monitor the state of the simulation, verify the display of your system, and virtually interact with the EVA devices like you will be using during test week.
 
 ![Image of the user interface of the main page of TSS](frontend/images/tss-main-page.png)
 
