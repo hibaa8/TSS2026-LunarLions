@@ -111,6 +111,9 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {2021, "eva.imu.eva2.posy", "float"},
     {2022, "eva.imu.eva2.heading", "float"},
 
+    //RTB command
+    {2023, "ltv.errors.test", "bool"},
+
     // Ping LTV command
     {2050, "ltv.signal.ping_requested", "bool"},
 

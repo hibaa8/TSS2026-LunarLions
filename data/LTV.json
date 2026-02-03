@@ -9,9 +9,6 @@
 		"ping_requested":	false
 	},
 	"errors":	{
-		"fuse_error":	false,
-		"comms_error":	false,
-		"power_error":	false,
-		"guidance_error":	false
+		"test":	false
 	}
 }
