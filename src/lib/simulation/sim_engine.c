@@ -384,10 +384,13 @@ bool sim_engine_initialize(sim_engine_t* engine) {
 
         
         //set active to true by default, will be set to false for fields that depend on DCU commands until the correct command is received
-        if(strncmp(field->field_name, "primary_battery_level", 19) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == false)) {
+        if(strncmp(field->field_name, "primary_battery_level", 19) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == true)) {
             field->active = false;
-            printf("Field %s.%s set to inactive due to DCU settings\n", field->component_name, field->field_name);
+        } else if(strncmp(field->field_name, "secondary_battery_level", 21) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == false)) {
+            field->active = false;
         }
+
+
 
 
         field->initialized = true;
@@ -477,7 +480,9 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
         //set active to true by default, will be set to false for fields that depend on DCU commands until the correct command is received
         if(strncmp(field->field_name, "primary_battery_level", 19) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == true)) {
             field->active = false;
-        } else if(strncmp(field->field_name, "primary_battery_level", 19) == 0) {
+        } else if(strncmp(field->field_name, "secondary_battery_level", 21) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == false)) {
+            field->active = false;
+        } else {
             field->active = true;
         }
     }

@@ -26,9 +26,6 @@ struct backend_data_t *init_backend() {
     backend->running_pr_sim = -1;
     backend->pr_sim_paused = false;
 
-    //determine when to throw error and which error to throw for this run
-
-
     // Initialize simulation engine
     backend->sim_engine = sim_engine_create();
     if (backend->sim_engine) {

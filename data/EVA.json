@@ -5,7 +5,7 @@
 			"secondary_battery_level":	100,
 			"oxy_pri_storage":	100,
 			"oxy_sec_storage":	100,
-			"oxy_pri_pressure":	2692.223876953125,
+			"oxy_pri_pressure":	0,
 			"oxy_sec_pressure":	0,
 			"suit_pressure_oxy":	4,
 			"suit_pressure_co2":	0.05000000074505806,
@@ -61,7 +61,7 @@
 			"pump":	true,
 			"co2":	true,
 			"batt":	{
-				"lu":	true,
+				"lu":	false,
 				"ps":	true
 			}
 		},
