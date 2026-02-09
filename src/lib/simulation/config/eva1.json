@@ -1,7 +1,14 @@
 {
   "component_name": "eva1",
   "fields": {
-    "battery_level": {
+    "primary_battery_level": {
+      "type": "float",
+      "algorithm": "linear_decay",
+      "start_value": 100,
+      "end_value": 20,
+      "duration_seconds": 2000
+    },
+    "secondary_battery_level": {
       "type": "float",
       "algorithm": "linear_decay",
       "start_value": 100,

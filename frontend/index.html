@@ -440,13 +440,102 @@
                                 <div class="card-content">
                                     <div class="sensor-container">
                                         <label class="switch">
-                                            <input type="checkbox" data-path="ltv.errors.test">
+                                            <input type="checkbox" data-path="ltv.errors.dust_sensor">
                                             <span class="slider round"></span>
                                         </label>
                                     </div>
                                     <div class="data-label">
                                         <span class="value">
-                                            Test Error
+                                            Dust Sensor Error
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" data-path="ltv.errors.power_module">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Power Module Error
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" data-path="ltv.errors.NAV_system">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            NAV System Error
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" data-path="ltv.errors.lidar_sensor">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Lidar Sensor Error
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" data-path="ltv.errors.ultrasonic_sensor">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Ultrasonic Sensor Error
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" data-path="ltv.errors.gyroscope_sensor">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Gyroscope Sensor Error
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" data-path="ltv.errors.potentiometer_sensor">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Potentiometer Sensor Error
+                                        </span>
+                                    </div>
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" data-path="ltv.errors.electronic_heater">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Electronic Heater Error
                                         </span>
                                     </div>
                                 </div>
@@ -762,14 +851,28 @@
                                 <div class="card-content">
                                     <div class="telemetry-label">
                                         <span class="telemetry-data">
-                                            Battery Level
+                                            Primary Battery Level
                                         </span>
                                     </div>
                                     <div class="telemetry-value">
-                                        <span class="telemetry-data" data-path="eva.telemetry.eva1.battery_level" data-units="%">
+                                        <span class="telemetry-data" data-path="eva.telemetry.eva1.primary_battery_level" data-units="%">
                                             ------
                                         </span>
                                     </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
+                                            Secondary Battery Level
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span class="telemetry-data" data-path="eva.telemetry.eva1.secondary_battery_level" data-units="%">
+                                            ------
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
                                     <div class="telemetry-label">
                                         <span class="telemetry-data">
                                             Primary O2 Storage
@@ -780,10 +883,6 @@
                                             ------
                                         </span>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="card-content">
                                     <div class="telemetry-label">
                                         <span class="telemetry-data">
                                             Secondary O2 Storage
@@ -794,6 +893,10 @@
                                             ------
                                         </span>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-content">
                                     <div class="telemetry-label">
                                         <span class="telemetry-data">
                                             Primary O2 Pressure
@@ -804,10 +907,6 @@
                                             ------
                                         </span>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="card-content">
                                     <div class="telemetry-label">
                                         <span class="telemetry-data">
                                             Secondary O2 Pressure
@@ -815,16 +914,6 @@
                                     </div>
                                     <div class="telemetry-value">
                                         <span class="telemetry-data" data-path="eva.telemetry.eva1.oxy_sec_pressure" data-units="psi">
-                                            ------
-                                        </span>
-                                    </div>
-                                    <div class="telemetry-label">
-                                        <span class="telemetry-data">
-                                            Coolant Storage
-                                        </span>
-                                    </div>
-                                    <div class="telemetry-value">
-                                        <span class="telemetry-data" data-path="eva.telemetry.eva1.coolant_storage" data-units="%">
                                             ------
                                         </span>
                                     </div>
@@ -1002,20 +1091,22 @@
                                 <div class="card-content">
                                     <div class="telemetry-label">
                                         <span class="telemetry-data">
+                                            Coolant Storage
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-value">
+                                        <span class="telemetry-data" data-path="eva.telemetry.eva1.coolant_storage" data-units="%">
+                                            ------
+                                        </span>
+                                    </div>
+                                    <div class="telemetry-label">
+                                        <span class="telemetry-data">
                                             Coolant Gas Pressure
                                         </span>
                                     </div>
                                     <div class="telemetry-value">
                                         <span class="telemetry-data" data-path="eva.telemetry.eva1.coolant_gas_pressure" data-units="psi">
                                             ------
-                                        </span>
-                                    </div>
-                                         <div class="telemetry-label">
-                                        <span class="telemetry-data">
-                                        </span>
-                                    </div>
-                                    <div class="telemetry-value">
-                                        <span id="scrubberBPressure2" class="telemetry-data">
                                         </span>
                                     </div>
                                 </div>
@@ -1090,7 +1181,7 @@
                                         <div class="dcu-switch-container">
                                             <span class="dcu-label-left">LOCAL</span>
                                             <label class="switch">
-                                                <input type="checkbox" data-path="eva.dcu.eva1.batt">
+                                                <input type="checkbox" data-path="eva.dcu.eva1.batt.lu">
                                                 <span class="slider round"></span>
                                             </label>
                                             <span class="dcu-label-right">UMB</span>
@@ -1150,13 +1241,13 @@
                                         <div class="dcu-switch-container">
                                             <span class="dcu-label-left">SEC</span>
                                             <label class="switch">
-                                                <input type="checkbox" data-path="eva.dcu.eva1.comm">
+                                                <input type="checkbox" data-path="eva.dcu.eva1.batt.ps">
                                                 <span class="slider round"></span>
                                             </label>
                                             <span class="dcu-label-right">PRI</span>
                                         </div>
                                         <div class="dcu-control-label">
-                                            <span class="info-text">COMMS</span>
+                                            <span class="info-text">BATTERY</span>
                                         </div>
                                     </div>
                                     <div class="dcu-control-row">

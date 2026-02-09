@@ -26,6 +26,7 @@ typedef enum {
 typedef enum {
     SIM_ALGO_SINE_WAVE,
     SIM_ALGO_LINEAR_DECAY,
+    SIM_ALGO_RAPID_LINEAR_DECAY,
     SIM_ALGO_LINEAR_GROWTH,
     SIM_ALGO_DEPENDENT_VALUE,
     SIM_ALGO_EXTERNAL_VALUE
@@ -51,6 +52,8 @@ typedef struct {
     int depends_count;
 
     // Internal state for algorithms
+    float run_time; //active time since component started
+    bool active; //whether the field should be actively updating (used for fields that depend on DCU commands)
     float start_time;
     bool initialized;
 } sim_field_t;
@@ -64,11 +67,24 @@ typedef struct {
 } sim_component_t;
 
 typedef struct {
+    bool battery_lu;
+    bool battery_ps;
+    bool fan;
+    bool o2;
+} sim_DCU_field_settings_t;
+
+typedef struct {
     sim_component_t* components;
     int component_count;
 
     sim_field_t** update_order;  // Fields sorted by dependencies
     int total_field_count;
+
+    //error throwing variables
+    int error_time;
+    int error_type;
+
+    sim_DCU_field_settings_t* dcu_field_settings;
 
     bool initialized;
 } sim_engine_t;
@@ -99,7 +115,11 @@ sim_value_t sim_engine_get_field_value(sim_engine_t* engine, const char* field_n
 // Component status
 bool sim_engine_is_component_running(sim_engine_t* engine, const char* component_name);
 
+//Get Component
+sim_component_t* sim_engine_get_component(sim_engine_t* engine, const char* component_name);
+
 // Utility functions
 sim_field_t* sim_engine_find_field(sim_engine_t* engine, const char* field_name);
+sim_field_t* sim_engine_find_field_within_component(sim_component_t* component, const char* field_name);
 
 #endif // SIM_ENGINE_H

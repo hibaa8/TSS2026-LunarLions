@@ -1,5 +1,6 @@
 #include "sim_engine.h"
 #include "sim_algorithms.h"
+#include "throw_errors.h"
 #include <string.h>
 #include <math.h>
 #ifdef _WIN32
@@ -64,6 +65,7 @@ void sim_engine_destroy(sim_engine_t* engine) {
     
     free(engine->components);
     free(engine->update_order);
+    free(engine->dcu_field_settings);
     free(engine);
 }
 
@@ -227,6 +229,8 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
             field->depends_on = NULL;
         }
 
+        field->run_time = 0.0f; 
+        field->active = true; //active by default, can be deactivated by DCU commands for certain fields
         field->initialized = false;
         field_idx++;
     }
@@ -344,6 +348,21 @@ bool sim_engine_initialize(sim_engine_t* engine) {
     if (!sort_fields_by_dependencies(engine)) {
         return false;
     }
+
+    //initialize the DCU field settings
+        engine->dcu_field_settings = malloc(sizeof(sim_DCU_field_settings_t));
+        engine->dcu_field_settings->battery_lu = false;
+        engine->dcu_field_settings->battery_ps = false;
+        engine->dcu_field_settings->fan = false;
+        engine->dcu_field_settings->o2 = false;
+        printf("DCU field settings initialized\n");
+
+    engine->error_time = 10; // force error at 10 seconds for testing purposes
+        printf("Error time set to: %d\n", engine->error_time);
+        //engine->error_time = time_to_throw_error();
+        engine->error_type = 0; // force pressure error for testing purposes
+        //engine->error_type = error_to_throw();
+        printf("Error type set to: %d\n", engine->error_type);
     
     // Initialize all fields
     for (int i = 0; i < engine->total_field_count; i++) {
@@ -359,6 +378,18 @@ bool sim_engine_initialize(sim_engine_t* engine) {
         }
 
         field->start_time = component ? component->simulation_time : 0.0f;
+
+        field->run_time = 0.0f;
+
+
+        
+        //set active to true by default, will be set to false for fields that depend on DCU commands until the correct command is received
+        if(strncmp(field->field_name, "primary_battery_level", 19) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == false)) {
+            field->active = false;
+            printf("Field %s.%s set to inactive due to DCU settings\n", field->component_name, field->field_name);
+        }
+
+
         field->initialized = true;
         
         // Set initial values based on algorithm
@@ -408,6 +439,8 @@ bool sim_engine_initialize(sim_engine_t* engine) {
 /**
  * Updates the simulation by one time step.
  * Advances simulation time and updates all fields in dependency order.
+ * Throws error if battery voltage drops below 20% and
+ * Throws pressure or fan error *randomly* once per 7 minutes of simulation time to simulate real-world issues.
  * Call this regularly to advance the simulation.
  * 
  * @param engine Pointer to the simulation engine
@@ -423,6 +456,49 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
         }
     }
 
+    //Next, advance simulation time for all fields that are running
+    for(int i = 0; i < engine->total_field_count; i++) {
+        sim_field_t* field = engine->update_order[i];
+
+        // Find the component this field belongs to
+        sim_component_t* component = NULL;
+        for (int j = 0; j < engine->component_count; j++) {
+            if (strcmp(engine->components[j].component_name, field->component_name) == 0) {
+                component = &engine->components[j];
+                break;
+            }
+        }
+
+        // Only update run_time if component is running
+        if (component && component->running && field->active) {
+            field->run_time += delta_time;
+        }
+
+        //set active to true by default, will be set to false for fields that depend on DCU commands until the correct command is received
+        if(strncmp(field->field_name, "primary_battery_level", 19) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == true)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "primary_battery_level", 19) == 0) {
+            field->active = true;
+        }
+    }
+    
+    //determine if we need to throw additional errors
+    bool eva_control_started = sim_engine_is_component_running(engine, "eva1");
+    sim_component_t* eva1 = sim_engine_get_component(engine, "eva1");
+
+    if(eva_control_started) {
+        if(eva1 != NULL) {
+            if(eva1->simulation_time == engine->error_time) {
+                throw_error(engine);
+                printf("Error thrown at simulation time: %.2f seconds\n", eva1->simulation_time);
+            }
+        } else {
+            printf("Simulation tried to access non-existent component 'eva1'\n");
+            exit(0);
+        }
+    }
+
+
     // Update all fields in dependency order (only for running components)
     for (int i = 0; i < engine->total_field_count; i++) {
         sim_field_t* field = engine->update_order[i];
@@ -436,7 +512,7 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
             }
         }
 
-        // Only update if component is running
+        // Only update if component is running and DCU in correct state (if field depends on DCU commands)
         if (!component || !component->running) continue;
 
         field->previous_value = field->current_value;
@@ -446,7 +522,10 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
                 field->current_value = sim_algo_sine_wave(field, component->simulation_time);
                 break;
             case SIM_ALGO_LINEAR_DECAY:
-                field->current_value = sim_algo_linear_decay(field, component->simulation_time);
+                field->current_value = sim_algo_linear_decay(field, field->run_time);
+                break;
+            case SIM_ALGO_RAPID_LINEAR_DECAY:
+                field->current_value = sim_algo_rapid_linear_decay(field, component->simulation_time);
                 break;
             case SIM_ALGO_LINEAR_GROWTH:
                 field->current_value = sim_algo_linear_growth(field, component->simulation_time);
@@ -655,6 +734,26 @@ sim_field_t* sim_engine_find_field(sim_engine_t* engine, const char* field_name)
 }
 
 /**
+ * Finds a field by name across a specific component.
+ * Searches through components to find a field with the given name.
+ * 
+ * @param engine Pointer to the component to search within
+ * @param field_name Name of the field to find
+ * @return Pointer to the field if found, NULL otherwise
+ */
+sim_field_t* sim_engine_find_field_within_component(sim_component_t* component, const char* field_name) {
+    if (!component || !field_name) return NULL;
+    
+    for (int j = 0; j < component->field_count; j++) {
+        if (strcmp(component->fields[j].field_name, field_name) == 0) {
+                return &component->fields[j];
+            }
+    }
+    
+    return NULL;
+}
+
+/**
  * Gets the current value of a field by name.
  * 
  * @param engine Pointer to the simulation engine
@@ -668,6 +767,24 @@ sim_value_t sim_engine_get_field_value(sim_engine_t* engine, const char* field_n
     if (!field) return empty;
     
     return field->current_value;
+}
+
+/**
+* Returns a specific component from the simulation engine by name.
+* @param engine Pointer to the simulation engine
+* @param component_name Name of the component to retrieve
+* @return Pointer to the component if found, NULL otherwise
+*/
+sim_component_t* sim_engine_get_component(sim_engine_t* engine, const char* component_name) {
+    if (!engine || !component_name) return NULL;
+
+    for (int i = 0; i < engine->component_count; i++) {
+        if (strcmp(engine->components[i].component_name, component_name) == 0) {
+            return &engine->components[i];
+        }
+    }
+
+    return NULL;
 }
 
 /**

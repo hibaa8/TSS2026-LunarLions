@@ -40,14 +40,7 @@ sim_value_t sim_algo_sine_wave(sim_field_t* field, float current_time) {
     return result;
 }
 
-/**
- * Llinear decay algorithm for decreasing values over time.
- * Values decrease linearly from start_value to end_value over duration_seconds.
- * 
- * @param field Pointer to the field containing algorithm parameters
- * @param current_time Current simulation time in seconds
- * @return Calculated value based on linear interpolation
- */
+
 sim_value_t sim_algo_linear_decay(sim_field_t* field, float current_time) {
     sim_value_t result = {0};
     
@@ -61,6 +54,46 @@ sim_value_t sim_algo_linear_decay(sim_field_t* field, float current_time) {
     float start_val = start_value && cJSON_IsNumber(start_value) ? (float)cJSON_GetNumberValue(start_value) : 100.0f;
     float end_val = end_value && cJSON_IsNumber(end_value) ? (float)cJSON_GetNumberValue(end_value) : 0.0f;
     float duration_sec = duration && cJSON_IsNumber(duration) ? (float)cJSON_GetNumberValue(duration) : 1.0f;
+    
+    // Calculate current progress (0.0 to 1.0)
+    float elapsed_time = current_time - field->start_time;
+    float progress = elapsed_time / duration_sec;
+    
+    // Clamp progress between 0 and 1
+    if (progress < 0.0f) progress = 0.0f;
+    if (progress > 1.0f) progress = 1.0f;
+    
+    // Linear interpolation from start to end
+    float current_value = start_val + (end_val - start_val) * progress;
+
+    result.f = current_value;
+
+    return result;
+}
+
+/** 
+* Linear decay algorithm for rapid decreasing values over time.
+ * Values decrease linearly from start_value to end_value over duration_seconds.
+ * 
+ * @param field Pointer to the field containing algorithm parameters
+ * @param current_time Current simulation time in seconds
+ * @return Calculated value based on rapid linear decay
+*/
+sim_value_t sim_algo_rapid_linear_decay(sim_field_t* field, float current_time) {
+    sim_value_t result = {0};
+    
+    if (!field || !field->params) return result;
+    
+    // Get parameters
+    static float start_val = 0.0f; 
+    static bool initialized = false;
+
+    if(!initialized) {
+        start_val = field->current_value.f; 
+        initialized = true;
+    }
+    float end_val = 0.0f;
+    float duration_sec = 10.0f;
     
     // Calculate current progress (0.0 to 1.0)
     float elapsed_time = current_time - field->start_time;
@@ -142,6 +175,16 @@ sim_value_t sim_algo_dependent_value(sim_field_t* field, float current_time, sim
 
     return result;
 }
+
+/**
+ * Implements error value algorithm for 
+ * Evaluates a mathematical formula using values from other fields as inputs.
+ * 
+ * @param field Pointer to the field containing algorithm parameters
+ * @param current_time Current simulation time in seconds (unused for dependent values)
+ * @param engine Pointer to the simulation engine for accessing other field values
+ * @return Calculated value based on formula evaluation
+ */
 
 /**
  * External value algorithm for fetching values from data JSON files.

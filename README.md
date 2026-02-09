@@ -103,7 +103,7 @@ The display and control unit (DCU) used for this challenge is a component that a
 | ------- | ---------- | --------------- | ----------------------------------------------------------------------------------------------------- |
 | BATTERY | SUIT BATT  | UMBILICAL POWER | Describes if the suit is running off its local battery or UIA power                                   |
 | OXYGEN  | PRI TANK   | SEC TANK        | Describes if the suit is pulling from primary or secondary oxygen tanks                               |
-| COMMS   | Channel A  | Channel B       | Describes if the suit is connected to Channel A or Channel B on comms                                 |
+| BATTERY   | PRI BATT  | SEC BATT       | Describes if the suit is connected to primary or secondary battery                                 |
 | FAN     | PRI FAN    | SEC FAN         | Describes if the suit is using the primary fan or secondary fan                                       |
 | PUMP    | OPEN       | CLOSED          | Describes if the coolant pump for the suit is open or closed (allows water to be flushed or supplied) |
 | CO2     | Scrubber A | Scrubber B      | Describes which scrubber is currently filling with CO2 (other is venting)                             |

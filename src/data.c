@@ -1,4 +1,5 @@
 #include "data.h"
+#include "lib/simulation/throw_errors.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -24,6 +25,9 @@ struct backend_data_t *init_backend() {
     backend->start_time = time(NULL);
     backend->running_pr_sim = -1;
     backend->pr_sim_paused = false;
+
+    //determine when to throw error and which error to throw for this run
+
 
     // Initialize simulation engine
     backend->sim_engine = sim_engine_create();
@@ -60,13 +64,14 @@ void increment_simulation(struct backend_data_t *backend) {
 
     // Update simulation engine once per second
     if (time_incremented) {
+
         // Update simulation engine with elapsed time
         float delta_time = 1.0f;  // 1 second per update
-
         if (backend->sim_engine) {
+            //update simulation engine DCU field settings based on the new values received from UDP commands
+            update_sim_DCU_field_settings(backend->sim_engine);
             sim_engine_update(backend->sim_engine, delta_time);
         }
-
         // Update EVA station timing
         update_eva_station_timing();
     }
@@ -694,6 +699,31 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
         return false;
     }
 }
+
+/**
+* Updates sim_DCU_field_settings based on the current state of the DCU station
+* @param sim_engine Pointer to the simulation engine
+*/
+void update_sim_DCU_field_settings(sim_engine_t* sim_engine) {
+    if (!sim_engine || !sim_engine->dcu_field_settings) {
+        return;
+    }
+
+    sim_DCU_field_settings_t* settings = sim_engine->dcu_field_settings;
+
+    // Update battery_lu setting
+    settings->battery_lu = (get_field_from_json("EVA", "dcu.eva1.batt.lu", 0.0) == 1.0);
+
+    // Update battery_ps setting
+    settings->battery_ps = (get_field_from_json("EVA", "dcu.eva1.batt.ps", 0.0) == 1.0);
+
+    // Update fan setting
+    settings->fan = (get_field_from_json("EVA", "dcu.eva1.fan", 0.0) == 1.0);
+
+    // Update o2 setting
+    settings->o2 = (get_field_from_json("EVA", "dcu.eva1.o2", 0.0) == 1.0);
+}
+
 
 /**
  * Gets a field value from a JSON file using a dot-separated path
