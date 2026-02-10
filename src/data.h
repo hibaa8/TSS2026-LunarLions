@@ -99,7 +99,7 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     // DCU commands (sent from the peripheral device over UDP)
     {2011, "eva.dcu.eva1.batt.lu", "bool"},
     {2012, "eva.dcu.eva1.oxy", "bool"},
-    {2013, "eva.dcu.eva1.ps", "bool"},
+    {2013, "eva.dcu.eva1.batt.ps", "bool"},
     {2014, "eva.dcu.eva1.fan", "bool"},
     {2015, "eva.dcu.eva1.pump", "bool"},
     {2016, "eva.dcu.eva1.co2", "bool"},

@@ -5,22 +5,23 @@
       "type": "float",
       "algorithm": "linear_decay",
       "start_value": 100,
-      "end_value": 20,
+      "end_value": 0,
       "duration_seconds": 2000
     },
     "secondary_battery_level": {
       "type": "float",
       "algorithm": "linear_decay",
       "start_value": 100,
-      "end_value": 20,
+      "end_value": 0,
       "duration_seconds": 2000
     },
     "oxy_pri_storage": {
       "type": "float",
       "algorithm": "linear_decay",
       "start_value": 100,
-      "end_value": 20,
-      "duration_seconds": 2500
+      "end_value": 0,
+      "duration_seconds": 2500,
+      "rapid_duration_seconds": 20
     },
     "oxy_sec_storage": {
       "type": "float",
@@ -93,9 +94,12 @@
     "fan_pri_rpm": {
       "type": "float",
       "algorithm": "sine_wave",
-      "base_value": 30000.0,
+      "base_value": 29500.0,
       "amplitude": 3.0,
-      "frequency": 0.003
+      "frequency": 0.003,
+      "rapid_growth_rate": 50.0,
+      "max_value": 35000.0,
+      "rapid_duration_seconds": 20
     },
     "fan_sec_rpm": {
       "type": "float",

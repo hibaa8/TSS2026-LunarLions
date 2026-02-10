@@ -34,13 +34,11 @@ int time_to_throw_error() {
 bool throw_error(sim_engine_t* engine) {
     switch(engine->error_type) {
         case 0:
-            return throw_O2_pressure_error(engine);
+            return throw_O2_storage_error(engine);
         case 1:
             return throw_fan_RPM_high_error(engine);
         case 2:
             return throw_fan_RPM_low_error(engine);
-        case 3:
-            return throw_power_error(engine);
         default:
             return false;
     }
@@ -54,19 +52,19 @@ bool throw_error(sim_engine_t* engine) {
  * @return bool indicating success or failure
  * 
 */
-bool throw_O2_pressure_error(sim_engine_t* engine) {
+bool throw_O2_storage_error(sim_engine_t* engine) {
     sim_component_t* eva1 = sim_engine_get_component(engine, "eva1");
         if (eva1 == NULL) {
-            printf("Simulation tried to access non-existent component 'eva1' for O2 pressure error\n");
+            printf("Simulation tried to access non-existent component 'eva1' for O2 storage error\n");
             return false;
         }
 
     //set the field start_time to the component simulation time
-    sim_field_t* field = sim_engine_find_field_within_component(eva1, "oxy_pri_pressure");
+    sim_field_t* field = sim_engine_find_field_within_component(eva1, "oxy_pri_storage");
     if (field) {
         field->start_time = eva1->simulation_time;
     } else {
-        printf("Simulation tried to access non-existent field 'oxy_pri_pressure' for O2 pressure error\n");
+        printf("Simulation tried to access non-existent field 'oxy_pri_storage' for O2 storage error\n");
         return false;
     }
 
@@ -86,6 +84,23 @@ bool throw_O2_pressure_error(sim_engine_t* engine) {
 */
 bool throw_fan_RPM_high_error(sim_engine_t* engine) {
 
+    sim_component_t* eva1 = sim_engine_get_component(engine, "eva1");
+    if (eva1 == NULL) {
+        printf("Simulation tried to access non-existent component 'eva1' for fan RPM high error\n");
+        return false;
+    }
+
+    //set the field start_time to the component simulation time
+    sim_field_t* field = sim_engine_find_field_within_component(eva1, "fan_pri_rpm");
+    if (field) {
+        field->start_time = eva1->simulation_time;
+    } else {
+        printf("Simulation tried to access non-existent field 'fan_pri_rpm' for fan RPM high error\n");
+        return false;
+    }
+
+    //set the field algorithm to rapid linear growth
+    field->algorithm = SIM_ALGO_RAPID_LINEAR_GROWTH;
     return true;
 }
 
@@ -99,17 +114,22 @@ bool throw_fan_RPM_high_error(sim_engine_t* engine) {
 */
 bool throw_fan_RPM_low_error(sim_engine_t* engine) {
 
-    return true;
-}
+    sim_component_t* eva1 = sim_engine_get_component(engine, "eva1");
+    if (eva1 == NULL) {
+        printf("Simulation tried to access non-existent component 'eva1' for fan RPM low error\n");
+        return false;
+    }
 
-/**
- * Waits for battery voltage to drop below 20% to simulate a power issue.
- * Will update UI and JSON files accordingly.
- * @param engine Pointer to the simulation engine
- * @return bool indicating success or failure
- * 
-*/
-bool throw_power_error(sim_engine_t* engine) {
+    //set the field start_time to the component simulation time
+    sim_field_t* field = sim_engine_find_field_within_component(eva1, "fan_pri_rpm");
+    if (field) {
+        field->start_time = eva1->simulation_time;
+    } else {
+        printf("Simulation tried to access non-existent field 'fan_pri_rpm' for fan RPM low error\n");
+        return false;
+    }
 
+    //set the field algorithm to rapid linear decay
+    field->algorithm = SIM_ALGO_RAPID_LINEAR_DECAY;
     return true;
 }

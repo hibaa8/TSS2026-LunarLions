@@ -360,8 +360,7 @@ bool sim_engine_initialize(sim_engine_t* engine) {
     engine->error_time = 10; // force error at 10 seconds for testing purposes
         printf("Error time set to: %d\n", engine->error_time);
         //engine->error_time = time_to_throw_error();
-        engine->error_type = 0; // force pressure error for testing purposes
-        //engine->error_type = error_to_throw();
+        engine->error_type = error_to_throw();
         printf("Error type set to: %d\n", engine->error_type);
     
     // Initialize all fields
@@ -531,6 +530,9 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
                 break;
             case SIM_ALGO_RAPID_LINEAR_DECAY:
                 field->current_value = sim_algo_rapid_linear_decay(field, component->simulation_time);
+                break;
+            case SIM_ALGO_RAPID_LINEAR_GROWTH:
+                field->current_value = sim_algo_rapid_linear_growth(field, component->simulation_time);
                 break;
             case SIM_ALGO_LINEAR_GROWTH:
                 field->current_value = sim_algo_linear_growth(field, component->simulation_time);
