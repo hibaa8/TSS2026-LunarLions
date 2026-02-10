@@ -86,11 +86,10 @@ sim_value_t sim_algo_rapid_linear_decay(sim_field_t* field, float current_time) 
     
     // Get parameters
     static float start_val = 0.0f; 
-    static bool initialized = false;
 
-    if(!initialized) {
+    if(!field->rapid_algo_initialized) {
         start_val = field->current_value.f; 
-        initialized = true;
+        field->rapid_algo_initialized = true;
     }
 
     cJSON* end_value = cJSON_GetObjectItem(field->params, "end_value");
@@ -101,6 +100,7 @@ sim_value_t sim_algo_rapid_linear_decay(sim_field_t* field, float current_time) 
     
     // Calculate current progress (0.0 to 1.0)
     float elapsed_time = current_time - field->start_time;
+    printf("current_time: %.2f, start_time: %.2f, elapsed_time: %.2f\n", current_time, field->start_time, elapsed_time);
     float progress = elapsed_time / rapid_duration_sec;
     
     // Clamp progress between 0 and 1
@@ -109,7 +109,7 @@ sim_value_t sim_algo_rapid_linear_decay(sim_field_t* field, float current_time) 
     
     // Linear interpolation from start to end
     float current_value = start_val + (end_val - start_val) * progress;
-
+    printf("Rapid linear decay - start_val: %.2f, end_val: %.2f, elapsed_time: %.2f, progress: %.2f, current_value: %.2f\n\n", start_val, end_val, elapsed_time, progress, current_value);
     result.f = current_value;
 
     return result;
@@ -130,11 +130,10 @@ sim_value_t sim_algo_rapid_linear_growth(sim_field_t* field, float current_time)
     
     // Get parameters
     static float start_val = 0.0f; 
-    static bool initialized = false;
 
-    if(!initialized) {
+    if(!field->rapid_algo_initialized) {
         start_val = field->current_value.f; 
-        initialized = true;
+        field->rapid_algo_initialized = true;
     }
 
     cJSON* rapid_growth_rate = cJSON_GetObjectItem(field->params, "rapid_growth_rate");
@@ -145,7 +144,9 @@ sim_value_t sim_algo_rapid_linear_growth(sim_field_t* field, float current_time)
 
     // Calculate current value based on growth rate
     float elapsed_time = current_time - field->start_time;
+    printf("current_time: %.2f, start_time: %.2f, elapsed_time: %.2f\n", current_time, field->start_time, elapsed_time);
     float current_value = start_val + (rapid_rate * elapsed_time);
+    printf("Rapid linear growth - start_val: %.2f, rapid_rate: %.2f, elapsed_time: %.2f, current_value: %.2f\n\n", start_val, rapid_rate, elapsed_time, current_value);
     
     // Clamp to maximum value if specified
     if (current_value > max_val) {

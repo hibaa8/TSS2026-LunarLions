@@ -232,6 +232,7 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
 
         field->run_time = 0.0f; 
         field->active = true; //active by default, can be deactivated by DCU commands for certain fields
+        field->rapid_algo_initialized = false;
         field->initialized = false;
         field_idx++;
     }
@@ -356,6 +357,8 @@ bool sim_engine_initialize(sim_engine_t* engine) {
         engine->dcu_field_settings->battery_ps = false;
         engine->dcu_field_settings->fan = false;
         engine->dcu_field_settings->o2 = false;
+        engine->dcu_field_settings->pump = false;
+        engine->dcu_field_settings->co2 = false;
         printf("DCU field settings initialized\n");
 
     engine->error_time = 10; // force error at 10 seconds for testing purposes
@@ -381,17 +384,37 @@ bool sim_engine_initialize(sim_engine_t* engine) {
 
         field->run_time = 0.0f;
 
-
+        
         
         //set active to true by default, will be set to false for fields that depend on DCU commands until the correct command is received
-        if(strncmp(field->field_name, "primary_battery_level", 19) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == true)) {
+        if(strncmp(field->field_name, "primary_battery_level", 21) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == true)) {
             field->active = false;
-        } else if(strncmp(field->field_name, "secondary_battery_level", 21) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == false)) {
+        } else if(strncmp(field->field_name, "secondary_battery_level", 23) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == false)) {
             field->active = false;
         }
 
+        if(strncmp(field->field_name, "oxy_pri_storage", 15) == 0 && (engine->dcu_field_settings->o2 == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "oxy_sec_storage", 15) == 0 && (engine->dcu_field_settings->o2 == true)) {
+            field->active = false;
+        }
 
+        if(strncmp(field->field_name, "fan_pri_rpm", 11) == 0 && (engine->dcu_field_settings->fan == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "fan_sec_rpm", 11) == 0 && (engine->dcu_field_settings->fan == true)) {
+            field->active = false;
+        }
 
+        if(strncmp(field->field_name, "coolant_liquid_pressure", 23) == 0 && (engine->dcu_field_settings->pump == false)) {
+            field->active = false;
+        }
+
+        if(strncmp(field->field_name, "scrubber_a_co2_storage", 22) == 0 && (engine->dcu_field_settings->co2 == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "scrubber_b_co2_storage", 22) == 0 && (engine->dcu_field_settings->co2 == true)) {
+            field->active = false;
+        }
+        
 
         field->initialized = true;
         
@@ -472,19 +495,38 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
             }
         }
 
-        // Only update run_time if component is running
-        if (component && component->running && field->active) {
-            field->run_time += delta_time;
-        }
-
+        
+        
         //set active to true by default, will be set to false for fields that depend on DCU commands until the correct command is received
-        if(strncmp(field->field_name, "primary_battery_level", 19) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == true)) {
+        if(strncmp(field->field_name, "primary_battery_level", 21) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == true)) {
             field->active = false;
-        } else if(strncmp(field->field_name, "secondary_battery_level", 21) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == false)) {
+        } else if(strncmp(field->field_name, "secondary_battery_level", 23) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "oxy_pri_storage", 15) == 0 && (engine->dcu_field_settings->o2 == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "oxy_sec_storage", 15) == 0 && (engine->dcu_field_settings->o2 == true)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "fan_pri_rpm", 11) == 0 && (engine->dcu_field_settings->fan == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "fan_sec_rpm", 11) == 0 && (engine->dcu_field_settings->fan == true)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "coolant_liquid_pressure", 23) == 0 && (engine->dcu_field_settings->pump == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "scrubber_a_co2_storage", 22) == 0 && (engine->dcu_field_settings->co2 == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "scrubber_b_co2_storage", 22) == 0 && (engine->dcu_field_settings->co2 == true)) {
             field->active = false;
         } else {
             field->active = true;
         }
+
+        
+
+        // Only update run_time if component is running
+        if (component && component->running && field->active) {
+            field->run_time += delta_time;
+        }
+            
     }
     
     //determine if we need to throw additional errors
@@ -524,25 +566,26 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
 
         switch (field->algorithm) {
             case SIM_ALGO_SINE_WAVE:
-                field->current_value = sim_algo_sine_wave(field, component->simulation_time);
+                field->current_value = sim_algo_sine_wave(field, field->run_time);
                 break;
             case SIM_ALGO_LINEAR_DECAY:
                 field->current_value = sim_algo_linear_decay(field, field->run_time);
+                
                 break;
             case SIM_ALGO_RAPID_LINEAR_DECAY:
-                field->current_value = sim_algo_rapid_linear_decay(field, component->simulation_time);
+                field->current_value = sim_algo_rapid_linear_decay(field, field->run_time);
                 break;
             case SIM_ALGO_RAPID_LINEAR_GROWTH:
-                field->current_value = sim_algo_rapid_linear_growth(field, component->simulation_time);
+                field->current_value = sim_algo_rapid_linear_growth(field, field->run_time);
                 break;
             case SIM_ALGO_LINEAR_GROWTH:
-                field->current_value = sim_algo_linear_growth(field, component->simulation_time);
+                field->current_value = sim_algo_linear_growth(field, field->run_time);
                 break;
             case SIM_ALGO_DEPENDENT_VALUE:
-                field->current_value = sim_algo_dependent_value(field, component->simulation_time, engine);
+                field->current_value = sim_algo_dependent_value(field,  field->run_time, engine);
                 break;
             case SIM_ALGO_EXTERNAL_VALUE:
-                field->current_value = sim_algo_external_value(field, component->simulation_time, engine);
+                field->current_value = sim_algo_external_value(field, field->run_time, engine);
                 break;
         }
     }
@@ -616,8 +659,11 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
         return;
     }
 
+    
+
     if(strcmp(component_name, "eva1") == 0) {
         //recalculate error time and type for eva1 when it is reset, to simulate different error scenarios on each run
+        target_component->simulation_time = 0.0f;
         //engine->error_time = time_to_throw_error();
         engine->error_time = 10; //force error at 10 seconds for testing purposes
         engine->error_type = error_to_throw();
@@ -629,10 +675,9 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
         if (field && strcmp(field->component_name, component_name) == 0) {
             // Reset field timing to component time (which is now 0)
             field->start_time = target_component->simulation_time;
-
-            if(strcmp(field->field_name, "fan_pri_rpm") == 0) {
-                printf("Field algorithm for '%s' is %d\n", field->field_name, field->algorithm);
-            }
+            field->run_time = 0.0f; 
+            field->rapid_algo_initialized = false;
+            
             // Set initial values based on algorithm
             switch (field->starting_algorithm) {
                 case SIM_ALGO_SINE_WAVE: {

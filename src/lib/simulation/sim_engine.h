@@ -57,6 +57,7 @@ typedef struct {
     float run_time; //active time since component started
     bool active; //whether the field should be actively updating (used for fields that depend on DCU commands)
     float start_time;
+    bool rapid_algo_initialized;
     bool initialized;
 } sim_field_t;
 
@@ -73,6 +74,8 @@ typedef struct {
     bool battery_ps;
     bool fan;
     bool o2;
+    bool pump;
+    bool co2;
 } sim_DCU_field_settings_t;
 
 typedef struct {

@@ -718,7 +718,14 @@ void update_sim_DCU_field_settings(sim_engine_t* sim_engine) {
     settings->fan = (get_field_from_json("EVA", "dcu.eva1.fan", 0.0) == 1.0);
 
     // Update o2 setting
-    settings->o2 = (get_field_from_json("EVA", "dcu.eva1.o2", 0.0) == 1.0);
+    settings->o2 = (get_field_from_json("EVA", "dcu.eva1.oxy", 0.0) == 1.0);
+
+    //update pump setting
+    settings->pump = (get_field_from_json("EVA", "dcu.eva1.pump", 0.0) == 1.0);
+
+    //update co2 setting
+    settings->co2 = (get_field_from_json("EVA", "dcu.eva1.co2", 0.0) == 1.0);
+
 }
 
 

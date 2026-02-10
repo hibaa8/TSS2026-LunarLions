@@ -27,7 +27,7 @@
       "type": "float",
       "algorithm": "linear_decay",
       "start_value": 100,
-      "end_value": 100,
+      "end_value": 0,
       "duration_seconds": 2500
     },
     "oxy_pri_pressure": {
