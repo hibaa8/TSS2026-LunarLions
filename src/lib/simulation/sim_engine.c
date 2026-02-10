@@ -205,6 +205,7 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
         }
         
         field->algorithm = sim_algo_parse_type_string(cJSON_GetStringValue(algorithm));
+        field->starting_algorithm = field->algorithm; // Store the starting algorithm for reset purposes
         
         // Parse type (always float)
         field->type = SIM_TYPE_FLOAT;
@@ -615,6 +616,13 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
         return;
     }
 
+    if(strcmp(component_name, "eva1") == 0) {
+        //recalculate error time and type for eva1 when it is reset, to simulate different error scenarios on each run
+        //engine->error_time = time_to_throw_error();
+        engine->error_time = 10; //force error at 10 seconds for testing purposes
+        engine->error_type = error_to_throw();
+    }
+
     // Reset all fields of this component
     for (int i = 0; i < engine->total_field_count; i++) {
         sim_field_t* field = engine->update_order[i];
@@ -622,9 +630,13 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
             // Reset field timing to component time (which is now 0)
             field->start_time = target_component->simulation_time;
 
+            if(strcmp(field->field_name, "fan_pri_rpm") == 0) {
+                printf("Field algorithm for '%s' is %d\n", field->field_name, field->algorithm);
+            }
             // Set initial values based on algorithm
-            switch (field->algorithm) {
+            switch (field->starting_algorithm) {
                 case SIM_ALGO_SINE_WAVE: {
+                    field->algorithm = SIM_ALGO_SINE_WAVE; // Reset to original algorithm
                     cJSON* base_value = cJSON_GetObjectItem(field->params, "base_value");
                     if (base_value && cJSON_IsNumber(base_value)) {
                         field->current_value.f = (float)cJSON_GetNumberValue(base_value);
@@ -632,6 +644,7 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
                     break;
                 }
                 case SIM_ALGO_LINEAR_DECAY: {
+                    field->algorithm = SIM_ALGO_LINEAR_DECAY; // Reset to original algorithm
                     cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
                     if (start_value && cJSON_IsNumber(start_value)) {
                         field->current_value.f = (float)cJSON_GetNumberValue(start_value);
@@ -639,6 +652,7 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
                     break;
                 }
                 case SIM_ALGO_LINEAR_GROWTH: {
+                    field->algorithm = SIM_ALGO_LINEAR_GROWTH; // Reset to original algorithm
                     cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
                     if (start_value && cJSON_IsNumber(start_value)) {
                         field->current_value.f = (float)cJSON_GetNumberValue(start_value);
@@ -648,11 +662,13 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
                     break;
                 }
                 case SIM_ALGO_DEPENDENT_VALUE: {
+                    field->algorithm = SIM_ALGO_DEPENDENT_VALUE; // Reset to original algorithm
                     // Will be calculated during first update
                     field->current_value.f = 0.0f;
                     break;
                 }
                 case SIM_ALGO_EXTERNAL_VALUE: {
+                    field->algorithm = SIM_ALGO_EXTERNAL_VALUE; // Reset to original algorithm
                     // Check if reset_value is defined and update the file if callback is provided
                     cJSON* reset_value = cJSON_GetObjectItem(field->params, "reset_value");
                     if (reset_value && update_json) {

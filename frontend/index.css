@@ -271,25 +271,6 @@ nav {
   justify-content: flex-start;
 }
 
-.card-flex {
-    display: flex;
-    flex-wrap: wrap;          /* allow multiple rows */
-    gap: 1rem;                /* spacing between cards */
-    width: 100%;
-}
-
-.card-flex .card-body {
-    flex: 0 0 50%;            /* two columns */
-    margin: 0;                /* override global margin */
-    box-sizing: border-box;
-}
-
-.card-flex .card-body .card-content {
-    width: auto;              /* let content size naturally */
-    flex-wrap: wrap;          /* allow inner elements to wrap if needed */
-}
-
-
 /* Switch Components - Shared across multiple pages */
 .switch {
   width: 2.95rem;
@@ -408,7 +389,6 @@ input:checked + .slider:before {
   white-space: nowrap;
   font-weight: bold;
 }
-
 
 .telemetry-data,
 .value {

@@ -46,7 +46,7 @@ bool throw_error(sim_engine_t* engine) {
 
 /**
  * Rapidly decreases O2 pressure to simulate a leak.
- * Pressure will drop to below 20% of normal within 10 seconds.
+ * Pressure will drop according to rapid linear decay algorithm.
  * Will update UI and JSON files accordingly.
  * @param engine Pointer to the simulation engine
  * @return bool indicating success or failure
@@ -70,13 +70,14 @@ bool throw_O2_storage_error(sim_engine_t* engine) {
 
     //set the field algorithm to rapid linear decrease
     field->algorithm = SIM_ALGO_RAPID_LINEAR_DECAY;
+    printf("O2 storage error thrown: rapidly decreasing O2 pressure\n");
 
     return true;
 }
 
 /**
  * Rapidly increases fan RPM to simulate a malfunction.
- * Fan RPM will exceed 120% of normal within 10 seconds.
+ * Fan RPM will increase according to rapid linear growth algorithm.
  * Will update UI and JSON files accordingly.
  * @param engine Pointer to the simulation engine
  * @return bool indicating success or failure
@@ -101,12 +102,13 @@ bool throw_fan_RPM_high_error(sim_engine_t* engine) {
 
     //set the field algorithm to rapid linear growth
     field->algorithm = SIM_ALGO_RAPID_LINEAR_GROWTH;
+    printf("Fan RPM high error thrown. Algorithm set to SIM_ALGO_RAPID_LINEAR_GROWTH for field 'fan_pri_rpm'\n");
     return true;
 }
 
 /**
  * Rapidly decreases fan RPM to simulate a malfunction.
- * Fan RPM will drop below 80% of normal within 10 seconds.
+ * Fan RPM will drop according to rapid linear decay algorithm.
  * Will update UI and JSON files accordingly.
  * @param engine Pointer to the simulation engine
  * @return bool indicating success or failure
@@ -131,5 +133,6 @@ bool throw_fan_RPM_low_error(sim_engine_t* engine) {
 
     //set the field algorithm to rapid linear decay
     field->algorithm = SIM_ALGO_RAPID_LINEAR_DECAY;
+    printf("Fan RPM low error thrown. Algorithm set to SIM_ALGO_RAPID_LINEAR_DECAY for field 'fan_pri_rpm'\n");
     return true;
 }

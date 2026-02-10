@@ -42,6 +42,7 @@ typedef struct {
     char* component_name;
     sim_field_type_t type;
     sim_algorithm_type_t algorithm;
+    sim_algorithm_type_t starting_algorithm; // Store the original algorithm for reset purposes
     sim_value_t current_value;
     sim_value_t previous_value;
 
