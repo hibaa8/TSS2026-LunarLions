@@ -46,6 +46,145 @@ struct backend_data_t *init_backend() {
 }
 
 /**
+* calls individual functions to update error states for each system based on the current DCU field settings. 
+* This function is called in data.c before sim_engine_update to ensure that error states are updated before each simulation update, 
+* allowing the simulation to reflect any changes in error conditions based on DCU commands.
+* @param sim_engine Pointer to the simulation engine to update
+ */
+void update_EVA_error_simulation_error_states(sim_engine_t* sim_engine) {
+    if (!sim_engine) {
+        return;
+    }
+
+    update_O2_error_state(sim_engine);
+    update_fan_error_state(sim_engine);
+    update_power_error_state(sim_engine);
+
+}
+
+/**
+* updates the O2 error state based on the current DCU field settings and o2 value.
+* If the DCU command for O2 is set to false, the O2 error state will be set to false (no error).
+* If the O2 error is thrown and the DCU command for O2 is set to true, the O2 error state will be set to true (error present).
+* @param sim_engine Pointer to the simulation engine to update
+*/
+void update_O2_error_state(sim_engine_t* sim_engine) {
+    if (!sim_engine) {
+        return;
+    }
+
+    //check if the O2 error is currently thrown by checking if the algorithm for the O2 storage field is set to rapid linear decay
+    sim_component_t* eva1 = sim_engine_get_component(sim_engine, "eva1");
+    if (eva1 == NULL) {
+        printf("Simulation tried to access non-existent component 'eva1' for O2 error state update\n");
+        return;
+    }
+
+    sim_field_t* field = sim_engine_find_field_within_component(eva1, "oxy_pri_storage");
+    if (field == NULL) {
+        printf("Simulation tried to access non-existent field 'oxy_pri_storage' for O2 error state update\n");
+        return;
+    }   
+
+    bool o2_error_thrown = (field->algorithm == SIM_ALGO_RAPID_LINEAR_DECAY);  
+
+    //update the oxy_error state in the JSON file based on the current error state and DCU command
+    if (sim_engine->dcu_field_settings->o2 == false) {
+        update_json_file("EVA", "error", "oxy_error", "false");
+    } else if (o2_error_thrown && sim_engine->dcu_field_settings->o2 == true) {
+        update_json_file("EVA", "error", "oxy_error", "true");
+    } else {
+        update_json_file("EVA", "error", "oxy_error", "false");
+    }
+}
+
+/**
+* updates the fan error states based on the current DCU field settings and fan value.
+* If the DCU command for the fan is set to false, the fan error states will be set to false (no error).
+* If the fan RPM high error is thrown and the DCU command for the fan is set to true, the fan RPM error state will be set to true (error present).
+* If the fan RPM low error is thrown and the DCU command for the fan is set to true, the fan RPM error state will be set to true (error present).
+* @param sim_engine Pointer to the simulation engine to update
+*/
+void update_fan_error_state(sim_engine_t* sim_engine) {
+    if (!sim_engine) {
+        return;
+    }
+
+    //check if the fan RPM high ow low error is currently thrown by checking if the algorithm for the fan RPM field is set to rapid linear growth
+    sim_component_t* eva1 = sim_engine_get_component(sim_engine, "eva1");
+    if (eva1 == NULL) {
+        printf("Simulation tried to access non-existent component 'eva1' for fan error state update\n");
+        return;
+    }
+
+    sim_field_t* field = sim_engine_find_field_within_component(eva1, "fan_pri_rpm");
+    if (field == NULL) {
+        printf("Simulation tried to access non-existent field 'fan_pri_rpm' for fan error state update\n");
+        return;
+    }   
+
+    bool fan_error_thrown = (field->algorithm == SIM_ALGO_RAPID_LINEAR_GROWTH || field->algorithm == SIM_ALGO_RAPID_LINEAR_DECAY);  
+
+    //update the fan_error state in the JSON file based on the current error state and DCU command
+    if (sim_engine->dcu_field_settings->fan == false) {
+        update_json_file("EVA", "error", "fan_error", "false");
+    } else if (fan_error_thrown && sim_engine->dcu_field_settings->fan == true) {
+        update_json_file("EVA", "error", "fan_error", "true");
+    } else {
+        update_json_file("EVA", "error", "fan_error", "false");
+    }
+}
+
+/**
+* updates the power error state based on the current DCU field settings and battery values.
+* If the DCU command for the battery.lu is set to true or battery.ps is set to false, the power error state will be set to false (no error).
+* If the power error is thrown and the DCU command for battery.lu is set to false and battery.ps is set to true, the power error state will be set to true (error present).
+* @param sim_engine Pointer to the simulation engine to update
+ */
+void update_power_error_state(sim_engine_t* sim_engine) {
+    if (!sim_engine) {
+        return;
+    }
+
+    //check if the power level is below the error threshold by checking the current value of the primary battery level field
+    sim_component_t* eva1 = sim_engine_get_component(sim_engine, "eva1");
+    if (eva1 == NULL) {
+        printf("Simulation tried to access non-existent component 'eva1' for power error state update\n");
+        return;
+    }
+
+    sim_field_t* field = sim_engine_find_field_within_component(eva1, "primary_battery_level");
+    if (field == NULL) {
+        printf("Simulation tried to access non-existent field 'primary_battery_level' for power error state update\n");
+        return;
+    }  
+
+    bool power_error_thrown = (field->current_value.f <= 20.0f);  //error threshold for battery level is 20%
+
+    //update the power_error state in the JSON file based on the current error state and DCU commands
+    if (sim_engine->dcu_field_settings->battery_lu == true || sim_engine->dcu_field_settings->battery_ps == false) {
+        update_json_file("EVA", "error", "power_error", "false");
+    } else if (power_error_thrown && sim_engine->dcu_field_settings->battery_lu == false && sim_engine->dcu_field_settings->battery_ps == true) {
+        update_json_file("EVA", "error", "power_error", "true");
+    } else {
+        update_json_file("EVA", "error", "power_error", "false");
+    }
+}
+
+/**
+ * Updates error states in the simulation engine based on the current JSON values and updates JSON values accordingly to reflect any changes in the error states. This ensures that the simulation engine's error conditions are in sync with the JSON data.
+ * For example, if a certain error condition is met in the simulation engine, it can update the corresponding field in the JSON file to reflect that error, and vice versa. This function acts as a bridge to keep the simulation engine and JSON data in sync regarding error states.
+ * This function is called before each simulation update to ensure the engine reflects the latest error conditions
+ *
+ * @param sim_engine Pointer to the simulation engine to update
+ */
+void update_error_states(sim_engine_t* sim_engine) {
+
+    update_EVA_error_simulation_error_states(sim_engine);
+    update_sim_DCU_field_settings(sim_engine);
+}
+
+/**
  * Calls the simulation engine to update all telemetry data based on elapsed time
  *
  * @param backend Backend data structure containing all telemetry and simulation engines
@@ -66,8 +205,8 @@ void increment_simulation(struct backend_data_t *backend) {
         float delta_time = 1.0f;  // 1 second per update
         if (backend->sim_engine) {
             //update simulation engine DCU field settings based on the new values received from UDP commands
-            update_sim_DCU_field_settings(backend->sim_engine);
             sim_engine_update(backend->sim_engine, delta_time);
+            update_error_states(backend->sim_engine);
         }
         // Update EVA station timing
         update_eva_station_timing();

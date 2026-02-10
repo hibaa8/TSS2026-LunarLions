@@ -100,7 +100,6 @@ sim_value_t sim_algo_rapid_linear_decay(sim_field_t* field, float current_time) 
     
     // Calculate current progress (0.0 to 1.0)
     float elapsed_time = current_time - field->start_time;
-    printf("current_time: %.2f, start_time: %.2f, elapsed_time: %.2f\n", current_time, field->start_time, elapsed_time);
     float progress = elapsed_time / rapid_duration_sec;
     
     // Clamp progress between 0 and 1
@@ -109,7 +108,6 @@ sim_value_t sim_algo_rapid_linear_decay(sim_field_t* field, float current_time) 
     
     // Linear interpolation from start to end
     float current_value = start_val + (end_val - start_val) * progress;
-    printf("Rapid linear decay - start_val: %.2f, end_val: %.2f, elapsed_time: %.2f, progress: %.2f, current_value: %.2f\n\n", start_val, end_val, elapsed_time, progress, current_value);
     result.f = current_value;
 
     return result;

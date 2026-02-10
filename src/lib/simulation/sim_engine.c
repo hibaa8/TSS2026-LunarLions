@@ -364,7 +364,7 @@ bool sim_engine_initialize(sim_engine_t* engine) {
     engine->error_time = 10; // force error at 10 seconds for testing purposes
         printf("Error time set to: %d\n", engine->error_time);
         //engine->error_time = time_to_throw_error();
-        engine->error_type = error_to_throw();
+        engine->error_type = 3; // set to 3 to signify no error, will be set to 0, 1, or 2 to signify different errors when it's time to throw an error
         printf("Error type set to: %d\n", engine->error_type);
     
     // Initialize all fields
@@ -520,7 +520,14 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
             field->active = true;
         }
 
-        
+        //error overrides active status, so if an error is active for a field, it should be active regardless of DCU settings
+        if((engine->error_type == 0) && (strcmp(field->field_name, "oxy_pri_storage") == 0)) {
+            field->active = true;
+        } else if((engine->error_type == 1) && (strcmp(field->field_name, "fan_pri_rpm") == 0)) {
+            field->active = true;
+        } else if((engine->error_type == 2) && (strcmp(field->field_name, "fan_pri_rpm") == 0)) {
+            field->active = true;
+        }
 
         // Only update run_time if component is running
         if (component && component->running && field->active) {

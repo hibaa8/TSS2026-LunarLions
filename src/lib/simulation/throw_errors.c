@@ -32,6 +32,8 @@ int time_to_throw_error() {
     * @return bool indicating success or failure of error throwing
  */
 bool throw_error(sim_engine_t* engine) {
+    engine->error_type = error_to_throw();
+    printf("Error type determined to throw: %d\n", engine->error_type);
     switch(engine->error_type) {
         case 0:
             return throw_O2_storage_error(engine);
@@ -62,7 +64,8 @@ bool throw_O2_storage_error(sim_engine_t* engine) {
     //set the field start_time to the component simulation time
     sim_field_t* field = sim_engine_find_field_within_component(eva1, "oxy_pri_storage");
     if (field) {
-        field->start_time = eva1->simulation_time;
+        field->start_time = 0.0f; //restart the timer for the rapid linear growth algorithm so it starts growing from the current value at the time of error
+        field->active = true; //make the field active so it starts updating based on the new algorithm
     } else {
         printf("Simulation tried to access non-existent field 'oxy_pri_storage' for O2 storage error\n");
         return false;
@@ -94,7 +97,8 @@ bool throw_fan_RPM_high_error(sim_engine_t* engine) {
     //set the field start_time to the component simulation time
     sim_field_t* field = sim_engine_find_field_within_component(eva1, "fan_pri_rpm");
     if (field) {
-        field->start_time = eva1->simulation_time;
+        field->start_time = 0.0f;  //restart the timer for the rapid linear growth algorithm so it starts growing from the current value at the time of error
+        field->active = true; //make the field active so it starts updating based on the new algorithm
     } else {
         printf("Simulation tried to access non-existent field 'fan_pri_rpm' for fan RPM high error\n");
         return false;
@@ -125,7 +129,7 @@ bool throw_fan_RPM_low_error(sim_engine_t* engine) {
     //set the field start_time to the component simulation time
     sim_field_t* field = sim_engine_find_field_within_component(eva1, "fan_pri_rpm");
     if (field) {
-        field->start_time = eva1->simulation_time;
+        field->start_time = 0.0f; //restart the timer for the rapid decay algorithm so it starts decaying from the current value at the time of error
     } else {
         printf("Simulation tried to access non-existent field 'fan_pri_rpm' for fan RPM low error\n");
         return false;
@@ -136,3 +140,4 @@ bool throw_fan_RPM_low_error(sim_engine_t* engine) {
     printf("Fan RPM low error thrown. Algorithm set to SIM_ALGO_RAPID_LINEAR_DECAY for field 'fan_pri_rpm'\n");
     return true;
 }
+

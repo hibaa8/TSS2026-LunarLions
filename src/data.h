@@ -46,6 +46,11 @@ void send_json_file(const char* filename, unsigned char* data);
 void update_eva_station_timing(void);
 void reset_eva_station_timing(void);
 void update_sim_DCU_field_settings(sim_engine_t* sim_engine);
+void update_error_states(sim_engine_t* sim_engine);
+void update_EVA_error_simulation_error_states(sim_engine_t* sim_engine);
+void update_O2_error_state(sim_engine_t* sim_engine);
+void update_fan_error_state(sim_engine_t* sim_engine);
+void update_power_error_state(sim_engine_t* sim_engine);
 
 // Helper functions
 void reverse_bytes(unsigned char* bytes);

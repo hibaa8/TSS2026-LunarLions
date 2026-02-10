@@ -6,7 +6,7 @@
       "algorithm": "linear_decay",
       "start_value": 100,
       "end_value": 0,
-      "duration_seconds": 2000
+      "duration_seconds": 20
     },
     "secondary_battery_level": {
       "type": "float",
