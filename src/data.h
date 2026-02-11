@@ -119,15 +119,18 @@ static const udp_command_mapping_t udp_command_mappings[] = {
 
     //LTV command
     {2023, "ltv.errors.dust_sensor", "bool"},
-    {2024, "ltv.errors.comms", "bool"},
-    {2025, "ltv.errors.power_module", "bool"},
-    {2026, "ltv.errors.nav_system", "bool"},
-    {2027, "ltv.errors.lidar_sensor", "bool"},
-    {2028, "ltv.errors.ultrasonic_sensor", "bool"},
-    {2029, "ltv.errors.gyroscope_sensor", "bool"},
-    {2030, "ltv.errors.potentiometer_sensor", "bool"},
-    {2031, "ltv.errors.electronic_heater", "bool"},
+    {2024, "ltv.errors.power_module", "bool"},
+    {2025, "ltv.errors.comms.nav_reset" , "bool"},
+    {2026, "ltv.errors.comms.lidar_reset", "bool"},
+    {2027, "ltv.errors.comms.pri_sec", "bool"},
+    {2028, "ltv.errors.nav_system", "bool"},
+    {2029, "ltv.errors.lidar_sensor", "bool"},
+    {2030, "ltv.errors.ultrasonic_sensor", "bool"},
+    {2031, "ltv.errors.gyroscope_sensor", "bool"},
+    {2032, "ltv.errors.potentiometer_sensor", "bool"},
+    {2033, "ltv.errors.electronic_heater", "bool"},
 
+    
     // Ping LTV command
     {2050, "ltv.signal.ping_requested", "bool"},
 
