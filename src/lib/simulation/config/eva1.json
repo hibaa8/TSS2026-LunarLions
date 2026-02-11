@@ -138,9 +138,10 @@
     },
     "coolant_storage": {
       "type": "float",
-      "algorithm": "dependent_value",
-      "formula": "100.0",
-      "depends_on": []
+      "algorithm": "linear_decay",
+      "start_value": 100,
+      "end_value": 0,
+      "duration_seconds": 900
     },
     "coolant_gas_pressure": {
       "type": "float",
