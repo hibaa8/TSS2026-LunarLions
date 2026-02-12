@@ -36,7 +36,7 @@ bool throw_error(sim_engine_t* engine) {
     printf("Error type determined to throw: %d\n", engine->error_type);
     switch(engine->error_type) {
         case 0:
-            return throw_O2_storage_error(engine);
+            return throw_O2_suit_pressure_error(engine);
         case 1:
             return throw_fan_RPM_high_error(engine);
         case 2:
@@ -56,7 +56,7 @@ bool throw_error(sim_engine_t* engine) {
  * @return bool indicating success or failure
  * 
 */
-bool throw_O2_storage_error(sim_engine_t* engine) {
+bool throw_O2_suit_pressure_error(sim_engine_t* engine) {
     sim_component_t* eva1 = sim_engine_get_component(engine, "eva1");
         if (eva1 == NULL) {
             printf("Simulation tried to access non-existent component 'eva1' for O2 storage error\n");
@@ -64,18 +64,18 @@ bool throw_O2_storage_error(sim_engine_t* engine) {
         }
 
     //set the field start_time to 0 so the rapid decay starts from the current value at the time of error
-    sim_field_t* field = sim_engine_find_field_within_component(eva1, "oxy_pri_storage");
+    sim_field_t* field = sim_engine_find_field_within_component(eva1, "suit_pressure_oxy");
     if (field) {
         field->start_time = 0.0f; //restart the timer for the rapid linear growth algorithm so it starts growing from the current value at the time of error
         field->active = true; //make the field active so it starts updating based on the new algorithm
     } else {
-        printf("Simulation tried to access non-existent field 'oxy_pri_storage' for O2 storage error\n");
+        printf("Simulation tried to access non-existent field 'suit_pressure_oxy' for O2 storage error\n");
         return false;
     }
 
     //set the field algorithm to rapid linear decrease
     field->algorithm = SIM_ALGO_RAPID_LINEAR_DECAY;
-    printf("O2 storage error thrown: rapidly decreasing O2 pressure\n");
+    printf("O2 suit pressure error thrown: rapidly decreasing O2 pressure\n");
 
     return true;
 }

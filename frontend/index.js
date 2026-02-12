@@ -1,6 +1,7 @@
 // GLOBAL VARIABLES
 let connectionFails = 0; // number of consecutive connection failures, resets on successful fetch
 let dustConnected = false; // tracks DUST/Unreal Engine connection status
+let evaStarted = false; //variable to track if EVA has been started yet
 
 //telemetry ranges
 const TELEMETRY_RANGES  = {
@@ -37,13 +38,12 @@ function onload() {
   updateClock(); // set clock immediately on load (will be updated every second later)
 
   // Fetch fresh data from the backend every one second
-  setInterval(async () => {
-  await fetchData();   // wait for data to finish updating the DOM
-  updateClock();
-  updateTelemetryStatus();
-  updateDustStatus();
-  applyTelemetryRanges(); // pass in evaStatus to determine if EVA is started
-}, 1000);
+  setInterval(() => {
+    fetchData();
+    updateClock();
+    updateTelemetryStatus();
+    updateDustStatus();
+  }, 1000);
 
 
   // Set up event listeners for switches and buttons
@@ -89,6 +89,9 @@ async function fetchData() {
       roverResponse.json(),
       ltvResponse.json(),
     ]);
+
+    //check if telemetry component has been started by seeing if EVA.status.started is true
+    evaStarted = evaData?.status?.started === true;
 
     connectionFails = 0;
     dustConnected =
@@ -246,40 +249,6 @@ function setupEventListeners() {
 }
 
 // HELPER FUNCTIONS
-
-/**
- * Applies the defined telemetry ranges to the displayed values, highlighting any out-of-range values in red
- */
-// Apply telemetry ranges coloring
-function applyTelemetryRanges() {
-  const elements = document.querySelectorAll("[data-path]");
-
-  elements.forEach((el) => {
-    const path = el.getAttribute("data-path");
-    const range = TELEMETRY_RANGES[path];
-
-    if (!range) return; // skip if no range defined
-
-    const value = parseFloat(el.textContent);
-
-    if (isNaN(value)) return;
-
-    const cardBody = el.closest(".card-body");
-    const label = cardBody?.querySelector(".telemetry-label .telemetry-data");
-
-    if (value < range.min || value > range.max) {
-      el.classList.add("out-of-range");
-      label?.classList.add("out-of-range");
-    } else {
-      el.classList.remove("out-of-range");
-      label?.classList.remove("out-of-range");
-    }
-  });
-}
-
-
-
-
 
 
 /**

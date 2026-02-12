@@ -8,7 +8,7 @@
 
 //Error throwing functions
 bool throw_error(sim_engine_t* engine);
-bool throw_O2_storage_error(sim_engine_t* engine);
+bool throw_O2_suit_pressure_error(sim_engine_t* engine);
 bool throw_fan_RPM_high_error(sim_engine_t* engine);
 bool throw_fan_RPM_low_error(sim_engine_t* engine);
 bool throw_CO2_scrubber_error(sim_engine_t* engine);

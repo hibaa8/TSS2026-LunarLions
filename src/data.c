@@ -341,6 +341,7 @@ bool handle_udp_post_request(unsigned int command, unsigned char* data, struct b
         // Other commands extract float value from packet format
         if (strcmp(mapping->data_type, "bool") == 0) {
             bool value = extract_bool_value(data);
+
             strcpy(value_str, value ? "true" : "false");
         } else if (strcmp(mapping->data_type, "float") == 0) {
             float value = extract_float_value(data);

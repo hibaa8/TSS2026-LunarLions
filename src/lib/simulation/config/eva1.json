@@ -98,7 +98,7 @@
       "type": "float",
       "algorithm": "sine_wave",
       "base_value": 30000.0,
-      "amplitude": 3.0,
+      "amplitude": 0.0,
       "frequency": 0.003,
       "rapid_growth_rate": 50.0,
       "max_value": 35000.0,
@@ -108,8 +108,11 @@
       "type": "float",
       "algorithm": "sine_wave",
       "base_value": 30000.0,
-      "amplitude": 3.0,
-      "frequency": 0.0025
+      "amplitude": 0.0,
+      "frequency": 0.003,
+      "rapid_growth_rate": 50.0,
+      "max_value": 35000.0,
+      "rapid_duration_seconds": 20
     },
     "helmet_pressure_co2": {
       "type": "float",
@@ -144,7 +147,7 @@
       "type": "float",
       "algorithm": "linear_decay",
       "start_value": 100,
-      "end_value": 0,
+      "end_value": 100,
       "duration_seconds": 900
     },
     "coolant_gas_pressure": {
