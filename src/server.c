@@ -438,11 +438,9 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
     if (!big_endian()) {
         // System is little-endian, convert to big-endian for UDP transmission
         reverse_bytes((unsigned char *)&time);
-        reverse_bytes((unsigned char *)&brakes);
-        reverse_bytes((unsigned char *)&lights_on);
         reverse_bytes((unsigned char *)&steering);
         reverse_bytes((unsigned char *)&throttle);
-        // ping is a boolean (0 or 1) and doesn't need endian conversion
+        // ping, lights, and brakes are booleans (0 or 1) and don't need endian conversion
     }
 
     // Send brakes command
