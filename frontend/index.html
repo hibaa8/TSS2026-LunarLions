@@ -414,14 +414,6 @@
                                     LTV CONTROL
                                 </span>
                             </div>
-                            <div class="card-subtitle">
-                                <span class="subtitle" data-path="ltv.signal.pings_left">
-                                    10
-                                </span>
-                                <span class="subtitle" style="margin-left: 0.3rem;">
-                                    Pings Left
-                                </span>
-                            </div>
                             <div class="card-body">
                                 <button data-path="ltv.signal.ping_requested" data-action="start" class="btn-ping">
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events: none;">
@@ -541,6 +533,19 @@
                                 </div>
                             </div>
                             <div class="card-body">
+                                <div class="card-content">
+                                    <div class="sensor-container">
+                                        <label class="switch">
+                                            <input type="checkbox" data-path="ltv.errors.power_module">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <div class="data-label">
+                                        <span class="value">
+                                            Power Module Error
+                                        </span>
+                                    </div>
+                                </div>
                                 <div class="card-content">
                                     <div class="sensor-container">
                                         <label class="switch">
@@ -819,7 +824,7 @@
                                 <div class="card-content">
                                     <div class="sensor-container">
                                         <label class="switch">
-                                            <input type="checkbox" data-path="eva.error.pump_error">
+                                            <input type="checkbox" data-path="eva.error.scrubber_error">
                                             <span class="slider round"></span>
                                         </label>
                                     </div>

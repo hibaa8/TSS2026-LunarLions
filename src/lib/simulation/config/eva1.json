@@ -72,7 +72,10 @@
       "algorithm": "sine_wave",
       "base_value": 0.05,
       "amplitude": 0.04,
-      "frequency": 0.01
+      "frequency": 0.01,
+      "rapid_growth_rate": 50.0,
+      "max_value": 35000.0,
+      "rapid_duration_seconds": 20
     },
     "suit_pressure_other": {
       "type": "float",
@@ -94,7 +97,7 @@
     "fan_pri_rpm": {
       "type": "float",
       "algorithm": "sine_wave",
-      "base_value": 29500.0,
+      "base_value": 30000.0,
       "amplitude": 3.0,
       "frequency": 0.003,
       "rapid_growth_rate": 50.0,
@@ -119,7 +122,8 @@
       "algorithm": "sine_wave",
       "base_value": 30,
       "amplitude": 30,
-      "frequency": 0.003
+      "frequency": 0.003,
+      "rapid_duration_seconds": 20
     },
     "scrubber_b_co2_storage": {
       "type": "float",

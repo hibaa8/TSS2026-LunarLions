@@ -2,6 +2,34 @@
 let connectionFails = 0; // number of consecutive connection failures, resets on successful fetch
 let dustConnected = false; // tracks DUST/Unreal Engine connection status
 
+//telemetry ranges
+const TELEMETRY_RANGES  = {
+  "eva.telemetry.eva1.primary_battery_level": { min: 20, max: 100, units: "%" },
+  "eva.telemetry.eva1.secondary_battery_level": { min: 20, max: 100, units: "%" },
+  "eva.telemetry.eva1.oxy_pri_storage": { min: 20, max: 100, units: "%" },
+  "eva.telemetry.eva1.oxy_sec_storage": { min: 20, max: 100, units: "%" },
+  "eva.telemetry.eva1.oxy_pri_pressure": { min: 600, max: 3000, units: "psi" },
+  "eva.telemetry.eva1.oxy_sec_pressure": { min: 600, max: 3000, units: "psi" },
+  "eva.telemetry.eva1.coolant_storage": { min: 80, max: 100, units: "%" },
+  "eva.telemetry.eva1.heart_rate": { min: 50, max: 160, units: "bpm" },
+  "eva.telemetry.eva1.oxy_consumption": { min: 0.05, max: 0.15, units: "psi/min" },
+  "eva.telemetry.eva1.co2_production": { min: 0.05, max: 0.15, units: "psi/min" },
+  "eva.telemetry.eva1.suit_pressure_oxy": { min: 3.5, max: 4.1, units: "psi" },
+  "eva.telemetry.eva1.suit_pressure_co2": { min: 0, max: 0.1, units: "psi" },
+  "eva.telemetry.eva1.suit_pressure_other": { min: 0, max: 0.5, units: "psi" },
+  "eva.telemetry.eva1.suit_pressure_total": { min: 3.5, max: 4.5, units: "psi" },
+  "eva.telemetry.eva1.helmet_pressure_co2": { min: 0, max: 0.15, units: "psi" },
+  "eva.telemetry.eva1.fan_pri_rpm": { min: 20000, max: 30000, units: "rpm" },
+  "eva.telemetry.eva1.fan_sec_rpm": { min: 20000, max: 30000, units: "rpm" },
+  "eva.telemetry.eva1.scrubber_a_co2_storage": { min: 0, max: 60, units: "%" },
+  "eva.telemetry.eva1.scrubber_b_co2_storage": { min: 0, max: 60, units: "%" },
+  "eva.telemetry.eva1.temperature": { min: 10, max: 32, units: "°C" },
+  "eva.telemetry.eva1.coolant_liquid_pressure": { min: 100, max: 700, units: "psi" },
+  "eva.telemetry.eva1.coolant_gas_pressure": { min: 0, max: 700, units: "psi" },
+};
+
+
+
 /**
  * Called when the index.html page is loaded, sets up the periodic data fetching
  */
@@ -9,12 +37,14 @@ function onload() {
   updateClock(); // set clock immediately on load (will be updated every second later)
 
   // Fetch fresh data from the backend every one second
-  setInterval(() => {
-    fetchData();
-    updateClock();
-    updateTelemetryStatus();
-    updateDustStatus();
-  }, 1000);
+  setInterval(async () => {
+  await fetchData();   // wait for data to finish updating the DOM
+  updateClock();
+  updateTelemetryStatus();
+  updateDustStatus();
+  applyTelemetryRanges(); // pass in evaStatus to determine if EVA is started
+}, 1000);
+
 
   // Set up event listeners for switches and buttons
   setupEventListeners();
@@ -87,6 +117,14 @@ async function fetchData() {
 
     if (path.startsWith("ltv.")) {
       value = getNestedValue(ltvData, path.slice(4));
+    }
+
+    // Special handling for signal strength
+    if (path === "ltv.signal.strength") {
+      if (value === 1.00) {
+        el.textContent = "NOT IN RANGE";
+        return;
+      }
     }
 
     // Handle checkboxes/switches (set checked property for boolean values)
@@ -208,6 +246,41 @@ function setupEventListeners() {
 }
 
 // HELPER FUNCTIONS
+
+/**
+ * Applies the defined telemetry ranges to the displayed values, highlighting any out-of-range values in red
+ */
+// Apply telemetry ranges coloring
+function applyTelemetryRanges() {
+  const elements = document.querySelectorAll("[data-path]");
+
+  elements.forEach((el) => {
+    const path = el.getAttribute("data-path");
+    const range = TELEMETRY_RANGES[path];
+
+    if (!range) return; // skip if no range defined
+
+    const value = parseFloat(el.textContent);
+
+    if (isNaN(value)) return;
+
+    const cardBody = el.closest(".card-body");
+    const label = cardBody?.querySelector(".telemetry-label .telemetry-data");
+
+    if (value < range.min || value > range.max) {
+      el.classList.add("out-of-range");
+      label?.classList.add("out-of-range");
+    } else {
+      el.classList.remove("out-of-range");
+      label?.classList.remove("out-of-range");
+    }
+  });
+}
+
+
+
+
+
 
 /**
  * Retrieves a nested value from an object/json using a dot-separated path

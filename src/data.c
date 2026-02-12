@@ -59,6 +59,7 @@ void update_EVA_error_simulation_error_states(sim_engine_t* sim_engine) {
     update_O2_error_state(sim_engine);
     update_fan_error_state(sim_engine);
     update_power_error_state(sim_engine);
+    update_scrubber_error_state(sim_engine);
 
 }
 
@@ -159,7 +160,7 @@ void update_power_error_state(sim_engine_t* sim_engine) {
         return;
     }  
 
-    bool power_error_thrown = (field->current_value.f <= 20.0f);  //error threshold for battery level is 20%
+    bool power_error_thrown = (field->current_value.f < 20.0f);  //error threshold for battery level is 20%
 
     //update the power_error state in the JSON file based on the current error state and DCU commands
     if (sim_engine->dcu_field_settings->battery_lu == true || sim_engine->dcu_field_settings->battery_ps == false) {
@@ -168,6 +169,43 @@ void update_power_error_state(sim_engine_t* sim_engine) {
         update_json_file("EVA", "error", "power_error", "true");
     } else {
         update_json_file("EVA", "error", "power_error", "false");
+    }
+}
+
+/**
+* Update scrubber error state based on DCU command and current CO2 scrubber value. 
+* If the DCU command for CO2 scrubber is set to false, the scrubber error state will be set to false (no error). 
+* If the CO2 scrubber error is thrown and the DCU command for CO2 scrubber is set to true, the scrubber error state will be set to true (error present).
+* @param sim_engine Pointer to the simulation engine to update
+*/
+
+void update_scrubber_error_state(sim_engine_t* sim_engine) {
+    if (!sim_engine) {
+        return;
+    }
+
+    //check if the CO2 scrubber error is currently thrown by checking if the algorithm for the scrubber_a_co2_storage field is set to rapid linear decay
+    sim_component_t* eva1 = sim_engine_get_component(sim_engine, "eva1");
+    if (eva1 == NULL) {
+        printf("Simulation tried to access non-existent component 'eva1' for scrubber error state update\n");
+        return;
+    }
+
+    sim_field_t* field = sim_engine_find_field_within_component(eva1, "scrubber_a_co2_storage");
+    if (field == NULL) {
+        printf("Simulation tried to access non-existent field 'scrubber_a_co2_storage' for scrubber error state update\n");
+        return;
+    }
+
+    bool scrubber_error_thrown = (field->algorithm == SIM_ALGO_RAPID_LINEAR_DECAY);
+
+    //update the scrubber_error state in the JSON file based on the current error state and DCU command
+    if (sim_engine->dcu_field_settings->co2 == false) {
+        update_json_file("EVA", "error", "scrubber_error", "false");
+    } else if (scrubber_error_thrown && sim_engine->dcu_field_settings->co2 == true) {
+        update_json_file("EVA", "error", "scrubber_error", "true");
+    } else {
+        update_json_file("EVA", "error", "scrubber_error", "false");
     }
 }
 

@@ -51,6 +51,7 @@ void update_EVA_error_simulation_error_states(sim_engine_t* sim_engine);
 void update_O2_error_state(sim_engine_t* sim_engine);
 void update_fan_error_state(sim_engine_t* sim_engine);
 void update_power_error_state(sim_engine_t* sim_engine);
+void update_scrubber_error_state(sim_engine_t* sim_engine);
 
 // Helper functions
 void reverse_bytes(unsigned char* bytes);

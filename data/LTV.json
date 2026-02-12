@@ -4,9 +4,9 @@
 		"last_known_y":	-5665.5
 	},
 	"signal":	{
-		"strength":	0,
-		"pings_left":	10,
-		"ping_requested":	false
+		"strength":	-16.814342,
+		"pings_left":	0,
+		"ping_requested":	0
 	},
 	"errors":	{
 		"dust_sensor":	false,

@@ -494,12 +494,5 @@ static void tss_to_unreal(SOCKET socket, struct sockaddr_in address, socklen_t l
 
         printf("Ping requested, sending Unreal ping command\n");
         update_json_file("LTV", "signal", "ping_requested", "0");
-
-        double pings_left = get_field_from_json("LTV", "signal.pings_left", 0.0);
-        if (pings_left > 0.0) {
-            char new_pings_left[16];
-            snprintf(new_pings_left, sizeof(new_pings_left), "%.0f", pings_left - 1.0);
-            update_json_file("LTV", "signal", "pings_left", new_pings_left);
-        }
     }
 }

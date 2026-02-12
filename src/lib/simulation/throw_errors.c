@@ -4,14 +4,14 @@
 
 /**
 * Determines the type of error (pressure, fan RPM high, fan RPM low) to throw determined by random chance.
-* @return int indicating which error to throw (0 = pressure error, 1 = fan RPM high error, 2 = fan RPM low error)
+* @return int indicating which error to throw (0 = pressure error, 1 = fan RPM high error, 2 = fan RPM low error, 3 = CO2 scrubber error)
 */
 int error_to_throw() {
 
         // Seed the random number generator only ONCE
         srand(time(NULL));
 
-        int random_value = rand() % 3; // Random value between 0 and 2
+        int random_value = rand() % 4; // Random value between 0 and 3
         return random_value;
 }
 
@@ -41,6 +41,8 @@ bool throw_error(sim_engine_t* engine) {
             return throw_fan_RPM_high_error(engine);
         case 2:
             return throw_fan_RPM_low_error(engine);
+        case 3:
+            return throw_CO2_scrubber_error(engine);
         default:
             return false;
     }
@@ -61,7 +63,7 @@ bool throw_O2_storage_error(sim_engine_t* engine) {
             return false;
         }
 
-    //set the field start_time to the component simulation time
+    //set the field start_time to 0 so the rapid decay starts from the current value at the time of error
     sim_field_t* field = sim_engine_find_field_within_component(eva1, "oxy_pri_storage");
     if (field) {
         field->start_time = 0.0f; //restart the timer for the rapid linear growth algorithm so it starts growing from the current value at the time of error
@@ -94,7 +96,7 @@ bool throw_fan_RPM_high_error(sim_engine_t* engine) {
         return false;
     }
 
-    //set the field start_time to the component simulation time
+    //set the field start_time to 0 so the rapid growth starts from the current value at the time of error
     sim_field_t* field = sim_engine_find_field_within_component(eva1, "fan_pri_rpm");
     if (field) {
         field->start_time = 0.0f;  //restart the timer for the rapid linear growth algorithm so it starts growing from the current value at the time of error
@@ -126,7 +128,7 @@ bool throw_fan_RPM_low_error(sim_engine_t* engine) {
         return false;
     }
 
-    //set the field start_time to the component simulation time
+    //set the field start_time to 0 so the rapid decay starts from the current value at the time of error
     sim_field_t* field = sim_engine_find_field_within_component(eva1, "fan_pri_rpm");
     if (field) {
         field->start_time = 0.0f; //restart the timer for the rapid decay algorithm so it starts decaying from the current value at the time of error
@@ -139,5 +141,46 @@ bool throw_fan_RPM_low_error(sim_engine_t* engine) {
     field->algorithm = SIM_ALGO_RAPID_LINEAR_DECAY;
     printf("Fan RPM low error thrown. Algorithm set to SIM_ALGO_RAPID_LINEAR_DECAY for field 'fan_pri_rpm'\n");
     return true;
+}
+
+/**
+ * Rapidly decreases CO2 scrubber efficiency to simulate a malfunction.
+ * Scrubber efficiency will drop according to rapid linear decay algorithm, causing CO2 pressure to increase.
+ * Will update UI and JSON files accordingly.
+ * @param engine Pointer to the simulation engine
+ * @return bool indicating success or failure
+ * 
+*/
+bool throw_CO2_scrubber_error(sim_engine_t* engine) {
+    sim_component_t* eva1 = sim_engine_get_component(engine, "eva1");
+    if (eva1 == NULL) {
+        printf("Simulation tried to access non-existent component 'eva1' for CO2 scrubber error\n");
+        return false;
+    }
+
+    //set the scrubber and CO2 pressure fields start_time to the component simulation time
+    sim_field_t* scrubber_field = sim_engine_find_field_within_component(eva1, "scrubber_a_co2_storage");
+    if (scrubber_field) {
+        scrubber_field->start_time = 0.0f; //restart the timer for the rapid decay algorithm so it starts decaying from the current value at the time of error
+    } else {
+        printf("Simulation tried to access non-existent field 'scrubber_a_co2_storage' for CO2 scrubber error\n");
+        return false;
+    }
+
+    sim_field_t* co2_pressure_field = sim_engine_find_field_within_component(eva1, "suit_pressure_co2");
+    if(co2_pressure_field) {
+        co2_pressure_field->start_time = 0.0f; //restart the timer for the rapid growth algorithm so it starts growing from the current value at the time of error
+    } else {
+        printf("Simulation tried to access non-existent field 'suit_pressure_co2' for CO2 scrubber error\n");
+        return false ;
+    }
+
+    //set the field algorithm to rapid linear decay
+    scrubber_field->algorithm = SIM_ALGO_RAPID_LINEAR_DECAY;
+    co2_pressure_field->algorithm = SIM_ALGO_RAPID_LINEAR_GROWTH;
+    printf("CO2 scrubber error thrown. Algorithm set to SIM_ALGO_RAPID_LINEAR_DECAY for field 'scrubber_a_co2_storage'\n");
+    printf("Algorithm set to SIM_ALGO_RAPID_LINEAR_GROWTH for field 'suit_pressure_co2'\n");
+    return true;
+
 }
 
