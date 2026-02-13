@@ -198,13 +198,6 @@
       "field_path": "signal.strength",
       "reset_value": 0
     },
-    "pings_left": {
-      "type": "float",
-      "algorithm": "external_value",
-      "file_path": "LTV.json",
-      "field_path": "signal.pings_left",
-      "reset_value": 10
-    },
     "ping_requested": {
       "type": "float",
       "algorithm": "external_value",

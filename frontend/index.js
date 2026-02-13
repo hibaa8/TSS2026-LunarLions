@@ -2,6 +2,8 @@
 let connectionFails = 0; // number of consecutive connection failures, resets on successful fetch
 let dustConnected = false; // tracks DUST/Unreal Engine connection status
 
+
+
 /**
  * Called when the index.html page is loaded, sets up the periodic data fetching
  */
@@ -15,6 +17,7 @@ function onload() {
     updateTelemetryStatus();
     updateDustStatus();
   }, 1000);
+
 
   // Set up event listeners for switches and buttons
   setupEventListeners();
@@ -60,6 +63,9 @@ async function fetchData() {
       ltvResponse.json(),
     ]);
 
+    //check if telemetry component has been started by seeing if EVA.status.started is true
+    evaStarted = evaData?.status?.started === true;
+
     connectionFails = 0;
     dustConnected =
       (roverData?.pr_telemetry?.dust_connected && connectionFails <= 2) ||
@@ -87,6 +93,14 @@ async function fetchData() {
 
     if (path.startsWith("ltv.")) {
       value = getNestedValue(ltvData, path.slice(4));
+    }
+
+    // Special handling for signal strength
+    if (path === "ltv.signal.strength") {
+      if (value === 1.00) {
+        el.textContent = "NOT IN RANGE";
+        return;
+      }
     }
 
     // Handle checkboxes/switches (set checked property for boolean values)
@@ -208,6 +222,7 @@ function setupEventListeners() {
 }
 
 // HELPER FUNCTIONS
+
 
 /**
  * Retrieves a nested value from an object/json using a dot-separated path

@@ -45,6 +45,14 @@ cJSON* get_json_file(const char* filename);
 void send_json_file(const char* filename, unsigned char* data);
 void update_eva_station_timing(void);
 void reset_eva_station_timing(void);
+void update_sim_DCU_field_settings(sim_engine_t* sim_engine);
+void update_error_states(sim_engine_t* sim_engine);
+void update_EVA_error_simulation_error_states(sim_engine_t* sim_engine);
+void update_O2_error_state(sim_engine_t* sim_engine);
+void update_fan_error_state(sim_engine_t* sim_engine);
+void update_power_error_state(sim_engine_t* sim_engine);
+void update_scrubber_state(sim_engine_t* sim_engine);
+void update_remaining_errors(sim_engine_t* engine);
 
 // Helper functions
 void reverse_bytes(unsigned char* bytes);
@@ -96,9 +104,9 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {2010, "eva.uia.depress", "bool"},
 
     // DCU commands (sent from the peripheral device over UDP)
-    {2011, "eva.dcu.eva1.batt", "bool"},
+    {2011, "eva.dcu.eva1.batt.lu", "bool"},
     {2012, "eva.dcu.eva1.oxy", "bool"},
-    {2013, "eva.dcu.eva1.comm", "bool"},
+    {2013, "eva.dcu.eva1.batt.ps", "bool"},
     {2014, "eva.dcu.eva1.fan", "bool"},
     {2015, "eva.dcu.eva1.pump", "bool"},
     {2016, "eva.dcu.eva1.co2", "bool"},
@@ -111,9 +119,21 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {2021, "eva.imu.eva2.posy", "float"},
     {2022, "eva.imu.eva2.heading", "float"},
 
-    //RTB command
-    {2023, "ltv.errors.test", "bool"},
+    //LTV command
+    {2023, "ltv.errors.dust_sensor", "bool"},
+    {2024, "ltv.errors.power_module", "bool"},
+    {2025, "ltv.errors.comms.nav_reset" , "bool"},
+    {2026, "ltv.errors.comms.lidar_reset", "bool"},
+    {2027, "ltv.errors.comms.pri_sec", "bool"},
+    {2028, "ltv.errors.nav_system", "bool"},
+    {2029, "ltv.errors.lidar_sensor", "bool"},
+    {2030, "ltv.errors.ultrasonic_sensor", "bool"},
+    {2031, "ltv.errors.gyroscope_sensor", "bool"},
+    {2032, "ltv.errors.potentiometer_sensor", "bool"},
+    {2033, "ltv.errors.electronic_heater", "bool"},
+    {2034, "ltv.errors.recovery_mode", "bool"},
 
+    
     // Ping LTV command
     {2050, "ltv.signal.ping_requested", "bool"},
 

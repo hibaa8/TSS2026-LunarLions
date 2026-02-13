@@ -1,4 +1,5 @@
 #include "data.h"
+#include "lib/simulation/throw_errors.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -25,9 +26,12 @@ struct backend_data_t *init_backend() {
     backend->running_pr_sim = -1;
     backend->pr_sim_paused = false;
 
+    
+
     // Initialize simulation engine
     backend->sim_engine = sim_engine_create();
     if (backend->sim_engine) {
+
         if (!sim_engine_load_predefined_configs(backend->sim_engine)) {
             printf("Warning: Failed to load simulation configurations\n");
         }
@@ -39,9 +43,246 @@ struct backend_data_t *init_backend() {
         printf("Warning: Failed to create simulation engine\n");
     }
 
+    
+
     printf("Backend and simulation engine initialized successfully\n");
 
     return backend;
+}
+
+/**
+* calls individual functions to update error states for each system based on the current DCU field settings. 
+* This function is called in data.c before sim_engine_update to ensure that error states are updated before each simulation update, 
+* allowing the simulation to reflect any changes in error conditions based on DCU commands.
+* @param sim_engine Pointer to the simulation engine to update
+ */
+void update_EVA_error_simulation_error_states(sim_engine_t* sim_engine) {
+    if (!sim_engine) {
+        return;
+    }
+
+    update_O2_error_state(sim_engine);
+    update_fan_error_state(sim_engine);
+    update_power_error_state(sim_engine);
+
+}
+
+/**
+* Update the number of LTV errors still thrown
+* @param engine Pointer to the simulation engine
+*/
+
+void update_remaining_errors(sim_engine_t* engine) {
+    if (!engine) {
+        printf("Error: Invalid simulation engine pointer in update_remaining_errors\n");
+        return;
+    }
+
+    //count the number of values in the LTV json file under "errors" that are set to true to indicate that those errors are still being thrown, and update the number of task board errors accordingly
+    cJSON* ltv_config = get_json_file("LTV");
+    if (!ltv_config) {
+        printf("Error: Failed to load LTV config file in update_remaining_errors\n");
+        return;
+    }
+
+    cJSON* errors = cJSON_GetObjectItem(ltv_config, "errors");
+    if (!errors || !cJSON_IsObject(errors)) {
+        printf("Error: Missing or invalid 'errors' object in LTV config file\n");
+        cJSON_Delete(ltv_config);
+        return;
+    }
+
+    int remaining_errors = 0;
+    cJSON* error = NULL;
+    cJSON_ArrayForEach(error, errors) {
+        if (cJSON_IsBool(error) && cJSON_IsTrue(error)) {
+            remaining_errors++;
+        }
+    }
+
+    engine->num_task_board_errors = remaining_errors;
+    
+    //update task board time clock if errors remain
+    if(remaining_errors !=0) {
+        engine->time_to_complete_task_board += 1; //increment time to complete task board by 1 second, simulating the increased time to complete the task board with more errors
+    }
+    cJSON_Delete(ltv_config);
+
+}
+
+/**
+* updates the O2 error state based on the current DCU field settings and o2 value.
+* If the DCU command for O2 is set to false, the O2 error state will be set to false (no error).
+* If the O2 error is thrown and the DCU command for O2 is set to true, the O2 error state will be set to true (error present).
+* @param sim_engine Pointer to the simulation engine to update
+*/
+void update_O2_error_state(sim_engine_t* sim_engine) {
+    if (!sim_engine) {
+        return;
+    }
+
+    //check if the O2 error is currently thrown by checking if the algorithm for the O2 storage field is set to rapid linear decay
+    sim_component_t* eva1 = sim_engine_get_component(sim_engine, "eva1");
+    if (eva1 == NULL) {
+        printf("Simulation tried to access non-existent component 'eva1' for O2 error state update\n");
+        return;
+    }
+
+    sim_field_t* field = sim_engine_find_field_within_component(eva1, "suit_pressure_oxy");
+    if (field == NULL) {
+        printf("Simulation tried to access non-existent field 'suit_pressure_oxy' for O2 error state update\n");
+        return;
+    }   
+
+    bool o2_error_thrown = (field->algorithm == SIM_ALGO_RAPID_LINEAR_DECAY || field->algorithm == SIM_ALGO_RAPID_LINEAR_GROWTH);  
+
+    //update the oxy_error state in the JSON file based on the current error state and DCU command
+    if (sim_engine->dcu_field_settings->o2 == false) {
+        update_json_file("EVA", "error", "oxy_error", "false");
+    } else if (o2_error_thrown && sim_engine->dcu_field_settings->o2 == true) {
+        update_json_file("EVA", "error", "oxy_error", "true");
+    } else {
+        update_json_file("EVA", "error", "oxy_error", "false");
+    }
+}
+
+/**
+* switches between which scrubber is increasing linearly and decreasing linearly based on the current DCU command for CO2 scrubber.
+* also switches whether suit_pressure_co2 is increasing or decreasing based on scrubber value and DCU command, to simulate the relationship between CO2 scrubber performance and suit CO2 pressure.
+* If the DCU command for CO2 scrubber is set to true, scrubber_a_co2_storage will be set to linear_growth and scrubber_b_co2_storage will be set to linear_decay.
+* If the DCU command for CO2 scrubber is set to false, scrubber_a_co2_storage will be set to linear_decay and scrubber_b_co2_storage will be set to linear_growth.
+* If the increasing scrubber co2 storage value is above 30, the suit_pressure_co2 field will be set to linear_growth, simulating a buildup of CO2 in the suit due to poor scrubber performance. 
+* If the increasing scrubber co2 storage value is below 30, the suit_pressure_co2 field will be set to linear_decay, simulating effective CO2 scrubbing and a decrease in suit CO2 pressure.
+* @param sim_engine Pointer to the simulation engine to update
+*/
+void update_scrubber_state(sim_engine_t* sim_engine) {
+    if (!sim_engine) {
+        return;
+    }
+
+    sim_component_t* eva1 = sim_engine_get_component(sim_engine, "eva1");
+    if (eva1 == NULL) {
+        printf("Simulation tried to access non-existent component 'eva1' for scrubber error state update\n");
+        return;
+    }
+
+    sim_field_t* scrubber_a_field = sim_engine_find_field_within_component(eva1, "scrubber_a_co2_storage");
+    sim_field_t* scrubber_b_field = sim_engine_find_field_within_component(eva1, "scrubber_b_co2_storage");
+    sim_field_t* suit_co2_pressure_field = sim_engine_find_field_within_component(eva1, "suit_pressure_co2");
+
+    if (scrubber_a_field == NULL || scrubber_b_field == NULL || suit_co2_pressure_field == NULL) {
+        printf("Simulation tried to access non-existent scrubber or suit pressure fields for scrubber error state update\n");
+        return;
+    }
+
+    if (sim_engine->dcu_field_settings->co2 == true) {
+        scrubber_a_field->algorithm = SIM_ALGO_LINEAR_GROWTH_CONSTANT;
+        scrubber_b_field->algorithm = SIM_ALGO_LINEAR_DECAY_CONSTANT;
+    } else {
+        scrubber_a_field->algorithm = SIM_ALGO_LINEAR_DECAY_CONSTANT;
+        scrubber_b_field->algorithm = SIM_ALGO_LINEAR_GROWTH_CONSTANT;
+    }
+
+    
+
+    //if the increasing scrubber co2 storage value is above 30, set suit_pressure_co2 to linear growth, otherwise set it to linear decay
+    if ((scrubber_a_field->algorithm == SIM_ALGO_LINEAR_GROWTH_CONSTANT && scrubber_a_field->current_value.f > 30.0f) || (scrubber_b_field->algorithm == SIM_ALGO_LINEAR_GROWTH_CONSTANT && scrubber_b_field->current_value.f > 30.0f)) {
+        suit_co2_pressure_field->algorithm = SIM_ALGO_LINEAR_GROWTH_CONSTANT;
+    } else {
+        suit_co2_pressure_field->algorithm = SIM_ALGO_LINEAR_DECAY_CONSTANT;
+    } 
+
+    //update scrubber_error state in JSON file based on DCU command and scrubber performance
+    if ((scrubber_a_field->algorithm == SIM_ALGO_LINEAR_GROWTH_CONSTANT && scrubber_a_field->current_value.f > 30.0f)
+    || (scrubber_b_field->algorithm == SIM_ALGO_LINEAR_GROWTH_CONSTANT && scrubber_b_field->current_value.f > 30.0f)) {
+        update_json_file("EVA", "error", "scrubber_error", "true");
+    } else {
+        update_json_file("EVA", "error", "scrubber_error", "false");
+    }
+}
+
+/**
+* updates the fan error states based on the current DCU field settings and fan value.
+* If the DCU command for the fan is set to false, the fan error states will be set to false (no error).
+* If the fan RPM high error is thrown and the DCU command for the fan is set to true, the fan RPM error state will be set to true (error present).
+* If the fan RPM low error is thrown and the DCU command for the fan is set to true, the fan RPM error state will be set to true (error present).
+* @param sim_engine Pointer to the simulation engine to update
+*/
+void update_fan_error_state(sim_engine_t* sim_engine) {
+    if (!sim_engine) {
+        return;
+    }
+
+    //check if the fan RPM is below 30000
+    sim_component_t* eva1 = sim_engine_get_component(sim_engine, "eva1");
+    if (eva1 == NULL) {
+        printf("Simulation tried to access non-existent component 'eva1' for fan error state update\n");
+        return;
+    }
+    sim_field_t* field = sim_engine_find_field_within_component(eva1, "fan_pri_rpm");
+    if (field == NULL) {
+        printf("Simulation tried to access non-existent field 'fan_pri_rpm' for fan error state update\n");
+        return;
+    }
+    bool fan_error_thrown = (field->algorithm == SIM_ALGO_RAPID_LINEAR_DECAY || field->algorithm == SIM_ALGO_RAPID_LINEAR_GROWTH);
+    //update the fan_error state in the JSON file based on the current error state and DCU command
+    if (sim_engine->dcu_field_settings->fan == false) {
+        update_json_file("EVA", "error", "fan_error", "false");
+    } else if (fan_error_thrown && sim_engine->dcu_field_settings->fan == true) {
+        update_json_file("EVA", "error", "fan_error", "true");
+    } else {
+        update_json_file("EVA", "error", "fan_error", "false");
+    }
+}
+
+/**
+* updates the power error state based on the current DCU field settings and battery values.
+* If the DCU command for the battery.lu is set to true or battery.ps is set to false, the power error state will be set to false (no error).
+* If the power error is thrown and the DCU command for battery.lu is set to false and battery.ps is set to true, the power error state will be set to true (error present).
+* @param sim_engine Pointer to the simulation engine to update
+ */
+void update_power_error_state(sim_engine_t* sim_engine) {
+    if (!sim_engine) {
+        return;
+    }
+
+    //check if the power level is below the error threshold by checking the current value of the primary battery level field
+    sim_component_t* eva1 = sim_engine_get_component(sim_engine, "eva1");
+    if (eva1 == NULL) {
+        printf("Simulation tried to access non-existent component 'eva1' for power error state update\n");
+        return;
+    }
+
+    sim_field_t* field = sim_engine_find_field_within_component(eva1, "primary_battery_level");
+    if (field == NULL) {
+        printf("Simulation tried to access non-existent field 'primary_battery_level' for power error state update\n");
+        return;
+    }  
+
+    bool power_error_thrown = (field->current_value.f < 20.0f);  //error threshold for battery level is 20%
+
+    //update the power_error state in the JSON file based on the current error state and DCU commands
+    if (sim_engine->dcu_field_settings->battery_lu == true || sim_engine->dcu_field_settings->battery_ps == false) {
+        update_json_file("EVA", "error", "power_error", "false");
+    } else if (power_error_thrown && sim_engine->dcu_field_settings->battery_lu == false && sim_engine->dcu_field_settings->battery_ps == true) {
+        update_json_file("EVA", "error", "power_error", "true");
+    } else {
+        update_json_file("EVA", "error", "power_error", "false");
+    }
+}
+
+/**
+ * Updates error states in the simulation engine based on the current JSON values and updates JSON values accordingly to reflect any changes in the error states. This ensures that the simulation engine's error conditions are in sync with the JSON data.
+ * For example, if a certain error condition is met in the simulation engine, it can update the corresponding field in the JSON file to reflect that error, and vice versa. This function acts as a bridge to keep the simulation engine and JSON data in sync regarding error states.
+ * This function is called before each simulation update to ensure the engine reflects the latest error conditions
+ *
+ * @param sim_engine Pointer to the simulation engine to update
+ */
+void update_error_states(sim_engine_t* sim_engine) {
+
+    update_EVA_error_simulation_error_states(sim_engine);
+    update_scrubber_state(sim_engine);
+    update_sim_DCU_field_settings(sim_engine);
 }
 
 /**
@@ -60,13 +301,15 @@ void increment_simulation(struct backend_data_t *backend) {
 
     // Update simulation engine once per second
     if (time_incremented) {
+
         // Update simulation engine with elapsed time
         float delta_time = 1.0f;  // 1 second per update
-
         if (backend->sim_engine) {
+            //update simulation engine DCU field settings based on the new values received from UDP commands
             sim_engine_update(backend->sim_engine, delta_time);
+            update_error_states(backend->sim_engine);
+            update_remaining_errors(backend->sim_engine);
         }
-
         // Update EVA station timing
         update_eva_station_timing();
     }
@@ -162,6 +405,7 @@ bool handle_udp_post_request(unsigned int command, unsigned char* data, struct b
         // Other commands extract float value from packet format
         if (strcmp(mapping->data_type, "bool") == 0) {
             bool value = extract_bool_value(data);
+
             strcpy(value_str, value ? "true" : "false");
         } else if (strcmp(mapping->data_type, "float") == 0) {
             float value = extract_float_value(data);
@@ -694,6 +938,38 @@ bool html_form_json_update(char* request_content, struct backend_data_t* backend
         return false;
     }
 }
+
+/**
+* Updates sim_DCU_field_settings based on the current state of the DCU station
+* @param sim_engine Pointer to the simulation engine
+*/
+void update_sim_DCU_field_settings(sim_engine_t* sim_engine) {
+    if (!sim_engine || !sim_engine->dcu_field_settings) {
+        return;
+    }
+
+    sim_DCU_field_settings_t* settings = sim_engine->dcu_field_settings;
+
+    // Update battery_lu setting
+    settings->battery_lu = (get_field_from_json("EVA", "dcu.eva1.batt.lu", 0.0) == 1.0);
+
+    // Update battery_ps setting
+    settings->battery_ps = (get_field_from_json("EVA", "dcu.eva1.batt.ps", 0.0) == 1.0);
+
+    // Update fan setting
+    settings->fan = (get_field_from_json("EVA", "dcu.eva1.fan", 0.0) == 1.0);
+
+    // Update o2 setting
+    settings->o2 = (get_field_from_json("EVA", "dcu.eva1.oxy", 0.0) == 1.0);
+
+    //update pump setting
+    settings->pump = (get_field_from_json("EVA", "dcu.eva1.pump", 0.0) == 1.0);
+
+    //update co2 setting
+    settings->co2 = (get_field_from_json("EVA", "dcu.eva1.co2", 0.0) == 1.0);
+
+}
+
 
 /**
  * Gets a field value from a JSON file using a dot-separated path

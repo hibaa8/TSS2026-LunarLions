@@ -14,6 +14,7 @@
 
 #define SIM_DATA_ROOT "data"
 #define SIM_CONFIG_ROOT "src/lib/simulation/config"
+#define INITIAL_NUM_TASK_BOARD_ERRORS 10
 
 ///////////////////////////////////////////////////////////////////////////////////
 //                                  Data Types
@@ -26,9 +27,13 @@ typedef enum {
 typedef enum {
     SIM_ALGO_SINE_WAVE,
     SIM_ALGO_LINEAR_DECAY,
+    SIM_ALGO_RAPID_LINEAR_DECAY,
+    SIM_ALGO_RAPID_LINEAR_GROWTH,
     SIM_ALGO_LINEAR_GROWTH,
     SIM_ALGO_DEPENDENT_VALUE,
-    SIM_ALGO_EXTERNAL_VALUE
+    SIM_ALGO_EXTERNAL_VALUE,
+    SIM_ALGO_LINEAR_GROWTH_CONSTANT,
+    SIM_ALGO_LINEAR_DECAY_CONSTANT
 } sim_algorithm_type_t;
 
 typedef union {
@@ -40,6 +45,7 @@ typedef struct {
     char* component_name;
     sim_field_type_t type;
     sim_algorithm_type_t algorithm;
+    sim_algorithm_type_t starting_algorithm; // Store the original algorithm for reset purposes
     sim_value_t current_value;
     sim_value_t previous_value;
 
@@ -51,7 +57,10 @@ typedef struct {
     int depends_count;
 
     // Internal state for algorithms
+    float run_time; //active time since component started
+    bool active; //whether the field should be actively updating (used for fields that depend on DCU commands)
     float start_time;
+    bool rapid_algo_initialized;
     bool initialized;
 } sim_field_t;
 
@@ -64,11 +73,28 @@ typedef struct {
 } sim_component_t;
 
 typedef struct {
+    bool battery_lu;
+    bool battery_ps;
+    bool fan;
+    bool o2;
+    bool pump;
+    bool co2;
+} sim_DCU_field_settings_t;
+
+typedef struct {
     sim_component_t* components;
     int component_count;
 
     sim_field_t** update_order;  // Fields sorted by dependencies
     int total_field_count;
+
+    //error throwing variables
+    int num_task_board_errors;
+    int time_to_complete_task_board;
+    int error_time;
+    int error_type;
+
+    sim_DCU_field_settings_t* dcu_field_settings;
 
     bool initialized;
 } sim_engine_t;
@@ -99,7 +125,11 @@ sim_value_t sim_engine_get_field_value(sim_engine_t* engine, const char* field_n
 // Component status
 bool sim_engine_is_component_running(sim_engine_t* engine, const char* component_name);
 
+//Get Component
+sim_component_t* sim_engine_get_component(sim_engine_t* engine, const char* component_name);
+
 // Utility functions
 sim_field_t* sim_engine_find_field(sim_engine_t* engine, const char* field_name);
+sim_field_t* sim_engine_find_field_within_component(sim_component_t* component, const char* field_name);
 
 #endif // SIM_ENGINE_H
