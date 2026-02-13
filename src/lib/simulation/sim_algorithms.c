@@ -193,6 +193,65 @@ sim_value_t sim_algo_linear_growth(sim_field_t* field, float current_time) {
 }
 
 /**
+* Linear growth algorithm for increasing values over time with a constant growth rate.
+ * Values increase linearly from start_value at growth_rate per second, regardless of elapsed time.
+ * 
+ * @param field Pointer to the field containing algorithm parameters
+ * @param current_time Current simulation time in seconds
+ * @return Calculated value based on linear growth with constant rate
+*/
+sim_value_t sim_algo_linear_growth_constant(sim_field_t* field, float current_time) {
+    sim_value_t result = {0};
+    
+    if (!field || !field->params) return result;
+    
+    // Get parameters
+    cJSON* growth_rate = cJSON_GetObjectItem(field->params, "growth_rate");
+    
+    float rate = growth_rate && cJSON_IsNumber(growth_rate) ? (float)cJSON_GetNumberValue(growth_rate) : 1.0f;
+    
+    // Calculate current value based on growth rate
+    float current_value = field->current_value.f + (rate);
+    
+    result.f = current_value;
+
+    return result;
+}
+
+/**
+* Linear decay algorithm for decreasing values over time with a constant decay rate.
+ * Values decrease linearly from start_value at decay_rate per second, regardless of elapsed time.
+    * Values will not go below end_value if specified.
+ * @param field Pointer to the field containing algorithm parameters
+*/
+
+sim_value_t sim_algo_linear_decay_constant(sim_field_t* field, float current_time) {
+    sim_value_t result = {0};
+    
+    if (!field || !field->params) return result;
+    
+    // Get parameters
+    cJSON* decay_rate = cJSON_GetObjectItem(field->params, "decay_rate");
+    cJSON* end_value = cJSON_GetObjectItem(field->params, "end_value");
+    
+    float rate = decay_rate && cJSON_IsNumber(decay_rate) ? (float)cJSON_GetNumberValue(decay_rate) : 1.0f;
+    float end_val = end_value && cJSON_IsNumber(end_value) ? (float)cJSON_GetNumberValue(end_value) : -INFINITY;
+    
+    // Calculate current value based on decay rate
+    float elapsed_time = current_time - field->start_time;
+    float current_value = field->current_value.f - (rate);
+    
+    // Clamp to minimum value if specified
+    if (current_value < end_val) {
+        current_value = end_val;
+    }
+
+    result.f = current_value;
+
+    return result;
+}
+
+/**
  * Implements dependent value algorithm for fields calculated from other fields.
  * Evaluates a mathematical formula using values from other fields as inputs.
  * 
@@ -221,15 +280,7 @@ sim_value_t sim_algo_dependent_value(sim_field_t* field, float current_time, sim
     return result;
 }
 
-/**
- * Implements error value algorithm for 
- * Evaluates a mathematical formula using values from other fields as inputs.
- * 
- * @param field Pointer to the field containing algorithm parameters
- * @param current_time Current simulation time in seconds (unused for dependent values)
- * @param engine Pointer to the simulation engine for accessing other field values
- * @return Calculated value based on formula evaluation
- */
+
 
 /**
  * External value algorithm for fetching values from data JSON files.
@@ -578,6 +629,10 @@ sim_algorithm_type_t sim_algo_parse_type_string(const char* algo_string) {
         return SIM_ALGO_DEPENDENT_VALUE;
     } else if (strcmp(algo_string, "external_value") == 0) {
         return SIM_ALGO_EXTERNAL_VALUE;
+    } else if (strcmp(algo_string, "linear_growth_constant") == 0) {
+        return SIM_ALGO_LINEAR_GROWTH_CONSTANT;
+    } else if (strcmp(algo_string, "linear_decay_constant") == 0) {
+        return SIM_ALGO_LINEAR_DECAY_CONSTANT;
     }
     
     return SIM_ALGO_SINE_WAVE;  // Default algorithm
@@ -602,6 +657,10 @@ const char* sim_algo_type_to_string(sim_algorithm_type_t type) {
             return "dependent_value";
         case SIM_ALGO_EXTERNAL_VALUE:
             return "external_value";
+        case SIM_ALGO_LINEAR_GROWTH_CONSTANT:
+            return "linear_growth_constant";
+        case SIM_ALGO_LINEAR_DECAY_CONSTANT:
+            return "linear_decay_constant";
         default:
             return "unknown";
     }

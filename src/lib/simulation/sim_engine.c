@@ -361,10 +361,12 @@ bool sim_engine_initialize(sim_engine_t* engine) {
         engine->dcu_field_settings->co2 = false;
         printf("DCU field settings initialized\n");
 
-    engine->error_time = 10; // force error at 10 seconds for testing purposes
-        printf("Error time set to: %d\n", engine->error_time);
-        //engine->error_time = time_to_throw_error();
-        engine->error_type = 4; // set to 4 to signify no error, will be set to 0, 1, 2, or 3 to signify different errors when it's time to throw an error
+        printf("Error time set to Task Board Completion Time + : %d\n", engine->error_time);
+        engine->error_time = time_to_throw_error();
+        engine->num_task_board_errors = INITIAL_NUM_TASK_BOARD_ERRORS; //initialize number of task board errors to 0 at the start of each simulation run
+        engine->time_to_complete_task_board = 0;
+        engine->error_type = NUM_ERRORS; // set to NUM_ERRORS to signify no error, will be set to 0,1,2..NUM_ERRORS-1 to signify different errors when it's time to throw an error
+        
         printf("Error type set to: %d\n", engine->error_type);
     
     // Initialize all fields
@@ -428,6 +430,20 @@ bool sim_engine_initialize(sim_engine_t* engine) {
                 break;
             }
             case SIM_ALGO_LINEAR_DECAY: {
+                cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
+                if (start_value && cJSON_IsNumber(start_value)) {
+                    field->current_value.f = (float)cJSON_GetNumberValue(start_value);
+                }
+                break;
+            }
+            case SIM_ALGO_LINEAR_DECAY_CONSTANT: {
+                cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
+                if (start_value && cJSON_IsNumber(start_value)) {
+                    field->current_value.f = (float)cJSON_GetNumberValue(start_value);
+                }
+                break;
+            }
+            case SIM_ALGO_LINEAR_GROWTH_CONSTANT: {
                 cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
                 if (start_value && cJSON_IsNumber(start_value)) {
                     field->current_value.f = (float)cJSON_GetNumberValue(start_value);
@@ -512,25 +528,22 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
             field->active = false;
         } else if(strncmp(field->field_name, "coolant_liquid_pressure", 23) == 0 && (engine->dcu_field_settings->pump == false)) {
             field->active = false;
-        } else if(strncmp(field->field_name, "scrubber_a_co2_storage", 22) == 0 && (engine->dcu_field_settings->co2 == false)) {
-            field->active = false;
-        } else if(strncmp(field->field_name, "scrubber_b_co2_storage", 22) == 0 && (engine->dcu_field_settings->co2 == true)) {
-            field->active = false;
         } else {
             field->active = true;
         }
 
         //error overrides active status, so if an error is active for a field, it should be active regardless of DCU settings
-        if((engine->error_type == 0) && (strcmp(field->field_name, "oxy_pri_storage") == 0)) {
+        if((engine->error_type == SUIT_PRESSURE_OXY_LOW) && (strcmp(field->field_name, "oxy_pri_storage") == 0)) {
             field->active = true;
-        } else if((engine->error_type == 1) && (strcmp(field->field_name, "fan_pri_rpm") == 0)) {
+        } else if((engine->error_type == SUIT_PRESSURE_OXY_HIGH) && (strcmp(field->field_name, "oxy_pri_storage") == 0)) {
             field->active = true;
-        } else if((engine->error_type == 2) && (strcmp(field->field_name, "fan_pri_rpm") == 0)) {
+        } else if((engine->error_type == FAN_RPM_HIGH) && (strcmp(field->field_name, "fan_pri_rpm") == 0)) {
             field->active = true;
-        } else if ((engine->error_type == 3) && (strcmp(field->field_name, "scrubber_a_co2_storage") == 0)) {
+        } else if((engine->error_type == FAN_RPM_LOW) && (strcmp(field->field_name, "fan_pri_rpm") == 0)) {
             field->active = true;
         }
 
+        
         // Only update run_time if component is running
         if (component && component->running && field->active) {
             field->run_time += delta_time;
@@ -544,8 +557,8 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
 
     if(eva_control_started) {
         if(eva1 != NULL) {
-            if(eva1->simulation_time == engine->error_time) {
-                throw_error(engine);
+            if(engine->num_task_board_errors == 0 && eva1->simulation_time == (engine->time_to_complete_task_board + engine->error_time)) {
+                throw_random_error(engine);
                 printf("Error thrown at simulation time: %.2f seconds\n", eva1->simulation_time);
             }
         } else {
@@ -595,6 +608,12 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
                 break;
             case SIM_ALGO_EXTERNAL_VALUE:
                 field->current_value = sim_algo_external_value(field, field->run_time, engine);
+                break;
+            case SIM_ALGO_LINEAR_GROWTH_CONSTANT:
+                field->current_value = sim_algo_linear_growth_constant(field, field->run_time);
+                break;
+            case SIM_ALGO_LINEAR_DECAY_CONSTANT:
+                field->current_value = sim_algo_linear_decay_constant(field, field->run_time);
                 break;
         }
     }
@@ -673,8 +692,7 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
     if(strcmp(component_name, "eva1") == 0) {
         //recalculate error time and type for eva1 when it is reset, to simulate different error scenarios on each run
         target_component->simulation_time = 0.0f;
-        //engine->error_time = time_to_throw_error();
-        engine->error_time = 10; //force error at 10 seconds for testing purposes
+        engine->error_time = time_to_throw_error();
         engine->error_type = error_to_throw();
     }
 
@@ -783,6 +801,8 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
 
     printf("Reset component '%s' simulation\n", component_name);
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 //                              Field Access

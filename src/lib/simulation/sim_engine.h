@@ -14,6 +14,7 @@
 
 #define SIM_DATA_ROOT "data"
 #define SIM_CONFIG_ROOT "src/lib/simulation/config"
+#define INITIAL_NUM_TASK_BOARD_ERRORS 10
 
 ///////////////////////////////////////////////////////////////////////////////////
 //                                  Data Types
@@ -30,7 +31,9 @@ typedef enum {
     SIM_ALGO_RAPID_LINEAR_GROWTH,
     SIM_ALGO_LINEAR_GROWTH,
     SIM_ALGO_DEPENDENT_VALUE,
-    SIM_ALGO_EXTERNAL_VALUE
+    SIM_ALGO_EXTERNAL_VALUE,
+    SIM_ALGO_LINEAR_GROWTH_CONSTANT,
+    SIM_ALGO_LINEAR_DECAY_CONSTANT
 } sim_algorithm_type_t;
 
 typedef union {
@@ -86,6 +89,8 @@ typedef struct {
     int total_field_count;
 
     //error throwing variables
+    int num_task_board_errors;
+    int time_to_complete_task_board;
     int error_time;
     int error_type;
 

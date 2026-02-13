@@ -1,33 +1,6 @@
 // GLOBAL VARIABLES
 let connectionFails = 0; // number of consecutive connection failures, resets on successful fetch
 let dustConnected = false; // tracks DUST/Unreal Engine connection status
-let evaStarted = false; //variable to track if EVA has been started yet
-
-//telemetry ranges
-const TELEMETRY_RANGES  = {
-  "eva.telemetry.eva1.primary_battery_level": { min: 20, max: 100, units: "%" },
-  "eva.telemetry.eva1.secondary_battery_level": { min: 20, max: 100, units: "%" },
-  "eva.telemetry.eva1.oxy_pri_storage": { min: 20, max: 100, units: "%" },
-  "eva.telemetry.eva1.oxy_sec_storage": { min: 20, max: 100, units: "%" },
-  "eva.telemetry.eva1.oxy_pri_pressure": { min: 600, max: 3000, units: "psi" },
-  "eva.telemetry.eva1.oxy_sec_pressure": { min: 600, max: 3000, units: "psi" },
-  "eva.telemetry.eva1.coolant_storage": { min: 80, max: 100, units: "%" },
-  "eva.telemetry.eva1.heart_rate": { min: 50, max: 160, units: "bpm" },
-  "eva.telemetry.eva1.oxy_consumption": { min: 0.05, max: 0.15, units: "psi/min" },
-  "eva.telemetry.eva1.co2_production": { min: 0.05, max: 0.15, units: "psi/min" },
-  "eva.telemetry.eva1.suit_pressure_oxy": { min: 3.5, max: 4.1, units: "psi" },
-  "eva.telemetry.eva1.suit_pressure_co2": { min: 0, max: 0.1, units: "psi" },
-  "eva.telemetry.eva1.suit_pressure_other": { min: 0, max: 0.5, units: "psi" },
-  "eva.telemetry.eva1.suit_pressure_total": { min: 3.5, max: 4.5, units: "psi" },
-  "eva.telemetry.eva1.helmet_pressure_co2": { min: 0, max: 0.15, units: "psi" },
-  "eva.telemetry.eva1.fan_pri_rpm": { min: 20000, max: 30000, units: "rpm" },
-  "eva.telemetry.eva1.fan_sec_rpm": { min: 20000, max: 30000, units: "rpm" },
-  "eva.telemetry.eva1.scrubber_a_co2_storage": { min: 0, max: 60, units: "%" },
-  "eva.telemetry.eva1.scrubber_b_co2_storage": { min: 0, max: 60, units: "%" },
-  "eva.telemetry.eva1.temperature": { min: 10, max: 32, units: "°C" },
-  "eva.telemetry.eva1.coolant_liquid_pressure": { min: 100, max: 700, units: "psi" },
-  "eva.telemetry.eva1.coolant_gas_pressure": { min: 0, max: 700, units: "psi" },
-};
 
 
 

@@ -51,7 +51,8 @@ void update_EVA_error_simulation_error_states(sim_engine_t* sim_engine);
 void update_O2_error_state(sim_engine_t* sim_engine);
 void update_fan_error_state(sim_engine_t* sim_engine);
 void update_power_error_state(sim_engine_t* sim_engine);
-void update_scrubber_error_state(sim_engine_t* sim_engine);
+void update_scrubber_state(sim_engine_t* sim_engine);
+void update_remaining_errors(sim_engine_t* engine);
 
 // Helper functions
 void reverse_bytes(unsigned char* bytes);
@@ -130,6 +131,7 @@ static const udp_command_mapping_t udp_command_mappings[] = {
     {2031, "ltv.errors.gyroscope_sensor", "bool"},
     {2032, "ltv.errors.potentiometer_sensor", "bool"},
     {2033, "ltv.errors.electronic_heater", "bool"},
+    {2034, "ltv.errors.recovery_mode", "bool"},
 
     
     // Ping LTV command
