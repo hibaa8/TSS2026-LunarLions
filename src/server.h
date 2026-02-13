@@ -18,7 +18,7 @@
 #define TSS_TO_UNREAL_PING_COMMAND 2005
 
 // Server Configuration
-#define UNREAL_UPDATE_INTERVAL_SEC 0.02
+#define UNREAL_UPDATE_INTERVAL_SEC 1.0
 
 #define LIDAR_NUM_POINTS 17 // number of LiDAR points expected from the DUST sim to allocate in memory
 

@@ -1,5 +1,6 @@
 #include "sim_engine.h"
 #include "sim_algorithms.h"
+#include "throw_errors.h"
 #include <string.h>
 #include <math.h>
 #ifdef _WIN32
@@ -64,6 +65,7 @@ void sim_engine_destroy(sim_engine_t* engine) {
     
     free(engine->components);
     free(engine->update_order);
+    free(engine->dcu_field_settings);
     free(engine);
 }
 
@@ -203,6 +205,7 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
         }
         
         field->algorithm = sim_algo_parse_type_string(cJSON_GetStringValue(algorithm));
+        field->starting_algorithm = field->algorithm; // Store the starting algorithm for reset purposes
         
         // Parse type (always float)
         field->type = SIM_TYPE_FLOAT;
@@ -227,6 +230,9 @@ bool sim_engine_load_component(sim_engine_t* engine, const char* json_file_path)
             field->depends_on = NULL;
         }
 
+        field->run_time = 0.0f; 
+        field->active = true; //active by default, can be deactivated by DCU commands for certain fields
+        field->rapid_algo_initialized = false;
         field->initialized = false;
         field_idx++;
     }
@@ -344,6 +350,24 @@ bool sim_engine_initialize(sim_engine_t* engine) {
     if (!sort_fields_by_dependencies(engine)) {
         return false;
     }
+
+    //initialize the DCU field settings
+        engine->dcu_field_settings = malloc(sizeof(sim_DCU_field_settings_t));
+        engine->dcu_field_settings->battery_lu = false;
+        engine->dcu_field_settings->battery_ps = false;
+        engine->dcu_field_settings->fan = false;
+        engine->dcu_field_settings->o2 = false;
+        engine->dcu_field_settings->pump = false;
+        engine->dcu_field_settings->co2 = false;
+        printf("DCU field settings initialized\n");
+
+        printf("Error time set to Task Board Completion Time + : %d\n", engine->error_time);
+        engine->error_time = time_to_throw_error();
+        engine->num_task_board_errors = INITIAL_NUM_TASK_BOARD_ERRORS; //initialize number of task board errors to 0 at the start of each simulation run
+        engine->time_to_complete_task_board = 0;
+        engine->error_type = NUM_ERRORS; // set to NUM_ERRORS to signify no error, will be set to 0,1,2..NUM_ERRORS-1 to signify different errors when it's time to throw an error
+        
+        printf("Error type set to: %d\n", engine->error_type);
     
     // Initialize all fields
     for (int i = 0; i < engine->total_field_count; i++) {
@@ -359,6 +383,41 @@ bool sim_engine_initialize(sim_engine_t* engine) {
         }
 
         field->start_time = component ? component->simulation_time : 0.0f;
+
+        field->run_time = 0.0f;
+
+        
+        
+        //set active to true by default, will be set to false for fields that depend on DCU commands until the correct command is received
+        if(strncmp(field->field_name, "primary_battery_level", 21) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == true)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "secondary_battery_level", 23) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == false)) {
+            field->active = false;
+        }
+
+        if(strncmp(field->field_name, "oxy_pri_storage", 15) == 0 && (engine->dcu_field_settings->o2 == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "oxy_sec_storage", 15) == 0 && (engine->dcu_field_settings->o2 == true)) {
+            field->active = false;
+        }
+
+        if(strncmp(field->field_name, "fan_pri_rpm", 11) == 0 && (engine->dcu_field_settings->fan == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "fan_sec_rpm", 11) == 0 && (engine->dcu_field_settings->fan == true)) {
+            field->active = false;
+        }
+
+        if(strncmp(field->field_name, "coolant_liquid_pressure", 23) == 0 && (engine->dcu_field_settings->pump == false)) {
+            field->active = false;
+        }
+
+        if(strncmp(field->field_name, "scrubber_a_co2_storage", 22) == 0 && (engine->dcu_field_settings->co2 == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "scrubber_b_co2_storage", 22) == 0 && (engine->dcu_field_settings->co2 == true)) {
+            field->active = false;
+        }
+        
+
         field->initialized = true;
         
         // Set initial values based on algorithm
@@ -371,6 +430,20 @@ bool sim_engine_initialize(sim_engine_t* engine) {
                 break;
             }
             case SIM_ALGO_LINEAR_DECAY: {
+                cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
+                if (start_value && cJSON_IsNumber(start_value)) {
+                    field->current_value.f = (float)cJSON_GetNumberValue(start_value);
+                }
+                break;
+            }
+            case SIM_ALGO_LINEAR_DECAY_CONSTANT: {
+                cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
+                if (start_value && cJSON_IsNumber(start_value)) {
+                    field->current_value.f = (float)cJSON_GetNumberValue(start_value);
+                }
+                break;
+            }
+            case SIM_ALGO_LINEAR_GROWTH_CONSTANT: {
                 cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
                 if (start_value && cJSON_IsNumber(start_value)) {
                     field->current_value.f = (float)cJSON_GetNumberValue(start_value);
@@ -408,6 +481,8 @@ bool sim_engine_initialize(sim_engine_t* engine) {
 /**
  * Updates the simulation by one time step.
  * Advances simulation time and updates all fields in dependency order.
+ * Throws error if battery voltage drops below 20% and
+ * Throws pressure or fan error *randomly* once per 7 minutes of simulation time to simulate real-world issues.
  * Call this regularly to advance the simulation.
  * 
  * @param engine Pointer to the simulation engine
@@ -423,6 +498,76 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
         }
     }
 
+    //Next, advance simulation time for all fields that are running
+    for(int i = 0; i < engine->total_field_count; i++) {
+        sim_field_t* field = engine->update_order[i];
+
+        // Find the component this field belongs to
+        sim_component_t* component = NULL;
+        for (int j = 0; j < engine->component_count; j++) {
+            if (strcmp(engine->components[j].component_name, field->component_name) == 0) {
+                component = &engine->components[j];
+                break;
+            }
+        }
+
+        
+        
+        //set active to true by default, will be set to false for fields that depend on DCU commands until the correct command is received
+        if(strncmp(field->field_name, "primary_battery_level", 21) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == true)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "secondary_battery_level", 23) == 0 && !(engine->dcu_field_settings->battery_lu == false && engine->dcu_field_settings->battery_ps == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "oxy_pri_storage", 15) == 0 && (engine->dcu_field_settings->o2 == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "oxy_sec_storage", 15) == 0 && (engine->dcu_field_settings->o2 == true)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "fan_pri_rpm", 11) == 0 && (engine->dcu_field_settings->fan == false)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "fan_sec_rpm", 11) == 0 && (engine->dcu_field_settings->fan == true)) {
+            field->active = false;
+        } else if(strncmp(field->field_name, "coolant_liquid_pressure", 23) == 0 && (engine->dcu_field_settings->pump == false)) {
+            field->active = false;
+        } else {
+            field->active = true;
+        }
+
+        //error overrides active status, so if an error is active for a field, it should be active regardless of DCU settings
+        if((engine->error_type == SUIT_PRESSURE_OXY_LOW) && (strcmp(field->field_name, "oxy_pri_storage") == 0)) {
+            field->active = true;
+        } else if((engine->error_type == SUIT_PRESSURE_OXY_HIGH) && (strcmp(field->field_name, "oxy_pri_storage") == 0)) {
+            field->active = true;
+        } else if((engine->error_type == FAN_RPM_HIGH) && (strcmp(field->field_name, "fan_pri_rpm") == 0)) {
+            field->active = true;
+        } else if((engine->error_type == FAN_RPM_LOW) && (strcmp(field->field_name, "fan_pri_rpm") == 0)) {
+            field->active = true;
+        }
+
+        
+        // Only update run_time if component is running
+        if (component && component->running && field->active) {
+            field->run_time += delta_time;
+        }
+            
+    }
+    
+    //determine if we need to throw additional errors
+    bool eva_control_started = sim_engine_is_component_running(engine, "eva1");
+    sim_component_t* eva1 = sim_engine_get_component(engine, "eva1");
+
+    if(eva_control_started) {
+        if(eva1 != NULL) {
+            if(engine->num_task_board_errors == 0 && eva1->simulation_time == (engine->time_to_complete_task_board + engine->error_time)) {
+                throw_random_error(engine);
+                printf("Error thrown at simulation time: %.2f seconds\n", eva1->simulation_time);
+            }
+        } else {
+            printf("Simulation tried to access non-existent component 'eva1'\n");
+            exit(0);
+        }
+    }
+
+
     // Update all fields in dependency order (only for running components)
     for (int i = 0; i < engine->total_field_count; i++) {
         sim_field_t* field = engine->update_order[i];
@@ -436,26 +581,39 @@ void sim_engine_update(sim_engine_t* engine, float delta_time) {
             }
         }
 
-        // Only update if component is running
+        // Only update if component is running and DCU in correct state (if field depends on DCU commands)
         if (!component || !component->running) continue;
 
         field->previous_value = field->current_value;
 
         switch (field->algorithm) {
             case SIM_ALGO_SINE_WAVE:
-                field->current_value = sim_algo_sine_wave(field, component->simulation_time);
+                field->current_value = sim_algo_sine_wave(field, field->run_time);
                 break;
             case SIM_ALGO_LINEAR_DECAY:
-                field->current_value = sim_algo_linear_decay(field, component->simulation_time);
+                field->current_value = sim_algo_linear_decay(field, field->run_time);
+                
+                break;
+            case SIM_ALGO_RAPID_LINEAR_DECAY:
+                field->current_value = sim_algo_rapid_linear_decay(field, field->run_time);
+                break;
+            case SIM_ALGO_RAPID_LINEAR_GROWTH:
+                field->current_value = sim_algo_rapid_linear_growth(field, field->run_time);
                 break;
             case SIM_ALGO_LINEAR_GROWTH:
-                field->current_value = sim_algo_linear_growth(field, component->simulation_time);
+                field->current_value = sim_algo_linear_growth(field, field->run_time);
                 break;
             case SIM_ALGO_DEPENDENT_VALUE:
-                field->current_value = sim_algo_dependent_value(field, component->simulation_time, engine);
+                field->current_value = sim_algo_dependent_value(field,  field->run_time, engine);
                 break;
             case SIM_ALGO_EXTERNAL_VALUE:
-                field->current_value = sim_algo_external_value(field, component->simulation_time, engine);
+                field->current_value = sim_algo_external_value(field, field->run_time, engine);
+                break;
+            case SIM_ALGO_LINEAR_GROWTH_CONSTANT:
+                field->current_value = sim_algo_linear_growth_constant(field, field->run_time);
+                break;
+            case SIM_ALGO_LINEAR_DECAY_CONSTANT:
+                field->current_value = sim_algo_linear_decay_constant(field, field->run_time);
                 break;
         }
     }
@@ -529,16 +687,28 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
         return;
     }
 
+    
+
+    if(strcmp(component_name, "eva1") == 0) {
+        //recalculate error time and type for eva1 when it is reset, to simulate different error scenarios on each run
+        target_component->simulation_time = 0.0f;
+        engine->error_time = time_to_throw_error();
+        engine->error_type = error_to_throw();
+    }
+
     // Reset all fields of this component
     for (int i = 0; i < engine->total_field_count; i++) {
         sim_field_t* field = engine->update_order[i];
         if (field && strcmp(field->component_name, component_name) == 0) {
             // Reset field timing to component time (which is now 0)
             field->start_time = target_component->simulation_time;
-
+            field->run_time = 0.0f; 
+            field->rapid_algo_initialized = false;
+            
             // Set initial values based on algorithm
-            switch (field->algorithm) {
+            switch (field->starting_algorithm) {
                 case SIM_ALGO_SINE_WAVE: {
+                    field->algorithm = SIM_ALGO_SINE_WAVE; // Reset to original algorithm
                     cJSON* base_value = cJSON_GetObjectItem(field->params, "base_value");
                     if (base_value && cJSON_IsNumber(base_value)) {
                         field->current_value.f = (float)cJSON_GetNumberValue(base_value);
@@ -546,6 +716,7 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
                     break;
                 }
                 case SIM_ALGO_LINEAR_DECAY: {
+                    field->algorithm = SIM_ALGO_LINEAR_DECAY; // Reset to original algorithm
                     cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
                     if (start_value && cJSON_IsNumber(start_value)) {
                         field->current_value.f = (float)cJSON_GetNumberValue(start_value);
@@ -553,6 +724,7 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
                     break;
                 }
                 case SIM_ALGO_LINEAR_GROWTH: {
+                    field->algorithm = SIM_ALGO_LINEAR_GROWTH; // Reset to original algorithm
                     cJSON* start_value = cJSON_GetObjectItem(field->params, "start_value");
                     if (start_value && cJSON_IsNumber(start_value)) {
                         field->current_value.f = (float)cJSON_GetNumberValue(start_value);
@@ -562,11 +734,13 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
                     break;
                 }
                 case SIM_ALGO_DEPENDENT_VALUE: {
+                    field->algorithm = SIM_ALGO_DEPENDENT_VALUE; // Reset to original algorithm
                     // Will be calculated during first update
                     field->current_value.f = 0.0f;
                     break;
                 }
                 case SIM_ALGO_EXTERNAL_VALUE: {
+                    field->algorithm = SIM_ALGO_EXTERNAL_VALUE; // Reset to original algorithm
                     // Check if reset_value is defined and update the file if callback is provided
                     cJSON* reset_value = cJSON_GetObjectItem(field->params, "reset_value");
                     if (reset_value && update_json) {
@@ -628,6 +802,8 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
     printf("Reset component '%s' simulation\n", component_name);
 }
 
+
+
 ///////////////////////////////////////////////////////////////////////////////////
 //                              Field Access
 ///////////////////////////////////////////////////////////////////////////////////
@@ -655,6 +831,26 @@ sim_field_t* sim_engine_find_field(sim_engine_t* engine, const char* field_name)
 }
 
 /**
+ * Finds a field by name across a specific component.
+ * Searches through components to find a field with the given name.
+ * 
+ * @param engine Pointer to the component to search within
+ * @param field_name Name of the field to find
+ * @return Pointer to the field if found, NULL otherwise
+ */
+sim_field_t* sim_engine_find_field_within_component(sim_component_t* component, const char* field_name) {
+    if (!component || !field_name) return NULL;
+    
+    for (int j = 0; j < component->field_count; j++) {
+        if (strcmp(component->fields[j].field_name, field_name) == 0) {
+                return &component->fields[j];
+            }
+    }
+    
+    return NULL;
+}
+
+/**
  * Gets the current value of a field by name.
  * 
  * @param engine Pointer to the simulation engine
@@ -668,6 +864,24 @@ sim_value_t sim_engine_get_field_value(sim_engine_t* engine, const char* field_n
     if (!field) return empty;
     
     return field->current_value;
+}
+
+/**
+* Returns a specific component from the simulation engine by name.
+* @param engine Pointer to the simulation engine
+* @param component_name Name of the component to retrieve
+* @return Pointer to the component if found, NULL otherwise
+*/
+sim_component_t* sim_engine_get_component(sim_engine_t* engine, const char* component_name) {
+    if (!engine || !component_name) return NULL;
+
+    for (int i = 0; i < engine->component_count; i++) {
+        if (strcmp(engine->components[i].component_name, component_name) == 0) {
+            return &engine->components[i];
+        }
+    }
+
+    return NULL;
 }
 
 /**

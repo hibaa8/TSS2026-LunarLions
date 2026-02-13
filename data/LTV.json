@@ -5,10 +5,19 @@
 	},
 	"signal":	{
 		"strength":	0,
-		"pings_left":	10,
+		"pings_left":	0,
 		"ping_requested":	false
 	},
 	"errors":	{
-		"test":	false
+		"dust_sensor":	false,
+		"power_module":	false,
+		"recovery_mode":	false,
+		"nav_system":	false,
+		"lidar_sensor":	false,
+		"ultrasonic_sensor":	false,
+		"gyroscope_sensor":	false,
+		"potentiometer_sensor":	false,
+		"electronic_heater":	false,
+		"comms":	false
 	}
 }
