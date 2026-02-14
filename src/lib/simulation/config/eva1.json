@@ -65,13 +65,23 @@
       "algorithm": "sine_wave",
       "base_value": 4.0,
       "amplitude": 0.08,
-      "frequency": 0.012
+      "frequency": 0.012,
+      "max_value": 6.0,
+      "end_value_constant_decay": 4.0,
+      "end_value_constant_growth": 4.0,
+      "end_value": 0,
+      "rapid_duration_seconds": 20,
+      "growth_rate": 0.1
+
     },
     "suit_pressure_co2": {
       "type": "float",
       "algorithm": "linear_growth_constant",
+      "end_value_constant_decay": 0.0,
+      "end_value_constant_growth": 0.1,
+      "end_value": 0.1,
       "start_value": 0.0,
-      "end_value": 0.0,
+      "end_value_constant": 0.0,
       "duration_seconds": 900,
       "growth_rate": 0.005,
       "decay_rate": 0.005
@@ -121,19 +131,23 @@
     },
     "scrubber_a_co2_storage": {
       "type": "float",
-      "algorithm": "linear_growth",
+      "algorithm": "linear_growth_constant",
       "start_value": 0,
-      "end_value": 0,
+      "end_value": 0.0,
       "growth_rate": 0.33,
+      "end_value_constant_decay": 0.0,
+      "end_value_constant_growth": 70.0,
       "decay_rate": 0.33,
       "duration_seconds": 100
     },
     "scrubber_b_co2_storage": {
       "type": "float",
-      "algorithm": "linear_decay",
+      "algorithm": "linear_decay_constant",
       "start_value": 0,
-      "end_value": 0,
+      "end_value": 0.0,
       "growth_rate": 0.33,
+      "end_value_constant_decay": 0.0,
+      "end_value_constant_growth": 70.0,
       "decay_rate": 0.33,
       "duration_seconds": 100
     },

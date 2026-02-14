@@ -7,6 +7,8 @@
 #include <string.h>
 #include <time.h>
 
+bool oxy_error_flag = true;
+
 ///////////////////////////////////////////////////////////////////////////////////
 //                        Backend Lifecycle Management
 ///////////////////////////////////////////////////////////////////////////////////
@@ -134,15 +136,42 @@ void update_O2_error_state(sim_engine_t* sim_engine) {
         return;
     }   
 
-    bool o2_error_thrown = (field->algorithm == SIM_ALGO_RAPID_LINEAR_DECAY || field->algorithm == SIM_ALGO_RAPID_LINEAR_GROWTH);  
+    bool o2_error_thrown = (sim_engine->error_type == SUIT_PRESSURE_OXY_LOW || sim_engine->error_type == SUIT_PRESSURE_OXY_HIGH);  
 
     //update the oxy_error state in the JSON file based on the current error state and DCU command
     if (sim_engine->dcu_field_settings->o2 == false) {
+        if(o2_error_thrown) {
+            if(field->algorithm == SIM_ALGO_RAPID_LINEAR_DECAY) {
+                field->algorithm = SIM_ALGO_LINEAR_GROWTH_CONSTANT;
+                printf("here1\n");
+            }
+            if(field->algorithm == SIM_ALGO_RAPID_LINEAR_GROWTH) {
+                field->algorithm = SIM_ALGO_LINEAR_DECAY_CONSTANT;
+                printf("here2\n");
+            }
+        }
         update_json_file("EVA", "error", "oxy_error", "false");
+        oxy_error_flag = false;
+
     } else if (o2_error_thrown && sim_engine->dcu_field_settings->o2 == true) {
         update_json_file("EVA", "error", "oxy_error", "true");
+        if(oxy_error_flag == false) {
+            oxy_error_flag = true;
+            if(sim_engine->error_type == SUIT_PRESSURE_OXY_LOW) {
+                field->rapid_algo_initialized = false;
+                field->run_time = 0.0f;
+                throw_O2_suit_pressure_low_error(sim_engine);
+                printf("here3\n");
+            } else {
+                field->rapid_algo_initialized = false;
+                field->run_time = 0.0f;
+                throw_O2_suit_pressure_high_error(sim_engine);
+                printf("here4\n");
+            }
+        }
     } else {
         update_json_file("EVA", "error", "oxy_error", "false");
+        printf("here5\n");
     }
 }
 
@@ -192,9 +221,8 @@ void update_scrubber_state(sim_engine_t* sim_engine) {
         suit_co2_pressure_field->algorithm = SIM_ALGO_LINEAR_DECAY_CONSTANT;
     } 
 
-    //update scrubber_error state in JSON file based on DCU command and scrubber performance
-    if ((scrubber_a_field->algorithm == SIM_ALGO_LINEAR_GROWTH_CONSTANT && scrubber_a_field->current_value.f > 30.0f)
-    || (scrubber_b_field->algorithm == SIM_ALGO_LINEAR_GROWTH_CONSTANT && scrubber_b_field->current_value.f > 30.0f)) {
+    //update scrubber_error state in JSON file based on scrubber performance
+    if ((scrubber_a_field->current_value.f > 60.0f || scrubber_b_field->current_value.f > 60.0f)) {
         update_json_file("EVA", "error", "scrubber_error", "true");
     } else {
         update_json_file("EVA", "error", "scrubber_error", "false");

@@ -100,7 +100,9 @@ sim_value_t sim_algo_rapid_linear_decay(sim_field_t* field, float current_time) 
     
     // Calculate current progress (0.0 to 1.0)
     float elapsed_time = current_time - field->start_time;
+    printf("current time: %f start time: %f\n", current_time, field->start_time);
     float progress = elapsed_time / rapid_duration_sec;
+    printf("Progress: %f, elapsed_time: %f, rapid_duration_sec: %f\n\n", progress, elapsed_time, rapid_duration_sec);
     
     // Clamp progress between 0 and 1
     if (progress < 0.0f) progress = 0.0f;
@@ -135,10 +137,9 @@ sim_value_t sim_algo_rapid_linear_growth(sim_field_t* field, float current_time)
     }
 
     cJSON* rapid_growth_rate = cJSON_GetObjectItem(field->params, "rapid_growth_rate");
-    cJSON* max_value = cJSON_GetObjectItem(field->params, "max_value");
 
     float rapid_rate = rapid_growth_rate && cJSON_IsNumber(rapid_growth_rate) ? (float)cJSON_GetNumberValue(rapid_growth_rate) : 1.0f;
-    float max_val = max_value && cJSON_IsNumber(max_value) ? (float)cJSON_GetNumberValue(max_value) : INFINITY;
+
 
     // Calculate current value based on growth rate
     float elapsed_time = current_time - field->start_time;
@@ -146,10 +147,7 @@ sim_value_t sim_algo_rapid_linear_growth(sim_field_t* field, float current_time)
     float current_value = start_val + (rapid_rate * elapsed_time);
     printf("Rapid linear growth - start_val: %.2f, rapid_rate: %.2f, elapsed_time: %.2f, current_value: %.2f\n\n", start_val, rapid_rate, elapsed_time, current_value);
     
-    // Clamp to maximum value if specified
-    if (current_value > max_val) {
-        current_value = max_val;
-    }
+
 
     result.f = current_value;
 
@@ -207,11 +205,19 @@ sim_value_t sim_algo_linear_growth_constant(sim_field_t* field, float current_ti
     
     // Get parameters
     cJSON* growth_rate = cJSON_GetObjectItem(field->params, "growth_rate");
+    cJSON* max_value = cJSON_GetObjectItem(field->params, "end_value_constant_growth");
+
     
     float rate = growth_rate && cJSON_IsNumber(growth_rate) ? (float)cJSON_GetNumberValue(growth_rate) : 1.0f;
+    float max_val = max_value && cJSON_IsNumber(max_value) ? (float)cJSON_GetNumberValue(max_value) : INFINITY;
     
     // Calculate current value based on growth rate
     float current_value = field->current_value.f + (rate);
+
+    // Clamp to maximum value if specified
+    if (current_value > max_val) {
+        current_value = max_val;
+    }
     
     result.f = current_value;
 
@@ -232,7 +238,7 @@ sim_value_t sim_algo_linear_decay_constant(sim_field_t* field, float current_tim
     
     // Get parameters
     cJSON* decay_rate = cJSON_GetObjectItem(field->params, "decay_rate");
-    cJSON* end_value = cJSON_GetObjectItem(field->params, "end_value");
+    cJSON* end_value = cJSON_GetObjectItem(field->params, "end_value_constant_decay");
     
     float rate = decay_rate && cJSON_IsNumber(decay_rate) ? (float)cJSON_GetNumberValue(decay_rate) : 1.0f;
     float end_val = end_value && cJSON_IsNumber(end_value) ? (float)cJSON_GetNumberValue(end_value) : -INFINITY;
