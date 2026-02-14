@@ -671,6 +671,8 @@ void sim_engine_reset_component(sim_engine_t* engine, const char* component_name
                                void (*update_json)(const char*, const char*, const char*, char*)) {
     if (!engine || !engine->initialized || !component_name) return;
 
+    engine->error_type = NUM_ERRORS; //reset error thrown
+
     // Find and stop the component
     sim_component_t* target_component = NULL;
     for (int i = 0; i < engine->component_count; i++) {
