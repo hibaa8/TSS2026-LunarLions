@@ -111,6 +111,11 @@ The display and control unit (DCU) used for this challenge is a component that a
 | PUMP    | OPEN       | CLOSED          | Describes if the coolant pump for the suit is open or closed (allows water to be flushed or supplied) |
 | CO2     | Scrubber A | Scrubber B      | Describes which scrubber is currently filling with CO2 (other is venting)                             |
 
+### LTV Task Board
+ NASA SUITS aims to have a physical activity box with various panels and mock sensors for the EV to troubleshoot and repair. This physical box is representative of the Lunar Terrain Vehicle (LTV) External Control Panel and will be referred to as the `LTV Task Board`. Each item within the LTV Task Board will have a unique procedure for troubleshooting and repair. These procedures may be found in [documents/ltv-repair-procedures.pdf](documents/ltv-repair-procedures.pdf).
+
+ Later on, we intend to release high definitions pictures of the LTV Task Board for teams pursuing computer vision solutions.
+
 ## DUST Simulation
 
 <img src="frontend/images/dust-rover-photo.png" style="height: 300px"/>
