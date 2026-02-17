@@ -361,13 +361,10 @@ bool sim_engine_initialize(sim_engine_t* engine) {
         engine->dcu_field_settings->co2 = false;
         printf("DCU field settings initialized\n");
 
-        printf("Error time set to Task Board Completion Time + : %d\n", engine->error_time);
         engine->error_time = time_to_throw_error();
         engine->num_task_board_errors = INITIAL_NUM_TASK_BOARD_ERRORS; //initialize number of task board errors to 0 at the start of each simulation run
         engine->time_to_complete_task_board = 0;
         engine->error_type = NUM_ERRORS; // set to NUM_ERRORS to signify no error, will be set to 0,1,2..NUM_ERRORS-1 to signify different errors when it's time to throw an error
-        
-        printf("Error type set to: %d\n", engine->error_type);
     
     // Initialize all fields
     for (int i = 0; i < engine->total_field_count; i++) {
