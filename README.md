@@ -1,4 +1,4 @@
-# 🚨 **Note:** This is not the final version of TSS 2026 but has most functional capabilities of the final version. More information can be found under `documents/updates`. 🚨
+# 🚨 **Note:** This is not the final version of TSS 2026 but has most functional capabilities of the final version. More information can be found under [documents/updates/](./documents/updates/). 🚨
 
 
 # TSS 2026
@@ -24,11 +24,11 @@ TSS (telemetry stream server) is the centralized server for sending and receivin
 ### Helpful Links
 
 - [Mission Description](https://www.nasa.gov/wp-content/uploads/2025/09/fy26-suits-mission-description.pdf?emrc=345f62?emrc=345f62)
-- <a href="/documents/suits-acronym-list.pdf">Acronym List</a>
+- <a href="/documents/mission_description/mission-description.pdf">Acronym List</a>
 - <a href="/documents/maps/">Rock Yard and DUST Maps</a>
 - <a href="/documents/3d-scans/">Rock Yard 3D Scans</a>
-- <a href="/documents/eva-telemetry-ranges.pdf">EVA Telemetry Ranges</a>
-- <a href="/documents/rover-telemetry-ranges.pdf">Rover Telemetry Ranges</a>
+- <a href="/documents/telemetry_ranges/eva-telemetry-ranges.pdf">EVA Telemetry Ranges</a>
+- <a href="/documents/telemetry_ranges/rover-telemetry-ranges.pdf">Rover Telemetry Ranges</a>
 
 ## Getting Started
 
@@ -112,7 +112,7 @@ The display and control unit (DCU) used for this challenge is a component that a
 | CO2     | Scrubber A | Scrubber B      | Describes which scrubber is currently filling with CO2 (other is venting)                             |
 
 ### LTV Task Board
- NASA SUITS aims to have a physical activity box with various panels and mock sensors for the EV to troubleshoot and repair. This physical box is representative of the Lunar Terrain Vehicle (LTV) External Control Panel and will be referred to as the `LTV Task Board`. Each item within the LTV Task Board will have a unique procedure for troubleshooting and repair. These procedures may be found in [documents/ltv-repair-procedures.pdf](documents/ltv-repair-procedures.pdf).
+ NASA SUITS aims to have a physical activity box with various panels and mock sensors for the EV to troubleshoot and repair. This physical box is representative of the Lunar Terrain Vehicle (LTV) External Control Panel and will be referred to as the `LTV Task Board`. Each item within the LTV Task Board will have a unique procedure for troubleshooting and repair. These procedures may be found in [documents/procedures/ltv-repair-procedures.pdf](documents/procedures/ltv-repair-procedures.pdf).
 
  Later on, we intend to release high definitions pictures of the LTV Task Board for teams pursuing computer vision solutions.
 
@@ -193,7 +193,7 @@ Controlling the rover is done through the same socket connection, and follows th
 | 1109           | Throttle | float: -100.0 (reverse), 100.0 |
 | 1110           | Steering | float: -1.0, 1.0           |
 
-In addition, the below commands can be used to turn on the headlights and trigger interior changes like turning a fan on to modify the simulated telemetry values and bring them back into normal operating ranges (see <a href="/documents/rover-telemetry-ranges.pdf">rover telemetry ranges</a>)
+In addition, the below commands can be used to turn on the headlights and trigger interior changes like turning a fan on to modify the simulated telemetry values and bring them back into normal operating ranges (see <a href="/documents/telemetry_ranges/rover-telemetry-ranges.pdf">rover telemetry ranges</a>)
 
 | Command number | Command  | Data input                 |
 | -------------- | -------- | -------------------------- |
@@ -293,7 +293,7 @@ We have created various scripts to support testing and simulate real world value
 ![](https://www.nasa.gov/wp-content/uploads/2023/02/jsc2025e046380.jpg?w=1200)
 _24-25 SUITS group photo at the rock yard located at JSC_
 
-Test week at The Lyndon B. Johnson Space Center is the culmination of your teams effort and a chance to test and highlight your work to NASA team members. During the week, you should expect two sessions to showcase your work in a complete scenario. They will be spaced apart on separate days to allow additional time for fixing any issues that arise during your first session. A list of the procedures and expected timing (subject to change) that will be tested can be found <a href="/documents/suits-procedure-timeline.pdf">here</a>.
+Test week at The Lyndon B. Johnson Space Center is the culmination of your teams effort and a chance to test and highlight your work to NASA team members. During the week, you should expect two sessions to showcase your work in a complete scenario. They will be spaced apart on separate days to allow additional time for fixing any issues that arise during your first session. A list of the procedures and expected timing (subject to change) that will be tested can be found <a href="/documents/procedures/suits-procedure-timeline.pdf">here</a>.
 
 ### What is the rock yard?
 
@@ -305,11 +305,11 @@ The rock yard is a physical location on-site at Johnson Space Center where your 
 
 During test week, we will be hosting an official instance of TSS. This will be deployed on a local network and you will connect to it via a network address. Provided that you are connected to the same Wi-Fi network as the server, you should be able to connect and issue commands in the exact same way. You should expect and plan that the network address for the server will differ from your development instances, so we suggest making it easy to change in your interface or code.
 
-Teams will be assigned a specific time slot, and will test their work in that order. A typical test session will accommodate both a rover and a EVA team. Within a 45 minute test window, each team will have 5 minutes of setup and clean up, allotting 25 minutes to test their work, and a 10 minute buffer. A detailed timeline/procedure of what will be tested can be found <a href="/documents/suits-procedure-timeline.pdf">here</a>.
+Teams will be assigned a specific time slot, and will test their work in that order. A typical test session will accommodate both a rover and a EVA team. Within a 45 minute test window, each team will have 5 minutes of setup and clean up, allotting 25 minutes to test their work, and a 10 minute buffer. A detailed timeline/procedure of what will be tested can be found <a href="/documents/procedures/suits-procedure-timeline.pdf">here</a>.
 
 ## Questions
 
-If this README or the additional documents provided in the <a href="/documents/">documents folder</a> are not enough to answer a specific question, please reach the SUITS tech team at nasa-suits@mail.nasa.gov.
+If this README or the additional documents provided in the <a href="/documents/">documents folder</a> are not enough to answer a specific question, please reach the SUITS tech team at `nasa-suits@mail.nasa.gov`.
 
 If there are any notable bugs with TSS blocking development, we welcome you to create a new issue within the GitHub repository.
 
