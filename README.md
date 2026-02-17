@@ -1,3 +1,6 @@
+# 🚨 **Note:** This is not the final version of TSS 2026 but has most functional capabilities of the final version. More information can be found under `documents/updates`. 🚨
+
+
 # TSS 2026
 
 NASA Spacesuit User Interface Technologies for Students ([SUITS](https://www.nasa.gov/learning-resources/spacesuit-user-interface-technologies-for-students/)) is a design challenge in which college students from across the country help design user interface solutions for future spaceflight needs. The following is a web interface for the SUITS telemetry stream server designed and developed for the challenge.
