@@ -9,15 +9,12 @@
 		"ping_requested":	false
 	},
 	"errors":	{
-		"dust_sensor":	false,
-		"power_module":	false,
 		"recovery_mode":	false,
+		"dust_sensor":	false,
+		"power_distribution":	false,
 		"nav_system":	false,
-		"lidar_sensor":	false,
-		"ultrasonic_sensor":	false,
-		"gyroscope_sensor":	false,
-		"potentiometer_sensor":	false,
 		"electronic_heater":	false,
-		"comms":	false
+		"comms":	false,
+		"fuse": false
 	}
 }

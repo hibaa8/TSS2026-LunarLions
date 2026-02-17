@@ -8,6 +8,7 @@
 #include <time.h>
 
 bool oxy_error_flag = true;
+bool fan_error_flag = false;
 
 ///////////////////////////////////////////////////////////////////////////////////
 //                        Backend Lifecycle Management
@@ -143,11 +144,9 @@ void update_O2_error_state(sim_engine_t* sim_engine) {
         if(o2_error_thrown) {
             if(field->algorithm == SIM_ALGO_RAPID_LINEAR_DECAY) {
                 field->algorithm = SIM_ALGO_LINEAR_GROWTH_CONSTANT;
-                printf("here1\n");
             }
             if(field->algorithm == SIM_ALGO_RAPID_LINEAR_GROWTH) {
                 field->algorithm = SIM_ALGO_LINEAR_DECAY_CONSTANT;
-                printf("here2\n");
             }
         }
         update_json_file("EVA", "error", "oxy_error", "false");
@@ -161,17 +160,14 @@ void update_O2_error_state(sim_engine_t* sim_engine) {
                 field->rapid_algo_initialized = false;
                 field->run_time = 0.0f;
                 throw_O2_suit_pressure_low_error(sim_engine);
-                printf("here3\n");
             } else {
                 field->rapid_algo_initialized = false;
                 field->run_time = 0.0f;
                 throw_O2_suit_pressure_high_error(sim_engine);
-                printf("here4\n");
             }
         }
     } else {
         update_json_file("EVA", "error", "oxy_error", "false");
-        printf("here5\n");
     }
 }
 
@@ -222,7 +218,7 @@ void update_scrubber_state(sim_engine_t* sim_engine) {
     } 
 
     //update scrubber_error state in JSON file based on scrubber performance
-    if ((scrubber_a_field->current_value.f > 60.0f || scrubber_b_field->current_value.f > 60.0f)) {
+    if ((scrubber_a_field->current_value.f > 60.0f && sim_engine->dcu_field_settings->co2 == true) || (scrubber_b_field->current_value.f > 60.0f && sim_engine->dcu_field_settings->co2 == false)) {
         update_json_file("EVA", "error", "scrubber_error", "true");
     } else {
         update_json_file("EVA", "error", "scrubber_error", "false");
@@ -234,6 +230,7 @@ void update_scrubber_state(sim_engine_t* sim_engine) {
 * If the DCU command for the fan is set to false, the fan error states will be set to false (no error).
 * If the fan RPM high error is thrown and the DCU command for the fan is set to true, the fan RPM error state will be set to true (error present).
 * If the fan RPM low error is thrown and the DCU command for the fan is set to true, the fan RPM error state will be set to true (error present).
+* The helmet_pressure_CO2 value will build up upon fan error and go back to noral upon fan error resolution
 * @param sim_engine Pointer to the simulation engine to update
 */
 void update_fan_error_state(sim_engine_t* sim_engine) {
@@ -252,12 +249,28 @@ void update_fan_error_state(sim_engine_t* sim_engine) {
         printf("Simulation tried to access non-existent field 'fan_pri_rpm' for fan error state update\n");
         return;
     }
+
+    sim_field_t* field_helmet_pressure_co2 = sim_engine_find_field_within_component(eva1, "helmet_pressure_co2");
+    if (field_helmet_pressure_co2 == NULL) {
+        printf("Simulation tried to access non-existent field 'helmet_pressure_co2' for fan error state update\n");
+        return;
+    }
+
     bool fan_error_thrown = (field->algorithm == SIM_ALGO_RAPID_LINEAR_DECAY || field->algorithm == SIM_ALGO_RAPID_LINEAR_GROWTH);
     //update the fan_error state in the JSON file based on the current error state and DCU command
     if (sim_engine->dcu_field_settings->fan == false) {
+        if(fan_error_thrown && fan_error_flag) {
+            field_helmet_pressure_co2->algorithm = SIM_ALGO_LINEAR_DECAY_CONSTANT;
+        }
         update_json_file("EVA", "error", "fan_error", "false");
+        if(field_helmet_pressure_co2->algorithm == SIM_ALGO_RAPID_LINEAR_GROWTH) {
+                field_helmet_pressure_co2->algorithm = SIM_ALGO_LINEAR_DECAY_CONSTANT;
+            }
     } else if (fan_error_thrown && sim_engine->dcu_field_settings->fan == true) {
+        fan_error_flag = true;
         update_json_file("EVA", "error", "fan_error", "true");
+        //set the field algorithm to linear growth constant
+        field_helmet_pressure_co2->algorithm = SIM_ALGO_LINEAR_GROWTH_CONSTANT;
     } else {
         update_json_file("EVA", "error", "fan_error", "false");
     }

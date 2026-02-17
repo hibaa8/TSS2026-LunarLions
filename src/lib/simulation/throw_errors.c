@@ -24,7 +24,7 @@ int time_to_throw_error() {
      // Seed the random number generator only ONCE
         srand(time(NULL));
 
-    int random_value = rand() % 10; // Random time between 0 and 300 * delta_time
+    int random_value = rand() % 10+1; // Random time between 1 and 10 * delta_time
     printf("Random time to throw error (in seconds): %d\n", random_value);
     return random_value;
 }
@@ -115,6 +115,7 @@ bool throw_O2_suit_pressure_high_error(sim_engine_t* engine) {
 
     return true;
 }
+
 
 /**
  * Rapidly increases fan RPM to simulate a malfunction.

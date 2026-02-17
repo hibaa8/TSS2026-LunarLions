@@ -45,7 +45,7 @@
     "heart_rate": {
       "type": "float",
       "algorithm": "dependent_value",
-      "formula": "90.0 + ( temperature - 21.1 ) * 0.36",
+      "formula": "120.0 + ( temperature - 0.0 ) * 1.55",
       "depends_on": ["temperature"]
     },
     "oxy_consumption": {
@@ -127,6 +127,10 @@
       "type": "float",
       "algorithm": "dependent_value",
       "formula": "suit_pressure_co2 * 1.5",
+      "decay_rate": 0.005,
+      "end_value_constant_decay": 0.0,
+      "end_value_constant_growth": 0.3,
+      "growth_rate": 0.005,
       "depends_on": ["suit_pressure_co2"]
     },
     "scrubber_a_co2_storage": {

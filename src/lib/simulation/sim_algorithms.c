@@ -100,9 +100,7 @@ sim_value_t sim_algo_rapid_linear_decay(sim_field_t* field, float current_time) 
     
     // Calculate current progress (0.0 to 1.0)
     float elapsed_time = current_time - field->start_time;
-    printf("current time: %f start time: %f\n", current_time, field->start_time);
     float progress = elapsed_time / rapid_duration_sec;
-    printf("Progress: %f, elapsed_time: %f, rapid_duration_sec: %f\n\n", progress, elapsed_time, rapid_duration_sec);
     
     // Clamp progress between 0 and 1
     if (progress < 0.0f) progress = 0.0f;
@@ -143,9 +141,7 @@ sim_value_t sim_algo_rapid_linear_growth(sim_field_t* field, float current_time)
 
     // Calculate current value based on growth rate
     float elapsed_time = current_time - field->start_time;
-    printf("current_time: %.2f, start_time: %.2f, elapsed_time: %.2f\n", current_time, field->start_time, elapsed_time);
     float current_value = start_val + (rapid_rate * elapsed_time);
-    printf("Rapid linear growth - start_val: %.2f, rapid_rate: %.2f, elapsed_time: %.2f, current_value: %.2f\n\n", start_val, rapid_rate, elapsed_time, current_value);
     
 
 
