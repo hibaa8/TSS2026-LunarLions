@@ -305,7 +305,7 @@ The rock yard is a physical location on-site at Johnson Space Center where your 
 
 During test week, we will be hosting an official instance of TSS. This will be deployed on a local network and you will connect to it via a network address. Provided that you are connected to the same Wi-Fi network as the server, you should be able to connect and issue commands in the exact same way. You should expect and plan that the network address for the server will differ from your development instances, so we suggest making it easy to change in your interface or code.
 
-Teams will be assigned a specific time slot, and will test their work in that order. A typical test session will accommodate both a rover and a EVA team. Within a 45 minute test window, each team will have 5 minutes of setup and clean up, allotting 25 minutes to test their work, and a 10 minute buffer. A detailed timeline/procedure of what will be tested can be found <a href="/documents/procedures/suits-procedure-timeline.pdf">here</a>.
+Teams will be assigned a specific time slot, and will test their work in that order. A typical test session will accommodate both a rover and a EVA team. Within a 45 minute test window, each team will have 5 minutes of setup and clean up, allotting 25 minutes to test their work, and a 10 minute buffer. A detailed timeline/procedure of what will be tested can be found <a href="/documents/procedures/">here</a>.
 
 ## Questions
 
