@@ -11,8 +11,9 @@
 |               | [suits-acronym-list.pdf](./mission_description/suits-acronym-list.pdf) | Shorthand terminology reference |
 | **[peripherals](./peripherals/)** | [dcu.jpeg](./peripherals/dcu.jpeg) | Display Control Unit image |
 |               | [uia.jpeg](./peripherals/uia.jpeg) | User Interface Assembly image |
-| **[procedures](./procedures/)** | [ltv-repair-procedures.pdf](./procedures/ltv-repair-procedures.pdf) | LTV procedures for repair |
-|               | [suits-procedure-timeline.pdf](./procedures/suits-procedure-timeline.pdf) | Test session timeline |
+| **[procedures](./procedures/)** | [ev-team-procedure-timeline.pdf](./procedures/ev-team-procedure-timeline.pdf) | EV team session timeline |
+|               | [ltv-repair-procedures.pdf](./procedures/ltv-repair-procedures.pdf) | LTV procedures for repair |
+|               | [pressurized-rover-procedure-timeline.pdf](./procedures/pressurized-rover-procedure-timeline.pdf) | Pressurized rover session timeline |
 | **[telemetry_ranges](./telemetry_ranges/)** | [eva-telemetry-ranges.pdf](./telemetry_ranges/eva-telemetry-ranges.pdf) | EVA telemetry parameter limits |
 |               | [rover-telemetry-ranges.pdf](./telemetry_ranges/rover-telemetry-ranges.pdf) | Rover telemetry parameter limits |
 | **[updates](./updates/)** | [updates.pdf](./updates/updates.pdf) | Tech Team Github General Update Log |
