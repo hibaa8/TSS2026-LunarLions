@@ -293,7 +293,7 @@ We have created various scripts to support testing and simulate real world value
 ![](https://www.nasa.gov/wp-content/uploads/2023/02/jsc2025e046380.jpg?w=1200)
 _24-25 SUITS group photo at the rock yard located at JSC_
 
-Test week at The Lyndon B. Johnson Space Center is the culmination of your teams effort and a chance to test and highlight your work to NASA team members. During the week, you should expect two sessions to showcase your work in a complete scenario. They will be spaced apart on separate days to allow additional time for fixing any issues that arise during your first session. A list of the procedures and expected timing (subject to change) that will be tested can be found <a href="/documents/procedures/suits-procedure-timeline.pdf">here</a>.
+Test week at The Lyndon B. Johnson Space Center is the culmination of your teams effort and a chance to test and highlight your work to NASA team members. During the week, you should expect two sessions to showcase your work in a complete scenario. They will be spaced apart on separate days to allow additional time for fixing any issues that arise during your first session. A list of the procedures and expected timing (subject to change) that will be tested can be found <a href="/documents/procedures/">here</a>.
 
 ### What is the rock yard?
 
