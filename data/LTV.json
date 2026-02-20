@@ -1,6 +1,6 @@
 {
 	"location":	{
-		"last_known_x":	-6090.0,
+		"last_known_x":	-6090,
 		"last_known_y":	-10485.6
 	},
 	"signal":	{
@@ -9,12 +9,12 @@
 		"ping_requested":	false
 	},
 	"errors":	{
-		"recovery_mode":	false,
+		"recovery_mode":	true,
 		"dust_sensor":	false,
-		"power_distribution":	false,
-		"nav_system":	false,
+		"power_distribution":	true,
+		"nav_system":	true,
 		"electronic_heater":	false,
 		"comms":	false,
-		"fuse": false
+		"fuse":	false
 	}
 }

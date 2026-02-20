@@ -4,3 +4,4 @@
 *.exp
 server
 venv
+server.exe.dSYM/
