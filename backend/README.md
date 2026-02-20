@@ -1,5 +1,7 @@
 # TSS Unity API
 
+Prerequisite: before running this backend, start the main TSS server first by following the setup instructions here: [SUITS-Techteam/TSS2026](https://github.com/SUITS-Techteam/TSS2026/tree/main).
+
 Python service that pulls live telemetry from TSS over UDP (`command=1` EVA, `command=2` LTV) on each REST request and exposes endpoints under `/api/v1/*`.
 
 Base URL (local default): `http://127.0.0.1:8100`
