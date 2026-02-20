@@ -17,7 +17,7 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python tss_unity_api.py --tss-host 127.0.0.1 --tss-port 8080 --api-host 0.0.0.0 --api-port 8100
+python tss_unity_api.py --tss-host 10.207.124.137 --tss-port 14141 --api-host 0.0.0.0 --api-port 8100
 ```
 
 ## API
